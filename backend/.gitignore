@@ -1,0 +1,73 @@
+# ===================================
+# BACKEND (Spring Boot) GITIGNORE
+# ===================================
+
+### Build Output ###
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### IDE Files ###
+.idea/
+*.iws
+*.iml
+*.ipr
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings/
+.springBeans
+.sts4-cache
+.vscode/
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+### Maven Wrapper###
+.mvn/
+mvnw
+mvnw.cmd
+
+### Logs ###
+*.log
+logs/
+
+### OS Files ###
+.DS_Store
+Thumbs.db
+
+### Uploads & User Data ###
+uploads/
+files/
+temp/
+
+### Sensitive Configuration ###
+application.properties
+application-dev.properties
+application-local.properties
+.env
+.env.local
+
+### Personal Documentation ###
+PROJECT_SUMMARY.md
+PERSONAL_NOTES.md
+TODO.md
+HELP.md
+API_TESTING_CHECKLIST.md
+*_PERSONAL.md
+
+### API Testing Files ###
+Folio-API-Postman-Collection.json
+*.postman_collection.json
+*.postman_environment.json
+
+### Keep Template Files ###
+!application.properties.template
+!application.properties.example
