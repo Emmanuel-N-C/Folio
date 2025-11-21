@@ -11,6 +11,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,22 +20,23 @@ import java.util.List;
 @RequestMapping("/api/posts")
 @CrossOrigin(origins = "*", maxAge = 3600)
 public class PostController {
-    
+
     @Autowired
     private PostService postService;
-    
+
     @PostMapping
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<PostResponse> createPost(@Valid @RequestBody CreatePostRequest request) {
         PostResponse response = postService.createPost(request);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
-    
+
     @GetMapping("/{postId}")
     public ResponseEntity<PostResponse> getPostById(@PathVariable Long postId) {
         PostResponse response = postService.getPostById(postId);
         return ResponseEntity.ok(response);
     }
-    
+
     @GetMapping("/trending")
     public ResponseEntity<Page<PostResponse>> getTrendingPosts(
             @RequestParam(defaultValue = "0") int page,
@@ -43,13 +45,13 @@ public class PostController {
         Page<PostResponse> response = postService.getTrendingPosts(pageable);
         return ResponseEntity.ok(response);
     }
-    
+
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<PostResponse>> getUserPosts(@PathVariable Long userId) {
         List<PostResponse> response = postService.getUserPosts(userId);
         return ResponseEntity.ok(response);
     }
-    
+
     @GetMapping("/search")
     public ResponseEntity<Page<PostResponse>> searchPosts(
             @RequestParam String keyword,
@@ -59,7 +61,7 @@ public class PostController {
         Page<PostResponse> response = postService.searchPosts(keyword, pageable);
         return ResponseEntity.ok(response);
     }
-    
+
     @GetMapping("/tag/{tag}")
     public ResponseEntity<Page<PostResponse>> getPostsByTag(
             @PathVariable String tag,
@@ -69,19 +71,20 @@ public class PostController {
         Page<PostResponse> response = postService.getPostsByTag(tag, pageable);
         return ResponseEntity.ok(response);
     }
-    
+
     @PutMapping("/{postId}")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<PostResponse> updatePost(
             @PathVariable Long postId,
             @Valid @RequestBody CreatePostRequest request) {
         PostResponse response = postService.updatePost(postId, request);
         return ResponseEntity.ok(response);
     }
-    
+
     @DeleteMapping("/{postId}")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<MessageResponse> deletePost(@PathVariable Long postId) {
         postService.deletePost(postId);
         return ResponseEntity.ok(new MessageResponse("Post deleted successfully"));
     }
 }
-

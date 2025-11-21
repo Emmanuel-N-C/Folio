@@ -4,6 +4,7 @@ import com.folio.folio_backend.dto.UpdateProfileRequest;
 import com.folio.folio_backend.dto.UserProfileResponse;
 import com.folio.folio_backend.exception.ResourceNotFoundException;
 import com.folio.folio_backend.model.User;
+import com.folio.folio_backend.repository.PostRepository;
 import com.folio.folio_backend.repository.UserRepository;
 import com.folio.folio_backend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,25 +15,29 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Transactional
 public class UserServiceImpl implements UserService {
-    
+
     @Autowired
     private UserRepository userRepository;
-    
+
+    @Autowired
+    private PostRepository postRepository;
+
     @Override
+    @Transactional(readOnly = true)
     public UserProfileResponse getUserProfile(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
-        
+
         return mapToUserProfileResponse(user);
     }
-    
+
     @Override
+    @Transactional
     public UserProfileResponse updateUserProfile(Long userId, UpdateProfileRequest request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
-        
+
         if (request.getBio() != null) {
             user.setBio(request.getBio());
         }
@@ -45,12 +50,13 @@ public class UserServiceImpl implements UserService {
         if (request.getWebsiteUrl() != null) {
             user.setWebsiteUrl(request.getWebsiteUrl());
         }
-        
+
         User updatedUser = userRepository.save(user);
         return mapToUserProfileResponse(updatedUser);
     }
-    
+
     @Override
+    @Transactional(readOnly = true)
     public User getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.getPrincipal() instanceof UserDetails) {
@@ -60,12 +66,13 @@ public class UserServiceImpl implements UserService {
         }
         throw new ResourceNotFoundException("No authenticated user found");
     }
-    
+
     @Override
+    @Transactional(readOnly = true)
     public Long getCurrentUserId() {
         return getCurrentUser().getId();
     }
-    
+
     private UserProfileResponse mapToUserProfileResponse(User user) {
         UserProfileResponse response = new UserProfileResponse();
         response.setId(user.getId());
@@ -76,8 +83,10 @@ public class UserServiceImpl implements UserService {
         response.setGithubUrl(user.getGithubUrl());
         response.setWebsiteUrl(user.getWebsiteUrl());
         response.setCreatedAt(user.getCreatedAt());
-        response.setPostsCount(user.getPosts() != null ? user.getPosts().size() : 0);
+
+        // Use repository count instead of accessing lazy collection
+        response.setPostsCount((int) postRepository.findByPostedByIdOrderByCreatedAtDesc(user.getId()).stream().count());
+
         return response;
     }
 }
-
