@@ -1,34 +1,95 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import { AuthProvider } from './contexts/AuthContext'
+import { Toaster } from '@/components/ui/toaster'
+import ErrorBoundary from '@/components/common/ErrorBoundary'
+import Layout from '@/components/layout/Layout'
+import ProtectedRoute from '@/components/auth/ProtectedRoute'
+
+// Auth Pages
+import LoginPage from '@/pages/auth/LoginPage'
+import RegisterPage from '@/pages/auth/RegisterPage'
+
+// Feed Pages
+import FeedPage from '@/pages/feed/FeedPage'
+import TrendingPage from '@/pages/feed/TrendingPage'
+
+// Post Pages
+import PostDetailPage from '@/pages/post/PostDetailPage'
+import CreatePostPage from '@/pages/post/CreatePostPage'
+import EditPostPage from '@/pages/post/EditPostPage'
+import SearchPage from '@/pages/post/SearchPage'
+
+// Profile Pages
+import ProfilePage from '@/pages/profile/ProfilePage'
+import EditProfilePage from '@/pages/profile/EditProfilePage'
+
+// Admin Pages
+import AdminDashboard from '@/pages/admin/AdminDashboard'
+
+// Common Pages
+import NotFound from '@/components/common/NotFound'
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    <ErrorBoundary>
+      <Router>
+        <AuthProvider>
+          <Routes>
+            <Route path="/" element={<Layout />}>
+              {/* Public Routes */}
+              <Route index element={<Navigate to="/feed" replace />} />
+              <Route path="login" element={<LoginPage />} />
+              <Route path="register" element={<RegisterPage />} />
+              <Route path="feed" element={<FeedPage />} />
+              <Route path="trending" element={<TrendingPage />} />
+              <Route path="search" element={<SearchPage />} />
+              <Route path="posts/:postId" element={<PostDetailPage />} />
+              <Route path="profile/:userId" element={<ProfilePage />} />
+
+              {/* Protected Routes */}
+              <Route
+                path="posts/create"
+                element={
+                  <ProtectedRoute>
+                    <CreatePostPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="posts/:postId/edit"
+                element={
+                  <ProtectedRoute>
+                    <EditPostPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="settings"
+                element={
+                  <ProtectedRoute>
+                    <EditProfilePage />
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* Admin Routes */}
+              <Route
+                path="admin"
+                element={
+                  <ProtectedRoute adminOnly>
+                    <AdminDashboard />
+                  </ProtectedRoute>
+                }
+              />
+
+              {/* 404 */}
+              <Route path="*" element={<NotFound />} />
+            </Route>
+          </Routes>
+          <Toaster />
+        </AuthProvider>
+      </Router>
+    </ErrorBoundary>
   )
 }
 
