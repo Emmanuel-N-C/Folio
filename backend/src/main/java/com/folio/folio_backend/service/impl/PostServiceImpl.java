@@ -196,16 +196,16 @@ public class PostServiceImpl implements PostService {
         response.setLiveDemoUrl(post.getLiveDemoUrl());
         response.setGithubUrl(post.getGithubUrl());
 
-        // Safe access to element collections (already eagerly fetched via join fetch)
+        // Access element collections - will be lazy loaded within transaction
         response.setScreenshotUrls(post.getScreenshotUrls() != null ? post.getScreenshotUrls() : List.of());
         response.setTags(post.getTags() != null ? post.getTags() : List.of());
 
-        // Safe access to user fields
+        // User fields (already fetched)
         response.setUserId(post.getPostedBy().getId());
         response.setUsername(post.getPostedBy().getUsername());
         response.setUserProfileImageUrl(post.getPostedBy().getProfileImageUrl());
 
-        // Counts are now safe due to eager fetching
+        // Lazy load counts within transaction
         response.setLikesCount(post.getLikes() != null ? post.getLikes().size() : 0);
         response.setCommentsCount(post.getComments() != null ? post.getComments().size() : 0);
 
