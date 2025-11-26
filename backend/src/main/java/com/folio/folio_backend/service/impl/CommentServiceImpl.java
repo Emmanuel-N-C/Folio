@@ -7,6 +7,7 @@ import com.folio.folio_backend.exception.ResourceNotFoundException;
 import com.folio.folio_backend.model.Comment;
 import com.folio.folio_backend.model.Post;
 import com.folio.folio_backend.model.User;
+import com.folio.folio_backend.model.Role;
 import com.folio.folio_backend.repository.CommentRepository;
 import com.folio.folio_backend.repository.PostRepository;
 import com.folio.folio_backend.service.CommentService;
@@ -68,11 +69,33 @@ public class CommentServiceImpl implements CommentService {
 
         User currentUser = userService.getCurrentUser();
 
-        if (!comment.getUser().getId().equals(currentUser.getId())) {
+        // Allow deletion if user is the owner OR an admin
+        boolean isOwner = comment.getUser().getId().equals(currentUser.getId());
+        boolean isAdmin = currentUser.getRoles().contains(Role.ROLE_ADMIN);
+        
+        if (!isOwner && !isAdmin) {
             throw new BadRequestException("You are not authorized to delete this comment");
         }
 
         commentRepository.delete(comment);
+    }
+
+    @Override
+    @Transactional
+    public CommentResponse updateComment(Long commentId, CreateCommentRequest request) {
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Comment not found with id: " + commentId));
+
+        User currentUser = userService.getCurrentUser();
+
+        // Only the owner can edit their comment
+        if (!comment.getUser().getId().equals(currentUser.getId())) {
+            throw new BadRequestException("You are not authorized to update this comment");
+        }
+
+        comment.setContent(request.getContent());
+        Comment updatedComment = commentRepository.save(comment);
+        return mapToCommentResponse(updatedComment);
     }
 
     private CommentResponse mapToCommentResponse(Comment comment) {

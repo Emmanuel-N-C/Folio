@@ -6,6 +6,7 @@ import com.folio.folio_backend.exception.BadRequestException;
 import com.folio.folio_backend.exception.ResourceNotFoundException;
 import com.folio.folio_backend.model.Post;
 import com.folio.folio_backend.model.User;
+import com.folio.folio_backend.model.Role;
 import com.folio.folio_backend.repository.LikeRepository;
 import com.folio.folio_backend.repository.PostRepository;
 import com.folio.folio_backend.service.PostService;
@@ -180,7 +181,11 @@ public class PostServiceImpl implements PostService {
 
         User currentUser = userService.getCurrentUser();
 
-        if (!post.getPostedBy().getId().equals(currentUser.getId())) {
+        // Allow deletion if user is the owner OR an admin
+        boolean isOwner = post.getPostedBy().getId().equals(currentUser.getId());
+        boolean isAdmin = currentUser.getRoles().contains(Role.ROLE_ADMIN);
+        
+        if (!isOwner && !isAdmin) {
             throw new BadRequestException("You are not authorized to delete this post");
         }
 
