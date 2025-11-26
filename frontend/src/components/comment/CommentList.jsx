@@ -4,7 +4,7 @@ import CommentItem from './CommentItem'
 import CommentForm from './CommentForm'
 import { useToast } from '@/components/ui/use-toast'
 
-const CommentList = ({ postId }) => {
+const CommentList = ({ postId, postOwnerId }) => {
   const [comments, setComments] = useState([])
   const [loading, setLoading] = useState(true)
   const { toast } = useToast()
@@ -59,6 +59,7 @@ const CommentList = ({ postId }) => {
             key={comment.id} 
             comment={comment} 
             postId={postId}
+            postOwnerId={postOwnerId}
             onDeleted={handleCommentDeleted}
             onUpdated={handleCommentUpdated}
           />

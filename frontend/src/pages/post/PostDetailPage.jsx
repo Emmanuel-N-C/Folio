@@ -220,7 +220,7 @@ const PostDetailPage = () => {
 
       <Card>
         <CardContent className="pt-6">
-          <CommentList postId={postId} />
+          <CommentList postId={postId} postOwnerId={post.userId} />
         </CardContent>
       </Card>
     </div>
