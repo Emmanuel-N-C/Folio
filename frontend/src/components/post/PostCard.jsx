@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge'
 import { formatRelativeTime } from '@/lib/utils'
 import { MessageCircle, ExternalLink, Github } from 'lucide-react'
 import LikeButton from './LikeButton'
+import LivePreview from './LivePreview'
 
 const PostCard = ({ post }) => {
   return (
@@ -42,13 +43,21 @@ const PostCard = ({ post }) => {
           {post.description}
         </p>
 
-        {post.screenshotUrls && post.screenshotUrls.length > 0 && (
+        {/* Live Preview or Screenshot */}
+        {post.liveDemoUrl ? (
+          <LivePreview 
+            url={post.liveDemoUrl}
+            screenshots={post.screenshotUrls}
+            title={post.title}
+            size="small"
+          />
+        ) : post.screenshotUrls && post.screenshotUrls.length > 0 ? (
           <img 
             src={post.screenshotUrls[0]} 
             alt={post.title}
             className="w-full h-48 object-cover rounded-lg"
           />
-        )}
+        ) : null}
 
         <div className="flex flex-wrap gap-2">
           {post.tags?.map((tag, index) => (
@@ -89,6 +98,7 @@ const PostCard = ({ post }) => {
               target="_blank" 
               rel="noopener noreferrer"
               className="text-muted-foreground hover:text-foreground"
+              onClick={(e) => e.stopPropagation()}
             >
               <ExternalLink className="h-4 w-4" />
             </a>
@@ -99,6 +109,7 @@ const PostCard = ({ post }) => {
               target="_blank" 
               rel="noopener noreferrer"
               className="text-muted-foreground hover:text-foreground"
+              onClick={(e) => e.stopPropagation()}
             >
               <Github className="h-4 w-4" />
             </a>

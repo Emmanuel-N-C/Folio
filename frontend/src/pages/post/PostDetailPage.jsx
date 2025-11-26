@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import CommentList from '@/components/comment/CommentList'
 import LikeButton from '@/components/post/LikeButton'
+import LivePreview from '@/components/post/LivePreview'
 import { useAuth } from '@/hooks/useAuth'
 import { useToast } from '@/components/ui/use-toast'
 import { formatRelativeTime } from '@/lib/utils'
@@ -134,8 +135,20 @@ const PostDetailPage = () => {
             </p>
           </div>
 
-          {post.screenshotUrls && post.screenshotUrls.length > 0 && (
+          {/* Live Preview Section */}
+          {post.liveDemoUrl && (
+            <LivePreview 
+              url={post.liveDemoUrl}
+              screenshots={post.screenshotUrls}
+              title={post.title}
+              size="large"
+            />
+          )}
+
+          {/* Screenshots (only if no live demo) */}
+          {!post.liveDemoUrl && post.screenshotUrls && post.screenshotUrls.length > 0 && (
             <div className="space-y-4">
+              <h3 className="font-semibold">Screenshots</h3>
               {post.screenshotUrls.map((url, index) => (
                 <img 
                   key={index}
@@ -183,7 +196,7 @@ const PostDetailPage = () => {
                   className="flex items-center gap-2 text-primary hover:underline"
                 >
                   <ExternalLink className="h-4 w-4" />
-                  Live Demo
+                  Open in New Tab
                 </a>
               )}
 
