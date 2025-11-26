@@ -14,11 +14,9 @@ import java.util.Optional;
 @Repository
 public interface PostRepository extends JpaRepository<Post, Long> {
 
-    // For single post - can use multiple fetches
-    @Query("SELECT DISTINCT p FROM Post p " +
+    // For single post - fetch in two queries to avoid MultipleBagFetchException
+    @Query("SELECT p FROM Post p " +
             "LEFT JOIN FETCH p.postedBy " +
-            "LEFT JOIN FETCH p.likes " +
-            "LEFT JOIN FETCH p.comments " +
             "WHERE p.id = :id")
     Optional<Post> findByIdWithDetails(@Param("id") Long id);
 
