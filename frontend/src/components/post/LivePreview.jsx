@@ -8,7 +8,7 @@ const LivePreview = ({
   url, 
   screenshots = [], 
   title = "Project",
-  size = "large" // "small" for feed, "large" for detail page
+  size = "large" // "feed" for feed cards, "large" for detail page
 }) => {
   const [iframeStatus, setIframeStatus] = useState('loading') // 'loading', 'success', 'error'
   const [showFallback, setShowFallback] = useState(false)
@@ -16,7 +16,12 @@ const LivePreview = ({
   const timeoutRef = useRef(null)
 
   const isSmall = size === 'small'
-  const heightClass = isSmall ? 'h-64' : 'h-96 md:h-[600px]'
+  const isFeed = size === 'feed'
+  
+  // LinkedIn-style: Big preview for feed, even bigger for detail
+  const heightClass = isFeed 
+    ? 'aspect-video' // 16:9 ratio like LinkedIn
+    : 'h-96 md:h-[700px] lg:h-[800px]'
 
   useEffect(() => {
     if (!url) {
@@ -150,40 +155,42 @@ const LivePreview = ({
   }
 
   return (
-    <Card>
-      <CardContent className="pt-6">
-        <div className="space-y-4">
-          {/* Header with status badge */}
-          <div className="flex items-center justify-between">
-            <h3 className="font-semibold flex items-center gap-2">
-              {isSmall ? 'Preview' : 'Live Interactive Preview'}
-              {iframeStatus === 'loading' && (
-                <Badge variant="secondary" className="gap-1">
-                  <Loader2 className="h-3 w-3 animate-spin" />
-                  Loading
-                </Badge>
+    <Card className={isFeed ? 'shadow-none border-0' : ''}>
+      <CardContent className={isFeed ? 'p-0' : 'pt-6'}>
+        <div className={isFeed ? '' : 'space-y-4'}>
+          {/* Only show header on detail page, not feed */}
+          {!isFeed && (
+            <div className="flex items-center justify-between">
+              <h3 className="font-semibold flex items-center gap-2">
+                Live Interactive Preview
+                {iframeStatus === 'loading' && (
+                  <Badge variant="secondary" className="gap-1">
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                    Loading
+                  </Badge>
+                )}
+                {iframeStatus === 'success' && !showFallback && (
+                  <Badge variant="default" className="bg-green-500">
+                    Live
+                  </Badge>
+                )}
+              </h3>
+              {!showFallback && (
+                <Button variant="outline" size="sm" asChild>
+                  <a href={url} target="_blank" rel="noopener noreferrer">
+                    <ExternalLink className="h-3 w-3 mr-1" />
+                    Open
+                  </a>
+                </Button>
               )}
-              {iframeStatus === 'success' && !showFallback && (
-                <Badge variant="default" className="bg-green-500">
-                  Live
-                </Badge>
-              )}
-            </h3>
-            {!showFallback && (
-              <Button variant="outline" size="sm" asChild>
-                <a href={url} target="_blank" rel="noopener noreferrer">
-                  <ExternalLink className="h-3 w-3 mr-1" />
-                  Open
-                </a>
-              </Button>
-            )}
-          </div>
+            </div>
+          )}
 
           {/* Iframe or Fallback */}
           {showFallback ? (
             <FallbackUI />
           ) : (
-            <div className={`relative ${heightClass} w-full overflow-hidden rounded-lg border bg-muted`}>
+            <div className={`relative ${heightClass} w-full overflow-hidden ${isFeed ? '' : 'rounded-lg border'} bg-muted`}>
               {iframeStatus === 'loading' && (
                 <div className="absolute inset-0 flex items-center justify-center bg-background/80 z-10">
                   <div className="text-center">
@@ -207,8 +214,8 @@ const LivePreview = ({
             </div>
           )}
 
-          {/* Helper text for successful iframe */}
-          {iframeStatus === 'success' && !showFallback && !isSmall && (
+          {/* Helper text - only on detail page */}
+          {iframeStatus === 'success' && !showFallback && !isFeed && (
             <p className="text-xs text-muted-foreground text-center">
               💡 You can interact with the live project above. Click "Open" to view in a new tab.
             </p>

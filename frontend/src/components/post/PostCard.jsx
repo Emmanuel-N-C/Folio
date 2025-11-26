@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
+import { Card, CardContent, CardFooter } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { formatRelativeTime } from '@/lib/utils'
 import { MessageCircle, ExternalLink, Github } from 'lucide-react'
@@ -8,73 +8,91 @@ import LivePreview from './LivePreview'
 
 const PostCard = ({ post }) => {
   return (
-    <Card className="hover:shadow-lg transition-shadow">
-      <CardHeader>
-        <div className="flex items-start justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+    <Card className="hover:shadow-xl transition-all overflow-hidden">
+      {/* Author Header - Compact */}
+      <div className="px-4 pt-4 pb-2">
+        <div className="flex items-center gap-3">
+          <Link to={`/profile/${post.userId}`}>
+            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center hover:bg-primary/20 transition-colors">
               <span className="text-sm font-bold text-primary">
                 {post.username?.charAt(0).toUpperCase()}
               </span>
             </div>
-            <div>
-              <Link 
-                to={`/profile/${post.userId}`}
-                className="font-semibold hover:underline"
-              >
-                {post.username}
-              </Link>
-              <p className="text-xs text-muted-foreground">
-                {formatRelativeTime(post.createdAt)}
-              </p>
-            </div>
+          </Link>
+          <div className="flex-1">
+            <Link 
+              to={`/profile/${post.userId}`}
+              className="font-semibold hover:underline text-sm"
+            >
+              {post.username}
+            </Link>
+            <p className="text-xs text-muted-foreground">
+              {formatRelativeTime(post.createdAt)}
+            </p>
           </div>
         </div>
-      </CardHeader>
+      </div>
 
-      <CardContent className="space-y-4">
+      {/* Title - Above Preview */}
+      <div className="px-4 pb-3">
         <Link to={`/posts/${post.id}`}>
-          <h3 className="text-xl font-bold hover:text-primary transition-colors">
+          <h3 className="text-lg font-bold hover:text-primary transition-colors line-clamp-2">
             {post.title}
           </h3>
         </Link>
+      </div>
 
-        <p className="text-muted-foreground line-clamp-2">
-          {post.description}
-        </p>
-
-        {/* Live Preview or Screenshot */}
-        {post.liveDemoUrl ? (
+      {/* HERO: Live Preview or Screenshot - Full Width, Large */}
+      {post.liveDemoUrl ? (
+        <div className="w-full">
           <LivePreview 
             url={post.liveDemoUrl}
             screenshots={post.screenshotUrls}
             title={post.title}
-            size="small"
+            size="feed"
           />
-        ) : post.screenshotUrls && post.screenshotUrls.length > 0 ? (
-          <img 
-            src={post.screenshotUrls[0]} 
-            alt={post.title}
-            className="w-full h-48 object-cover rounded-lg"
-          />
-        ) : null}
+        </div>
+      ) : post.screenshotUrls && post.screenshotUrls.length > 0 ? (
+        <Link to={`/posts/${post.id}`} className="block">
+          <div className="w-full aspect-video overflow-hidden bg-muted">
+            <img 
+              src={post.screenshotUrls[0]} 
+              alt={post.title}
+              className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+            />
+          </div>
+        </Link>
+      ) : null}
 
-        <div className="flex flex-wrap gap-2">
-          {post.tags?.map((tag, index) => (
-            <Badge key={index} variant="secondary">
+      {/* Content Below - Compact */}
+      <CardContent className="px-4 pt-3 pb-2 space-y-2">
+        {/* Description */}
+        <p className="text-sm text-muted-foreground line-clamp-2">
+          {post.description}
+        </p>
+
+        {/* Tags & Tech Stack */}
+        <div className="flex items-center gap-2 flex-wrap">
+          {post.techStack && (
+            <span className="text-xs text-muted-foreground font-medium bg-muted px-2 py-1 rounded">
+              {post.techStack}
+            </span>
+          )}
+          {post.tags?.slice(0, 3).map((tag, index) => (
+            <Badge key={index} variant="secondary" className="text-xs">
               {tag}
             </Badge>
           ))}
-        </div>
-
-        <div className="flex items-center gap-4 text-sm text-muted-foreground">
-          {post.techStack && (
-            <span className="font-medium">{post.techStack}</span>
+          {post.tags?.length > 3 && (
+            <span className="text-xs text-muted-foreground">
+              +{post.tags.length - 3} more
+            </span>
           )}
         </div>
       </CardContent>
 
-      <CardFooter className="flex items-center justify-between">
+      {/* Footer Actions */}
+      <CardFooter className="px-4 py-3 border-t flex items-center justify-between">
         <div className="flex items-center gap-4">
           <LikeButton 
             postId={post.id} 
@@ -84,21 +102,22 @@ const PostCard = ({ post }) => {
           
           <Link 
             to={`/posts/${post.id}`}
-            className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
+            className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
           >
             <MessageCircle className="h-4 w-4" />
-            <span>{post.commentsCount}</span>
+            <span className="text-sm">{post.commentsCount}</span>
           </Link>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           {post.liveDemoUrl && (
             <a 
               href={post.liveDemoUrl} 
               target="_blank" 
               rel="noopener noreferrer"
-              className="text-muted-foreground hover:text-foreground"
+              className="text-muted-foreground hover:text-primary transition-colors"
               onClick={(e) => e.stopPropagation()}
+              title="Open Live Demo"
             >
               <ExternalLink className="h-4 w-4" />
             </a>
@@ -108,8 +127,9 @@ const PostCard = ({ post }) => {
               href={post.githubUrl} 
               target="_blank" 
               rel="noopener noreferrer"
-              className="text-muted-foreground hover:text-foreground"
+              className="text-muted-foreground hover:text-primary transition-colors"
               onClick={(e) => e.stopPropagation()}
+              title="View Code"
             >
               <Github className="h-4 w-4" />
             </a>
