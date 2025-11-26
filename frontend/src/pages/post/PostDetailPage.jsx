@@ -67,8 +67,10 @@ const PostDetailPage = () => {
     return <div className="max-w-4xl mx-auto">Post not found</div>
   }
 
-  const canEdit = user?.id === post.userId
-  const canDelete = user?.id === post.userId || isAdmin()
+  console.log('DEBUG - User ID:', user?.id, typeof user?.id)
+  console.log('DEBUG - Post User ID:', post.userId, typeof post.userId)
+  const canEdit = user?.userId === post.userId
+  const canDelete = user?.userId === post.userId || isAdmin()
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">

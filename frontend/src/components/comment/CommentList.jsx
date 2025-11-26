@@ -36,6 +36,12 @@ const CommentList = ({ postId }) => {
     setComments(prev => prev.filter(c => c.id !== commentId))
   }
 
+  const handleCommentUpdated = (updatedComment) => {
+    setComments(comments.map(c => 
+      c.id === updatedComment.id ? updatedComment : c
+    ))
+  }
+
   if (loading) {
     return <div>Loading comments...</div>
   }
@@ -54,6 +60,7 @@ const CommentList = ({ postId }) => {
             comment={comment} 
             postId={postId}
             onDeleted={handleCommentDeleted}
+            onUpdated={handleCommentUpdated}
           />
         ))}
       </div>

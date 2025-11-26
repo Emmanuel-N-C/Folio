@@ -23,12 +23,19 @@ export const AuthProvider = ({ children }) => {
   const login = async (credentials) => {
     try {
       const response = await authAPI.login(credentials)
-      const { token: newToken, ...userData } = response
+      const { token: newToken, userId, ...userData } = response
+
+      // Normalize userId to id for consistency
+      const normalizedUser = { 
+        id: userId,
+        userId: userId,  // Keep both for compatibility
+        ...userData 
+      }
 
       setToken(newToken)
-      setUser(userData)
+      setUser(normalizedUser)
       localStorage.setItem('token', newToken)
-      localStorage.setItem('user', JSON.stringify(userData))
+      localStorage.setItem('user', JSON.stringify(normalizedUser))
 
       return { success: true }
     } catch (error) {
@@ -42,12 +49,19 @@ export const AuthProvider = ({ children }) => {
   const register = async (data) => {
     try {
       const response = await authAPI.register(data)
-      const { token: newToken, ...userData } = response
+      const { token: newToken, userId, ...userData } = response
+
+      // Normalize userId to id for consistency
+      const normalizedUser = { 
+        id: userId,
+        userId: userId,  // Keep both for compatibility
+        ...userData 
+      }
 
       setToken(newToken)
-      setUser(userData)
+      setUser(normalizedUser)
       localStorage.setItem('token', newToken)
-      localStorage.setItem('user', JSON.stringify(userData))
+      localStorage.setItem('user', JSON.stringify(normalizedUser))
 
       return { success: true }
     } catch (error) {
