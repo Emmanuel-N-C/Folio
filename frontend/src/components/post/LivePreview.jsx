@@ -146,83 +146,81 @@ const LivePreview = ({
   // If no URL provided, show fallback immediately
   if (!url) {
     return (
-      <Card>
-        <CardContent className="pt-6">
+      <div className={`${isFeed ? 'rounded-lg border overflow-hidden' : ''}`}>
+        <div className={isFeed ? 'p-4' : 'pt-6'}>
           <FallbackUI />
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     )
   }
 
   return (
-    <Card className={isFeed ? 'shadow-none border-0' : ''}>
-      <CardContent className={isFeed ? 'p-0' : 'pt-6'}>
-        <div className={isFeed ? '' : 'space-y-4'}>
-          {/* Only show header on detail page, not feed */}
-          {!isFeed && (
-            <div className="flex items-center justify-between">
-              <h3 className="font-semibold flex items-center gap-2">
-                Live Interactive Preview
-                {iframeStatus === 'loading' && (
-                  <Badge variant="secondary" className="gap-1">
-                    <Loader2 className="h-3 w-3 animate-spin" />
-                    Loading
-                  </Badge>
-                )}
-                {iframeStatus === 'success' && !showFallback && (
-                  <Badge variant="default" className="bg-green-500">
-                    Live
-                  </Badge>
-                )}
-              </h3>
-              {!showFallback && (
-                <Button variant="outline" size="sm" asChild>
-                  <a href={url} target="_blank" rel="noopener noreferrer">
-                    <ExternalLink className="h-3 w-3 mr-1" />
-                    Open
-                  </a>
-                </Button>
-              )}
-            </div>
-          )}
-
-          {/* Iframe or Fallback */}
-          {showFallback ? (
-            <FallbackUI />
-          ) : (
-            <div className={`relative ${heightClass} w-full overflow-hidden ${isFeed ? '' : 'rounded-lg border'} bg-muted`}>
-              {iframeStatus === 'loading' && (
-                <div className="absolute inset-0 flex items-center justify-center bg-background/80 z-10">
-                  <div className="text-center">
-                    <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2 text-primary" />
-                    <p className="text-sm text-muted-foreground">Loading preview...</p>
-                  </div>
-                </div>
-              )}
-              
-              <iframe
-                ref={iframeRef}
-                src={url}
-                title={`${title} - Live Preview`}
-                className="w-full h-full border-0"
-                sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"
-                loading="lazy"
-                onLoad={handleIframeLoad}
-                onError={handleIframeError}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              />
-            </div>
-          )}
-
-          {/* Helper text - only on detail page */}
-          {iframeStatus === 'success' && !showFallback && !isFeed && (
-            <p className="text-xs text-muted-foreground text-center">
-              💡 You can interact with the live project above. Click "Open" to view in a new tab.
-            </p>
+    <div className={isFeed ? '' : 'space-y-4'}>
+      {/* Header - Only show on detail page */}
+      {!isFeed && (
+        <div className="flex items-center justify-between">
+          <h3 className="font-semibold flex items-center gap-2">
+            Live Interactive Preview
+            {iframeStatus === 'loading' && (
+              <Badge variant="secondary" className="gap-1">
+                <Loader2 className="h-3 w-3 animate-spin" />
+                Loading
+              </Badge>
+            )}
+            {iframeStatus === 'success' && !showFallback && (
+              <Badge variant="default" className="bg-green-500">
+                Live
+              </Badge>
+            )}
+          </h3>
+          {!showFallback && (
+            <Button variant="outline" size="sm" asChild>
+              <a href={url} target="_blank" rel="noopener noreferrer">
+                <ExternalLink className="h-3 w-3 mr-1" />
+                Open
+              </a>
+            </Button>
           )}
         </div>
-      </CardContent>
-    </Card>
+      )}
+
+      {/* Preview Container */}
+      {showFallback ? (
+        <div className={isFeed ? 'rounded-lg border p-4' : ''}>
+          <FallbackUI />
+        </div>
+      ) : (
+        <div className={`relative ${heightClass} w-full overflow-hidden rounded-lg border bg-muted`}>
+          {iframeStatus === 'loading' && (
+            <div className="absolute inset-0 flex items-center justify-center bg-background/80 z-10">
+              <div className="text-center">
+                <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2 text-primary" />
+                <p className="text-sm text-muted-foreground">Loading preview...</p>
+              </div>
+            </div>
+          )}
+          
+          <iframe
+            ref={iframeRef}
+            src={url}
+            title={`${title} - Live Preview`}
+            className="w-full h-full border-0"
+            sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"
+            loading="lazy"
+            onLoad={handleIframeLoad}
+            onError={handleIframeError}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          />
+        </div>
+      )}
+
+      {/* Helper text - only on detail page */}
+      {iframeStatus === 'success' && !showFallback && !isFeed && (
+        <p className="text-xs text-muted-foreground text-center">
+          💡 You can interact with the live project above. Click "Open" to view in a new tab.
+        </p>
+      )}
+    </div>
   )
 }
 

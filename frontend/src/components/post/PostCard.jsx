@@ -1,50 +1,140 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Card, CardContent, CardFooter } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { formatRelativeTime } from '@/lib/utils'
-import { MessageCircle, ExternalLink, Github } from 'lucide-react'
+import { MessageCircle, ExternalLink, Github, ChevronDown, ChevronUp } from 'lucide-react'
 import LikeButton from './LikeButton'
 import LivePreview from './LivePreview'
 
 const PostCard = ({ post }) => {
+  const [isExpanded, setIsExpanded] = useState(false)
+  
+  // Check if description is long (more than 150 characters)
+  const isLongDescription = post.description && post.description.length > 150
+  const shouldTruncate = isLongDescription && !isExpanded
+
   return (
-    <Card className="hover:shadow-xl transition-all overflow-hidden">
-      {/* Author Header - Compact */}
-      <div className="px-4 pt-4 pb-2">
-        <div className="flex items-center gap-3">
-          <Link to={`/profile/${post.userId}`}>
-            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center hover:bg-primary/20 transition-colors">
-              <span className="text-sm font-bold text-primary">
-                {post.username?.charAt(0).toUpperCase()}
-              </span>
-            </div>
-          </Link>
-          <div className="flex-1">
-            <Link 
-              to={`/profile/${post.userId}`}
-              className="font-semibold hover:underline text-sm"
-            >
-              {post.username}
+    <Card className="hover:shadow-xl transition-all">
+      {/* Compact Header */}
+      <div className="px-4 pt-4 pb-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Link to={`/profile/${post.userId}`}>
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center hover:bg-primary/20 transition-colors">
+                <span className="text-sm font-bold text-primary">
+                  {post.username?.charAt(0).toUpperCase()}
+                </span>
+              </div>
             </Link>
-            <p className="text-xs text-muted-foreground">
-              {formatRelativeTime(post.createdAt)}
-            </p>
+            <div>
+              <Link 
+                to={`/profile/${post.userId}`}
+                className="font-semibold hover:underline text-sm"
+              >
+                {post.username}
+              </Link>
+              <p className="text-xs text-muted-foreground">
+                {formatRelativeTime(post.createdAt)}
+              </p>
+            </div>
+          </div>
+          
+          {/* Quick Action Links */}
+          <div className="flex items-center gap-2">
+            {post.liveDemoUrl && (
+              <a 
+                href={post.liveDemoUrl} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-muted-foreground hover:text-primary transition-colors"
+                onClick={(e) => e.stopPropagation()}
+                title="Open Live Demo"
+              >
+                <ExternalLink className="h-4 w-4" />
+              </a>
+            )}
+            {post.githubUrl && (
+              <a 
+                href={post.githubUrl} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-muted-foreground hover:text-primary transition-colors"
+                onClick={(e) => e.stopPropagation()}
+                title="View Code"
+              >
+                <Github className="h-4 w-4" />
+              </a>
+            )}
           </div>
         </div>
       </div>
 
-      {/* Title - Above Preview */}
-      <div className="px-4 pb-3">
+      {/* Content Section - Above Preview */}
+      <CardContent className="px-4 pb-3 space-y-3">
+        {/* Title */}
         <Link to={`/posts/${post.id}`}>
-          <h3 className="text-lg font-bold hover:text-primary transition-colors line-clamp-2">
+          <h3 className="text-xl font-bold hover:text-primary transition-colors line-clamp-2">
             {post.title}
           </h3>
         </Link>
-      </div>
 
-      {/* HERO: Live Preview or Screenshot - Full Width, Large */}
+        {/* Description with Read More */}
+        {post.description && (
+          <div className="space-y-1">
+            <p className={`text-sm text-muted-foreground ${shouldTruncate ? 'line-clamp-3' : ''}`}>
+              {post.description}
+            </p>
+            {isLongDescription && (
+              <button
+                onClick={() => setIsExpanded(!isExpanded)}
+                className="text-xs text-primary hover:underline flex items-center gap-1 font-medium"
+              >
+                {isExpanded ? (
+                  <>
+                    Show less <ChevronUp className="h-3 w-3" />
+                  </>
+                ) : (
+                  <>
+                    Read more <ChevronDown className="h-3 w-3" />
+                  </>
+                )}
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* Tech Stack */}
+        {post.techStack && (
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-semibold text-muted-foreground">Built with:</span>
+            <span className="text-xs text-foreground font-medium bg-muted px-2 py-1 rounded">
+              {post.techStack}
+            </span>
+          </div>
+        )}
+
+        {/* Tags */}
+        {post.tags && post.tags.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            {post.tags.slice(0, 5).map((tag, index) => (
+              <Badge key={index} variant="secondary" className="text-xs">
+                {tag}
+              </Badge>
+            ))}
+            {post.tags.length > 5 && (
+              <Badge variant="outline" className="text-xs">
+                +{post.tags.length - 5}
+              </Badge>
+            )}
+          </div>
+        )}
+      </CardContent>
+
+      {/* HERO: Live Preview - Full Width */}
       {post.liveDemoUrl ? (
-        <div className="w-full">
+        <div className="px-4 pb-4">
           <LivePreview 
             url={post.liveDemoUrl}
             screenshots={post.screenshotUrls}
@@ -53,43 +143,18 @@ const PostCard = ({ post }) => {
           />
         </div>
       ) : post.screenshotUrls && post.screenshotUrls.length > 0 ? (
-        <Link to={`/posts/${post.id}`} className="block">
-          <div className="w-full aspect-video overflow-hidden bg-muted">
-            <img 
-              src={post.screenshotUrls[0]} 
-              alt={post.title}
-              className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-            />
-          </div>
-        </Link>
-      ) : null}
-
-      {/* Content Below - Compact */}
-      <CardContent className="px-4 pt-3 pb-2 space-y-2">
-        {/* Description */}
-        <p className="text-sm text-muted-foreground line-clamp-2">
-          {post.description}
-        </p>
-
-        {/* Tags & Tech Stack */}
-        <div className="flex items-center gap-2 flex-wrap">
-          {post.techStack && (
-            <span className="text-xs text-muted-foreground font-medium bg-muted px-2 py-1 rounded">
-              {post.techStack}
-            </span>
-          )}
-          {post.tags?.slice(0, 3).map((tag, index) => (
-            <Badge key={index} variant="secondary" className="text-xs">
-              {tag}
-            </Badge>
-          ))}
-          {post.tags?.length > 3 && (
-            <span className="text-xs text-muted-foreground">
-              +{post.tags.length - 3} more
-            </span>
-          )}
+        <div className="px-4 pb-4">
+          <Link to={`/posts/${post.id}`} className="block">
+            <div className="w-full aspect-video overflow-hidden rounded-lg bg-muted border">
+              <img 
+                src={post.screenshotUrls[0]} 
+                alt={post.title}
+                className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+              />
+            </div>
+          </Link>
         </div>
-      </CardContent>
+      ) : null}
 
       {/* Footer Actions */}
       <CardFooter className="px-4 py-3 border-t flex items-center justify-between">
@@ -109,32 +174,11 @@ const PostCard = ({ post }) => {
           </Link>
         </div>
 
-        <div className="flex items-center gap-3">
-          {post.liveDemoUrl && (
-            <a 
-              href={post.liveDemoUrl} 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-muted-foreground hover:text-primary transition-colors"
-              onClick={(e) => e.stopPropagation()}
-              title="Open Live Demo"
-            >
-              <ExternalLink className="h-4 w-4" />
-            </a>
-          )}
-          {post.githubUrl && (
-            <a 
-              href={post.githubUrl} 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-muted-foreground hover:text-primary transition-colors"
-              onClick={(e) => e.stopPropagation()}
-              title="View Code"
-            >
-              <Github className="h-4 w-4" />
-            </a>
-          )}
-        </div>
+        <Link to={`/posts/${post.id}`}>
+          <Button variant="ghost" size="sm" className="text-xs">
+            View Details →
+          </Button>
+        </Link>
       </CardFooter>
     </Card>
   )
