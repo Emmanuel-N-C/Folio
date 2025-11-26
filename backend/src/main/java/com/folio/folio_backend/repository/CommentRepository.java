@@ -10,9 +10,14 @@ import java.util.List;
 
 @Repository
 public interface CommentRepository extends JpaRepository<Comment, Long> {
-
-    @Query("SELECT c FROM Comment c LEFT JOIN FETCH c.user WHERE c.post.id = :postId ORDER BY c.createdAt DESC")
-    List<Comment> findByPostIdOrderByCreatedAtDesc(@Param("postId") Long postId);
-
-    int countByPostId(Long postId);
+    
+    List<Comment> findByPostIdOrderByCreatedAtDesc(Long postId);
+    
+    // Get top-level comments only (no parent)
+    @Query("SELECT c FROM Comment c WHERE c.post.id = :postId AND c.parentComment IS NULL ORDER BY c.createdAt DESC")
+    List<Comment> findTopLevelCommentsByPostId(@Param("postId") Long postId);
+    
+    // Get replies to a specific comment
+    @Query("SELECT c FROM Comment c WHERE c.parentComment.id = :parentCommentId ORDER BY c.createdAt ASC")
+    List<Comment> findRepliesByParentCommentId(@Param("parentCommentId") Long parentCommentId);
 }

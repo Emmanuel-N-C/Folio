@@ -9,6 +9,8 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "comments")
@@ -22,7 +24,7 @@ public class Comment {
     private Long id;
     
     @NotBlank
-    @Column(nullable = false, columnDefinition = "TEXT")
+    @Column(columnDefinition = "TEXT", nullable = false)
     private String content;
     
     @ManyToOne(fetch = FetchType.LAZY)
@@ -33,11 +35,32 @@ public class Comment {
     @JoinColumn(name = "post_id", nullable = false)
     private Post post;
     
+    // For nested replies - parent comment (null for top-level comments)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_comment_id")
+    private Comment parentComment;
+    
+    // Replies to this comment
+    @OneToMany(mappedBy = "parentComment", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> replies = new ArrayList<>();
+    
+    // Likes on this comment
+    @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CommentLike> likes = new ArrayList<>();
+    
     @CreationTimestamp
     @Column(updatable = false)
     private LocalDateTime createdAt;
     
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+    
+    public int getLikesCount() {
+        return likes != null ? likes.size() : 0;
+    }
+    
+    public int getRepliesCount() {
+        return replies != null ? replies.size() : 0;
+    }
 }
 

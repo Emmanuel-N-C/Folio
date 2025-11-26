@@ -16,6 +16,10 @@ public class CommentResponse {
     private String username;
     private String userProfileImageUrl;
     private Long postId;
+    private Long parentCommentId;  // null for top-level comments
+    private int likesCount;
+    private int repliesCount;
+    private boolean likedByCurrentUser;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

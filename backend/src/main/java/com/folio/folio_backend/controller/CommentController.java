@@ -35,8 +35,10 @@ public class CommentController {
     }
     
     @DeleteMapping("/{commentId}")
-    public ResponseEntity<MessageResponse> deleteComment(@PathVariable Long commentId) {
-        commentService.deleteComment(commentId);
+    public ResponseEntity<MessageResponse> deleteComment(
+            @PathVariable Long postId,
+            @PathVariable Long commentId) {
+        commentService.deleteComment(commentId, postId);
         return ResponseEntity.ok(new MessageResponse("Comment deleted successfully"));
     }
 
@@ -45,6 +47,36 @@ public class CommentController {
             @PathVariable Long commentId,
             @Valid @RequestBody CreateCommentRequest request) {
         CommentResponse response = commentService.updateComment(commentId, request);
+        return ResponseEntity.ok(response);
+    }
+    
+    // Like a comment
+    @PostMapping("/{commentId}/like")
+    public ResponseEntity<CommentResponse> likeComment(@PathVariable Long commentId) {
+        CommentResponse response = commentService.likeComment(commentId);
+        return ResponseEntity.ok(response);
+    }
+    
+    // Unlike a comment
+    @DeleteMapping("/{commentId}/like")
+    public ResponseEntity<CommentResponse> unlikeComment(@PathVariable Long commentId) {
+        CommentResponse response = commentService.unlikeComment(commentId);
+        return ResponseEntity.ok(response);
+    }
+    
+    // Reply to a comment
+    @PostMapping("/{commentId}/replies")
+    public ResponseEntity<CommentResponse> createReply(
+            @PathVariable Long commentId,
+            @Valid @RequestBody CreateCommentRequest request) {
+        CommentResponse response = commentService.createReply(commentId, request);
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+    
+    // Get replies to a comment
+    @GetMapping("/{commentId}/replies")
+    public ResponseEntity<List<CommentResponse>> getReplies(@PathVariable Long commentId) {
+        List<CommentResponse> response = commentService.getReplies(commentId);
         return ResponseEntity.ok(response);
     }
 }
