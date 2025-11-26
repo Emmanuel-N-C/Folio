@@ -9,7 +9,6 @@ import com.folio.folio_backend.model.User;
 import com.folio.folio_backend.repository.UserRepository;
 import com.folio.folio_backend.security.JwtTokenProvider;
 import com.folio.folio_backend.service.AuthService;
-import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -36,27 +35,6 @@ public class AuthServiceImpl implements AuthService {
 
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
-
-    @PostConstruct
-    @Transactional
-    public void seedAdmin() {
-        // Seed default admin if not exists
-        if (!userRepository.existsByUsername("admin")) {
-            User admin = new User();
-            admin.setUsername("admin");
-            admin.setEmail("admin@folio.com");
-            admin.setPassword(passwordEncoder.encode("Admin123"));
-            admin.setBio("System Administrator");
-
-            Set<Role> roles = new HashSet<>();
-            roles.add(Role.ROLE_ADMIN);
-            roles.add(Role.ROLE_USER);
-            admin.setRoles(roles);
-
-            userRepository.save(admin);
-            System.out.println("✅ Default admin user created: username=admin, password=Admin123");
-        }
-    }
 
     @Override
     @Transactional
@@ -87,7 +65,7 @@ public class AuthServiceImpl implements AuthService {
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String token = jwtTokenProvider.generateToken(authentication);
 
-        return new AuthResponse(token, user.getId(), user.getUsername(), user.getEmail());
+        return new AuthResponse(token, user.getId(), user.getUsername(), user.getEmail(), user.getRoles());
     }
 
     @Override
@@ -105,6 +83,6 @@ public class AuthServiceImpl implements AuthService {
         User user = userRepository.findByUsernameOrEmail(request.getUsernameOrEmail(), request.getUsernameOrEmail())
                 .orElseThrow(() -> new BadRequestException("Invalid credentials"));
 
-        return new AuthResponse(token, user.getId(), user.getUsername(), user.getEmail());
+        return new AuthResponse(token, user.getId(), user.getUsername(), user.getEmail(), user.getRoles());
     }
 }
