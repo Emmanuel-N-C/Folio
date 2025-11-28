@@ -49,4 +49,24 @@ export const postsAPI = {
     const response = await axiosInstance.delete(`/posts/${postId}`)
     return response.data
   },
+
+  uploadPostScreenshots: async (postId, files) => {
+    const formData = new FormData()
+    
+    // Append multiple files
+    files.forEach((file) => {
+      formData.append('files', file)
+    })
+
+    const response = await axiosInstance.post(
+      `/posts/${postId}/screenshots`,
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    )
+    return response.data
+  },
 }

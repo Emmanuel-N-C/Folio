@@ -10,4 +10,20 @@ export const usersAPI = {
     const response = await axiosInstance.put('/users/me', data)
     return response.data
   },
+
+  uploadProfilePicture: async (userId, file) => {
+    const formData = new FormData()
+    formData.append('file', file)
+
+    const response = await axiosInstance.post(
+      `/users/${userId}/profile-picture`,
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    )
+    return response.data
+  },
 }
