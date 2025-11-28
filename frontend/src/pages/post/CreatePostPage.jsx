@@ -6,7 +6,8 @@ import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
 import { postsAPI } from '@/api/posts'
 import { useToast } from '@/components/ui/use-toast'
-import { X } from 'lucide-react'
+import { X, Sparkles } from 'lucide-react'
+import AIGenerateProjectFields from '@/components/ai/AIGenerateProjectFields'
 
 const CreatePostPage = () => {
   const [formData, setFormData] = useState({
@@ -18,9 +19,34 @@ const CreatePostPage = () => {
     screenshotUrls: [''],
     tags: ['']
   })
+  const [showAIGenerator, setShowAIGenerator] = useState(true)
+  const [aiGenerated, setAiGenerated] = useState(false)
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
   const { toast } = useToast()
+
+  const handleAIGenerate = (aiResult) => {
+    // Populate form with AI-generated data
+    setFormData({
+      ...formData,
+      title: aiResult.projectTitle || formData.title,
+      description: aiResult.description || formData.description,
+      techStack: Array.isArray(aiResult.techStack) 
+        ? aiResult.techStack.join(', ') 
+        : aiResult.techStack || formData.techStack,
+      tags: Array.isArray(aiResult.tags) && aiResult.tags.length > 0
+        ? aiResult.tags
+        : formData.tags,
+    })
+    
+    setAiGenerated(true)
+    setShowAIGenerator(false)
+    
+    // Scroll to form
+    setTimeout(() => {
+      document.getElementById('project-form')?.scrollIntoView({ behavior: 'smooth' })
+    }, 100)
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -85,10 +111,50 @@ const CreatePostPage = () => {
   }
 
   return (
-    <div className="max-w-2xl mx-auto">
-      <Card>
+    <div className="max-w-2xl mx-auto space-y-6">
+      {/* AI Generator Section */}
+      {showAIGenerator && (
+        <AIGenerateProjectFields
+          onGenerate={handleAIGenerate}
+          initialData={{
+            githubUrl: formData.githubUrl,
+            liveDemoUrl: formData.liveDemoUrl,
+            screenshotUrls: formData.screenshotUrls,
+          }}
+        />
+      )}
+
+      {/* Manual Form */}
+      <Card id="project-form">
         <CardHeader>
-          <CardTitle>Create New Post</CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle>
+              {aiGenerated ? (
+                <span className="flex items-center gap-2">
+                  <Sparkles className="h-5 w-5 text-purple-600" />
+                  AI Generated - Review & Edit
+                </span>
+              ) : (
+                'Create New Post'
+              )}
+            </CardTitle>
+            {!showAIGenerator && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setShowAIGenerator(true)}
+              >
+                <Sparkles className="mr-2 h-4 w-4" />
+                Use AI Again
+              </Button>
+            )}
+          </div>
+          {aiGenerated && (
+            <p className="text-sm text-gray-600">
+              Review the AI-generated content below and make any adjustments before publishing.
+            </p>
+          )}
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -108,7 +174,7 @@ const CreatePostPage = () => {
                 placeholder="Describe your project..."
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                rows={4}
+                rows={6}
                 required
               />
             </div>
