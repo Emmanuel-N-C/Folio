@@ -31,7 +31,7 @@ public class Post {
     private String description;
     
     @Column(columnDefinition = "TEXT")
-    private String techStack; // Comma-separated or JSON string
+    private String techStack;
     
     private String liveDemoUrl;
     
