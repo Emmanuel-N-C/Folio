@@ -16,6 +16,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.folio.folio_backend.service.S3Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -31,6 +33,9 @@ public class PostServiceImpl implements PostService {
 
     @Autowired
     private LikeRepository likeRepository;
+
+    @Autowired
+    private S3Service s3Service;
 
     @Override
     @Transactional
@@ -187,6 +192,52 @@ public class PostServiceImpl implements PostService {
         
         if (!isOwner && !isAdmin) {
             throw new BadRequestException("You are not authorized to delete this post");
+        }
+
+        postRepository.delete(post);
+    }
+    @Override
+    @Transactional
+    public PostResponse uploadPostScreenshots(Long postId, List<MultipartFile> files) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new ResourceNotFoundException("Post not found with id: " + postId));
+
+        // Verify the current user owns this post
+        User currentUser = userService.getCurrentUser();
+        if (!post.getPostedBy().getId().equals(currentUser.getId())) {
+            throw new BadRequestException("You can only upload screenshots to your own posts");
+        }
+
+        // Upload screenshots to S3
+        List<String> newScreenshotUrls = s3Service.uploadPostScreenshots(files, postId);
+
+        // Add new URLs to existing screenshots
+        post.getScreenshotUrls().addAll(newScreenshotUrls);
+        postRepository.save(post);
+
+        return mapToPostResponse(post, currentUser);
+    }
+
+    @Override
+    @Transactional
+    public void deletePost(Long postId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new ResourceNotFoundException("Post not found with id: " + postId));
+
+        User currentUser = userService.getCurrentUser();
+        if (!post.getPostedBy().getId().equals(currentUser.getId()) &&
+                !currentUser.getRoles().contains(Role.ADMIN)) {
+            throw new BadRequestException("You don't have permission to delete this post");
+        }
+
+        // Delete all screenshots from S3
+        for (String screenshotUrl : post.getScreenshotUrls()) {
+            try {
+                String key = s3Service.extractKeyFromUrl(screenshotUrl);
+                s3Service.deleteFile(key);
+            } catch (Exception e) {
+                System.err.println("Failed to delete screenshot: " + e.getMessage());
+            }
         }
 
         postRepository.delete(post);

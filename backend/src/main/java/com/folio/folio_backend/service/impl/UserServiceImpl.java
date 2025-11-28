@@ -79,22 +79,6 @@ public class UserServiceImpl implements UserService {
         return getCurrentUser().getId();
     }
 
-    private UserProfileResponse mapToUserProfileResponse(User user) {
-        UserProfileResponse response = new UserProfileResponse();
-        response.setId(user.getId());
-        response.setUsername(user.getUsername());
-        response.setEmail(user.getEmail());
-        response.setBio(user.getBio());
-        response.setProfileImageUrl(user.getProfileImageUrl());
-        response.setGithubUrl(user.getGithubUrl());
-        response.setWebsiteUrl(user.getWebsiteUrl());
-        response.setCreatedAt(user.getCreatedAt());
-
-        // Use repository count instead of accessing lazy collection
-        response.setPostsCount((int) postRepository.findByPostedByIdOrderByCreatedAtDesc(user.getId()).stream().count());
-
-        return response;
-    }
     @Override
     @Transactional
     public UserProfileResponse uploadProfilePicture(Long userId, MultipartFile file) {
@@ -125,4 +109,22 @@ public class UserServiceImpl implements UserService {
 
         return mapToUserProfileResponse(user);
     }
+
+    private UserProfileResponse mapToUserProfileResponse(User user) {
+        UserProfileResponse response = new UserProfileResponse();
+        response.setId(user.getId());
+        response.setUsername(user.getUsername());
+        response.setEmail(user.getEmail());
+        response.setBio(user.getBio());
+        response.setProfileImageUrl(user.getProfileImageUrl());
+        response.setGithubUrl(user.getGithubUrl());
+        response.setWebsiteUrl(user.getWebsiteUrl());
+        response.setCreatedAt(user.getCreatedAt());
+
+        // Use repository count instead of accessing lazy collection
+        response.setPostsCount((int) postRepository.findByPostedByIdOrderByCreatedAtDesc(user.getId()).stream().count());
+
+        return response;
+    }
+
 }
