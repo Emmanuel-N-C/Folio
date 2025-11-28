@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
-import { Sparkles, Loader2, AlertCircle, Upload, X } from 'lucide-react';
+import { Loader2, AlertCircle, Upload, X, ChevronDown, ChevronUp } from 'lucide-react';
 import { groqAPI } from '@/api/groqClient';
 
 const AIGenerateProjectFields = ({ onGenerate, initialData = {} }) => {
@@ -49,7 +49,7 @@ const AIGenerateProjectFields = ({ onGenerate, initialData = {} }) => {
       onGenerate(result);
 
       toast({
-        title: 'Success! ✨',
+        title: 'Success',
         description: 'AI has generated your project details. Review and edit as needed.',
       });
 
@@ -89,26 +89,21 @@ const AIGenerateProjectFields = ({ onGenerate, initialData = {} }) => {
 
   if (!showAIForm) {
     return (
-      <Card className="border-2 border-dashed border-purple-300 bg-gradient-to-br from-purple-50 to-blue-50">
+      <Card className="border-2 border-dashed hover:shadow-lg transition-all">
         <CardContent className="pt-6">
-          <div className="flex flex-col items-center text-center space-y-4">
-            <div className="p-3 bg-purple-100 rounded-full">
-              <Sparkles className="h-8 w-8 text-purple-600" />
+          <div className="flex flex-col items-center text-center space-y-3">
+            <div className="text-sm font-medium text-muted-foreground">
+              Generate with AI
             </div>
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900">
-                Generate with AI ✨
-              </h3>
-              <p className="text-sm text-gray-600 mt-1">
-                Let AI analyze your project and auto-fill the form
-              </p>
-            </div>
+            <p className="text-xs text-muted-foreground max-w-md">
+              Let AI analyze your project and auto-fill the form
+            </p>
             <Button
               type="button"
               onClick={() => setShowAIForm(true)}
-              className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+              variant="outline"
+              size="sm"
             >
-              <Sparkles className="mr-2 h-4 w-4" />
               Start AI Generation
             </Button>
           </div>
@@ -118,22 +113,30 @@ const AIGenerateProjectFields = ({ onGenerate, initialData = {} }) => {
   }
 
   return (
-    <Card className="border-2 border-purple-300 bg-gradient-to-br from-purple-50 to-blue-50">
+    <Card className="hover:shadow-lg transition-all">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Sparkles className="h-5 w-5 text-purple-600" />
-          AI Project Generator
-        </CardTitle>
-        <p className="text-sm text-gray-600">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-lg">AI Project Generator</CardTitle>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={() => setShowAIForm(false)}
+            disabled={isGenerating}
+          >
+            {showAIForm ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+          </Button>
+        </div>
+        <p className="text-sm text-muted-foreground">
           Provide any combination of inputs below, and AI will generate your project details
         </p>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* GitHub URL */}
         <div className="space-y-2">
-          <label className="text-sm font-medium flex items-center gap-2">
-            <span>GitHub Repository URL</span>
-            <span className="text-xs text-gray-500">(AI will read README)</span>
+          <label className="text-sm font-medium">
+            GitHub Repository URL
+            <span className="text-xs text-muted-foreground ml-2">(AI will read README)</span>
           </label>
           <Input
             type="url"
@@ -146,9 +149,9 @@ const AIGenerateProjectFields = ({ onGenerate, initialData = {} }) => {
 
         {/* Live Demo URL */}
         <div className="space-y-2">
-          <label className="text-sm font-medium flex items-center gap-2">
-            <span>Live Demo URL</span>
-            <span className="text-xs text-gray-500">(AI will analyze the site)</span>
+          <label className="text-sm font-medium">
+            Live Demo URL
+            <span className="text-xs text-muted-foreground ml-2">(AI will analyze the site)</span>
           </label>
           <Input
             type="url"
@@ -163,8 +166,8 @@ const AIGenerateProjectFields = ({ onGenerate, initialData = {} }) => {
         <div className="space-y-2">
           <label className="text-sm font-medium flex items-center gap-2">
             <Upload className="h-4 w-4" />
-            <span>Screenshot URLs</span>
-            <span className="text-xs text-gray-500">(AI vision will analyze images)</span>
+            Screenshot URLs
+            <span className="text-xs text-muted-foreground">(AI vision will analyze images)</span>
           </label>
           {aiInputs.screenshotUrls.map((url, index) => (
             <div key={index} className="flex gap-2">
@@ -215,9 +218,9 @@ const AIGenerateProjectFields = ({ onGenerate, initialData = {} }) => {
         </div>
 
         {/* Info Alert */}
-        <div className="flex items-start gap-2 p-3 bg-blue-50 border border-blue-200 rounded-md">
-          <AlertCircle className="h-4 w-4 text-blue-600 mt-0.5 flex-shrink-0" />
-          <p className="text-xs text-blue-800">
+        <div className="flex items-start gap-2 p-3 bg-muted border rounded-md">
+          <AlertCircle className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+          <p className="text-xs text-muted-foreground">
             <strong>Tip:</strong> The more information you provide, the better the AI can understand your project. 
             You can provide any combination of GitHub URL, demo URL, screenshots, or notes.
           </p>
@@ -229,7 +232,7 @@ const AIGenerateProjectFields = ({ onGenerate, initialData = {} }) => {
             type="button"
             onClick={handleGenerate}
             disabled={isGenerating}
-            className="flex-1 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+            className="flex-1"
           >
             {isGenerating ? (
               <>
@@ -237,10 +240,7 @@ const AIGenerateProjectFields = ({ onGenerate, initialData = {} }) => {
                 Generating...
               </>
             ) : (
-              <>
-                <Sparkles className="mr-2 h-4 w-4" />
-                Generate Project Details
-              </>
+              'Generate Project Details'
             )}
           </Button>
           <Button

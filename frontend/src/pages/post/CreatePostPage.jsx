@@ -4,9 +4,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import { postsAPI } from '@/api/posts'
 import { useToast } from '@/components/ui/use-toast'
-import { X, Sparkles } from 'lucide-react'
+import { X } from 'lucide-react'
 import AIGenerateProjectFields from '@/components/ai/AIGenerateProjectFields'
 
 const CreatePostPage = () => {
@@ -125,19 +126,19 @@ const CreatePostPage = () => {
       )}
 
       {/* Manual Form */}
-      <Card id="project-form">
+      <Card id="project-form" className="hover:shadow-lg transition-all">
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle>
-              {aiGenerated ? (
-                <span className="flex items-center gap-2">
-                  <Sparkles className="h-5 w-5 text-purple-600" />
-                  AI Generated - Review & Edit
-                </span>
-              ) : (
-                'Create New Post'
+            <div>
+              <CardTitle>
+                {aiGenerated ? 'AI Generated - Review & Edit' : 'Create New Post'}
+              </CardTitle>
+              {aiGenerated && (
+                <p className="text-sm text-muted-foreground mt-1">
+                  Review the AI-generated content below and make any adjustments before publishing.
+                </p>
               )}
-            </CardTitle>
+            </div>
             {!showAIGenerator && (
               <Button
                 type="button"
@@ -145,15 +146,14 @@ const CreatePostPage = () => {
                 size="sm"
                 onClick={() => setShowAIGenerator(true)}
               >
-                <Sparkles className="mr-2 h-4 w-4" />
                 Use AI Again
               </Button>
             )}
           </div>
           {aiGenerated && (
-            <p className="text-sm text-gray-600">
-              Review the AI-generated content below and make any adjustments before publishing.
-            </p>
+            <Badge variant="secondary" className="w-fit">
+              AI Generated
+            </Badge>
           )}
         </CardHeader>
         <CardContent>
