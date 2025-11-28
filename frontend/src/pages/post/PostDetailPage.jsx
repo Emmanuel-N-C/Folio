@@ -10,7 +10,7 @@ import LivePreview from '@/components/post/LivePreview'
 import { useAuth } from '@/hooks/useAuth'
 import { useToast } from '@/components/ui/use-toast'
 import { formatRelativeTime } from '@/lib/utils'
-import { Edit, Trash2, ExternalLink, Github, ArrowLeft } from 'lucide-react'
+import { Edit, Trash2, ExternalLink, Github, ArrowLeft, Upload } from 'lucide-react'
 
 const PostDetailPage = () => {
   const { postId } = useParams()
@@ -67,10 +67,10 @@ const PostDetailPage = () => {
     return <div className="max-w-4xl mx-auto">Post not found</div>
   }
 
-  console.log('DEBUG - User ID:', user?.id, typeof user?.id)
-  console.log('DEBUG - Post User ID:', post.userId, typeof post.userId)
-  const canEdit = user?.userId === post.userId
-  const canDelete = user?.userId === post.userId || isAdmin()
+  // Check permissions
+  const isOwner = user?.id === post.userId
+  const canEdit = isOwner
+  const canDelete = isOwner || isAdmin()
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -83,10 +83,18 @@ const PostDetailPage = () => {
         <CardHeader>
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-3 flex-1">
-              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                <span className="text-lg font-bold text-primary">
-                  {post.username?.charAt(0).toUpperCase()}
-                </span>
+              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden">
+                {post.userProfileImageUrl ? (
+                  <img 
+                    src={post.userProfileImageUrl} 
+                    alt={post.username}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <span className="text-lg font-bold text-primary">
+                    {post.username?.charAt(0).toUpperCase()}
+                  </span>
+                )}
               </div>
               <div>
                 <Link 
@@ -105,14 +113,24 @@ const PostDetailPage = () => {
             {(canEdit || canDelete) && (
               <div className="flex gap-2">
                 {canEdit && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => navigate(`/posts/${postId}/edit`)}
-                  >
-                    <Edit className="h-4 w-4 mr-2" />
-                    Edit
-                  </Button>
+                  <>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => navigate(`/posts/${postId}/upload-screenshots`)}
+                    >
+                      <Upload className="h-4 w-4 mr-2" />
+                      Upload Screenshots
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => navigate(`/posts/${postId}/edit`)}
+                    >
+                      <Edit className="h-4 w-4 mr-2" />
+                      Edit
+                    </Button>
+                  </>
                 )}
                 {canDelete && (
                   <Button
@@ -151,14 +169,31 @@ const PostDetailPage = () => {
           {!post.liveDemoUrl && post.screenshotUrls && post.screenshotUrls.length > 0 && (
             <div className="space-y-4">
               <h3 className="font-semibold">Screenshots</h3>
-              {post.screenshotUrls.map((url, index) => (
-                <img 
-                  key={index}
-                  src={url} 
-                  alt={`${post.title} screenshot ${index + 1}`}
-                  className="w-full rounded-lg shadow-md"
-                />
-              ))}
+              <div className="grid grid-cols-1 gap-4">
+                {post.screenshotUrls.map((url, index) => (
+                  <img 
+                    key={index}
+                    src={url} 
+                    alt={`${post.title} screenshot ${index + 1}`}
+                    className="w-full rounded-lg shadow-md hover:shadow-xl transition-shadow"
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* No screenshots message for owner */}
+          {isOwner && (!post.screenshotUrls || post.screenshotUrls.length === 0) && (
+            <div className="bg-muted p-4 rounded-lg text-center">
+              <p className="text-muted-foreground mb-2">No screenshots uploaded yet</p>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => navigate(`/posts/${postId}/upload-screenshots`)}
+              >
+                <Upload className="h-4 w-4 mr-2" />
+                Upload Screenshots
+              </Button>
             </div>
           )}
 
@@ -183,12 +218,16 @@ const PostDetailPage = () => {
               </div>
             )}
 
-            <div className="flex items-center gap-4 pt-4">
+            <div className="flex items-center gap-4 pt-4 border-t">
               <LikeButton 
                 postId={post.id}
                 initialLiked={post.likedByCurrentUser}
                 initialCount={post.likesCount}
               />
+
+              <span className="text-sm text-muted-foreground">
+                {post.commentsCount} {post.commentsCount === 1 ? 'comment' : 'comments'}
+              </span>
 
               {post.liveDemoUrl && (
                 <a
@@ -198,7 +237,7 @@ const PostDetailPage = () => {
                   className="flex items-center gap-2 text-primary hover:underline"
                 >
                   <ExternalLink className="h-4 w-4" />
-                  Open in New Tab
+                  Live Demo
                 </a>
               )}
 
