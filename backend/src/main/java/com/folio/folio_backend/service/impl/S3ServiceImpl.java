@@ -84,6 +84,22 @@ public class S3ServiceImpl implements S3Service {
         return String.format("https://%s.s3.%s.amazonaws.com/%s", bucketName, region, fileKey);
     }
 
+    @Override
+    public String extractKeyFromUrl(String url) {
+        // Extract the key from a full S3 URL
+        // Example: https://bucket.s3.region.amazonaws.com/profile-pictures/1/file.jpg
+        // Returns: profile-pictures/1/file.jpg
+        try {
+            String[] parts = url.split(".amazonaws.com/");
+            if (parts.length > 1) {
+                return parts[1];
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Invalid S3 URL format");
+        }
+        return url;
+    }
+
     private void uploadToS3(MultipartFile file, String fileKey) {
         try {
             PutObjectRequest putObjectRequest = PutObjectRequest.builder()
@@ -123,18 +139,5 @@ public class S3ServiceImpl implements S3Service {
             throw new InvalidFileException("File has no extension");
         }
         return filename.substring(filename.lastIndexOf(".") + 1);
-    }
-
-    public String extractKeyFromUrl(String url) {
-
-        try {
-            String[] parts = url.split(".amazonaws.com/");
-            if (parts.length > 1) {
-                return parts[1];
-            }
-        } catch (Exception e) {
-            throw new RuntimeException("Invalid S3 URL format");
-        }
-        return url;
     }
 }

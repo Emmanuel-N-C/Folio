@@ -11,12 +11,12 @@ import com.folio.folio_backend.repository.LikeRepository;
 import com.folio.folio_backend.repository.PostRepository;
 import com.folio.folio_backend.service.PostService;
 import com.folio.folio_backend.service.UserService;
+import com.folio.folio_backend.service.S3Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.folio.folio_backend.service.S3Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -180,24 +180,6 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional
-    public void deletePost(Long postId) {
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new ResourceNotFoundException("Post not found with id: " + postId));
-
-        User currentUser = userService.getCurrentUser();
-
-        // Allow deletion if user is the owner OR an admin
-        boolean isOwner = post.getPostedBy().getId().equals(currentUser.getId());
-        boolean isAdmin = currentUser.getRoles().contains(Role.ROLE_ADMIN);
-        
-        if (!isOwner && !isAdmin) {
-            throw new BadRequestException("You are not authorized to delete this post");
-        }
-
-        postRepository.delete(post);
-    }
-    @Override
-    @Transactional
     public PostResponse uploadPostScreenshots(Long postId, List<MultipartFile> files) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new ResourceNotFoundException("Post not found with id: " + postId));
@@ -215,7 +197,7 @@ public class PostServiceImpl implements PostService {
         post.getScreenshotUrls().addAll(newScreenshotUrls);
         postRepository.save(post);
 
-        return mapToPostResponse(post, currentUser);
+        return mapToPostResponse(post, currentUser.getId());
     }
 
     @Override
@@ -225,9 +207,13 @@ public class PostServiceImpl implements PostService {
                 .orElseThrow(() -> new ResourceNotFoundException("Post not found with id: " + postId));
 
         User currentUser = userService.getCurrentUser();
-        if (!post.getPostedBy().getId().equals(currentUser.getId()) &&
-                !currentUser.getRoles().contains(Role.ADMIN)) {
-            throw new BadRequestException("You don't have permission to delete this post");
+
+        // Allow deletion if user is the owner OR an admin
+        boolean isOwner = post.getPostedBy().getId().equals(currentUser.getId());
+        boolean isAdmin = currentUser.getRoles().contains(Role.ROLE_ADMIN);
+
+        if (!isOwner && !isAdmin) {
+            throw new BadRequestException("You are not authorized to delete this post");
         }
 
         // Delete all screenshots from S3

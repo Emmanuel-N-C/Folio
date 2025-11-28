@@ -2,18 +2,19 @@ package com.folio.folio_backend.service.impl;
 
 import com.folio.folio_backend.dto.UpdateProfileRequest;
 import com.folio.folio_backend.dto.UserProfileResponse;
+import com.folio.folio_backend.exception.BadRequestException;
 import com.folio.folio_backend.exception.ResourceNotFoundException;
 import com.folio.folio_backend.model.User;
 import com.folio.folio_backend.repository.PostRepository;
 import com.folio.folio_backend.repository.UserRepository;
 import com.folio.folio_backend.service.UserService;
+import com.folio.folio_backend.service.S3Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.folio.folio_backend.service.S3Service;
 import org.springframework.web.multipart.MultipartFile;
 
 

@@ -9,4 +9,5 @@ public interface S3Service {
     List<String> uploadPostScreenshots(List<MultipartFile> files, Long postId);
     void deleteFile(String fileKey);
     String getPublicUrl(String fileKey);
+    String extractKeyFromUrl(String url);
 }
