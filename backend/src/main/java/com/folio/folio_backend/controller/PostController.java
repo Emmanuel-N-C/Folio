@@ -10,9 +10,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -78,6 +80,15 @@ public class PostController {
             @PathVariable Long postId,
             @Valid @RequestBody CreatePostRequest request) {
         PostResponse response = postService.updatePost(postId, request);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping(value = "/{postId}/screenshots", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<PostResponse> uploadPostScreenshots(
+            @PathVariable Long postId,
+            @RequestParam("files") List<MultipartFile> files) {
+        PostResponse response = postService.uploadPostScreenshots(postId, files);
         return ResponseEntity.ok(response);
     }
 
