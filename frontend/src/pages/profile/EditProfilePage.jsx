@@ -7,11 +7,11 @@ import { Button } from '@/components/ui/button'
 import { usersAPI } from '@/api/users'
 import { useAuth } from '@/hooks/useAuth'
 import { useToast } from '@/components/ui/use-toast'
+import ProfilePictureUpload from '@/components/profile/ProfilePictureUpload'
 
 const EditProfilePage = () => {
   const [formData, setFormData] = useState({
     bio: '',
-    profileImageUrl: '',
     githubUrl: '',
     websiteUrl: ''
   })
@@ -24,7 +24,6 @@ const EditProfilePage = () => {
     if (user) {
       setFormData({
         bio: user.bio || '',
-        profileImageUrl: user.profileImageUrl || '',
         githubUrl: user.githubUrl || '',
         websiteUrl: user.websiteUrl || ''
       })
@@ -54,11 +53,23 @@ const EditProfilePage = () => {
     }
   }
 
+  const handleProfilePictureUploadSuccess = (updatedUser) => {
+    updateUser(updatedUser)
+  }
+
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="max-w-2xl mx-auto space-y-6">
+      {/* Profile Picture Upload */}
+      <ProfilePictureUpload
+        userId={user?.id}
+        currentImageUrl={user?.profileImageUrl}
+        onUploadSuccess={handleProfilePictureUploadSuccess}
+      />
+
+      {/* Profile Information */}
       <Card>
         <CardHeader>
-          <CardTitle>Edit Profile</CardTitle>
+          <CardTitle>Profile Information</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -69,16 +80,6 @@ const EditProfilePage = () => {
                 value={formData.bio}
                 onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
                 rows={4}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Profile Image URL</label>
-              <Input
-                type="url"
-                placeholder="https://imgur.com/profile.png"
-                value={formData.profileImageUrl}
-                onChange={(e) => setFormData({ ...formData, profileImageUrl: e.target.value })}
               />
             </div>
 
