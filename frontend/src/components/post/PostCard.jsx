@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { formatRelativeTime } from '@/lib/utils'
 import { MessageCircle, ExternalLink, Github, ChevronDown, ChevronUp } from 'lucide-react'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import ProjectMediaViewer from './ProjectMediaViewer'
 import LikeButton from './LikeButton'
 import LivePreview from './LivePreview'
 
@@ -134,29 +135,17 @@ const PostCard = ({ post }) => {
         )}
       </CardContent>
 
-      {/* HERO: Live Preview - Full Width */}
-      {post.liveDemoUrl ? (
+      {/* HERO: Media Viewer - Full Width */}
+      {(post.liveDemoUrl || (post.screenshotUrls && post.screenshotUrls.length > 0)) && (
         <div className="px-4 pb-4">
-          <LivePreview 
-            url={post.liveDemoUrl}
+          <ProjectMediaViewer
+            liveDemoUrl={post.liveDemoUrl}
             screenshots={post.screenshotUrls}
             title={post.title}
             size="feed"
           />
         </div>
-      ) : post.screenshotUrls && post.screenshotUrls.length > 0 ? (
-        <div className="px-4 pb-4">
-          <Link to={`/posts/${post.id}`} className="block">
-            <div className="w-full aspect-video overflow-hidden rounded-lg bg-muted border">
-              <img 
-                src={post.screenshotUrls[0]} 
-                alt={post.title}
-                className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-              />
-            </div>
-          </Link>
-        </div>
-      ) : null}
+      )}
 
       {/* Footer Actions */}
       <CardFooter className="px-4 py-3 border-t flex items-center justify-between">
