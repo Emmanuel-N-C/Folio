@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import CommentList from '@/components/comment/CommentList'
 import LikeButton from '@/components/post/LikeButton'
 import LivePreview from '@/components/post/LivePreview'
+import ProjectMediaViewer from '@/components/post/ProjectMediaViewer'
 import { useAuth } from '@/hooks/useAuth'
 import { useToast } from '@/components/ui/use-toast'
 import { formatRelativeTime } from '@/lib/utils'
@@ -155,47 +156,33 @@ const PostDetailPage = () => {
             </p>
           </div>
 
-          {/* Live Preview Section */}
-          {post.liveDemoUrl && (
-            <LivePreview 
-              url={post.liveDemoUrl}
+          {/* Media Viewer Section */}
+          {(post.liveDemoUrl || (post.screenshotUrls && post.screenshotUrls.length > 0)) && (
+            <ProjectMediaViewer
+              liveDemoUrl={post.liveDemoUrl}
               screenshots={post.screenshotUrls}
               title={post.title}
               size="large"
             />
           )}
 
-          {/* Screenshots (only if no live demo) */}
-          {!post.liveDemoUrl && post.screenshotUrls && post.screenshotUrls.length > 0 && (
-            <div className="space-y-4">
-              <h3 className="font-semibold">Screenshots</h3>
-              <div className="grid grid-cols-1 gap-4">
-                {post.screenshotUrls.map((url, index) => (
-                  <img 
-                    key={index}
-                    src={url} 
-                    alt={`${post.title} screenshot ${index + 1}`}
-                    className="w-full rounded-lg shadow-md hover:shadow-xl transition-shadow"
-                  />
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* No screenshots message for owner */}
-          {isOwner && (!post.screenshotUrls || post.screenshotUrls.length === 0) && (
-            <div className="bg-muted p-4 rounded-lg text-center">
-              <p className="text-muted-foreground mb-2">No screenshots uploaded yet</p>
+          {/* No media message for owner */}
+          {isOwner && !post.liveDemoUrl && (!post.screenshotUrls || post.screenshotUrls.length === 0) && (
+            <div className="bg-muted p-6 rounded-lg text-center">
+              <Images className="h-12 w-12 mx-auto mb-3 text-muted-foreground opacity-50" />
+              <p className="text-muted-foreground mb-3">No preview available yet</p>
+              <p className="text-sm text-muted-foreground mb-4">
+                Add a live demo URL or upload screenshots to showcase your project
+              </p>
               <Button
                 variant="outline"
-                size="sm"
                 onClick={() => navigate(`/posts/${postId}/upload-screenshots`)}
               >
                 <Upload className="h-4 w-4 mr-2" />
                 Upload Screenshots
               </Button>
             </div>
-          )}
+)}
 
           <div className="space-y-4">
             <div>
