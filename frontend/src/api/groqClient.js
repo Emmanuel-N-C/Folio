@@ -6,7 +6,6 @@ const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
 const MODELS = {
   LLAMA_90B: 'llama-3.3-70b-versatile', // Best for complex reasoning
   LLAMA_8B: 'llama-3.1-8b-instant', // Fast for simple tasks
-  VISION: 'llama-3.2-90b-vision-preview', // For image analysis
 };
 
 /**
@@ -60,65 +59,11 @@ async function fetchDeployedSiteContent(url) {
 }
 
 /**
- * Analyze screenshots using Groq's vision model (base64 images)
- */
-async function analyzeScreenshots(screenshotBase64) {
-  if (!screenshotBase64 || screenshotBase64.length === 0) return null;
-
-  try {
-    // Build image messages with base64 data
-    const imageMessages = screenshotBase64.map(base64Data => ({
-      type: 'image_url',
-      image_url: {
-        url: base64Data, // Base64 data URL (data:image/png;base64,...)
-      },
-    }));
-
-    const response = await fetch(GROQ_API_URL, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${GROQ_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: MODELS.VISION,
-        messages: [
-          {
-            role: 'user',
-            content: [
-              {
-                type: 'text',
-                text: 'Analyze these project screenshots in detail. Describe: 1) What type of application/website this is, 2) All visible features and functionality, 3) UI/UX design style and color scheme, 4) Likely technologies and frameworks used based on the design patterns, 5) Target audience or use case. Be thorough and specific.',
-              },
-              ...imageMessages,
-            ],
-          },
-        ],
-        temperature: 0.7,
-        max_tokens: 800,
-      }),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error?.message || `Groq API error: ${response.statusText}`);
-    }
-
-    const data = await response.json();
-    return data.choices[0]?.message?.content || null;
-  } catch (error) {
-    console.error('Error analyzing screenshots:', error);
-    throw error; // Propagate error to show user
-  }
-}
-
-/**
  * Generate project details using Groq AI
  */
 export async function generateProjectWithAI({
   githubUrl = '',
   liveDemoUrl = '',
-  screenshotBase64 = [],
   userNotes = '',
 }) {
   if (!GROQ_API_KEY) {
@@ -130,7 +75,6 @@ export async function generateProjectWithAI({
     const context = {
       readme: githubUrl ? await fetchGitHubReadme(githubUrl) : null,
       deployedSite: liveDemoUrl ? await fetchDeployedSiteContent(liveDemoUrl) : null,
-      screenshotAnalysis: screenshotBase64.length > 0 ? await analyzeScreenshots(screenshotBase64) : null,
       userNotes,
     };
 
@@ -190,7 +134,7 @@ function buildPrompt(context, githubUrl, liveDemoUrl) {
   let prompt = 'Generate a compelling project description based on the following information:\n\n';
 
   if (context.readme) {
-    prompt += `**GitHub README:**\n${context.readme.substring(0, 2000)}\n\n`;
+    prompt += `**GitHub README:**\n${context.readme.substring(0, 3000)}\n\n`;
   }
 
   if (context.deployedSite?.hasContent) {
@@ -199,12 +143,8 @@ function buildPrompt(context, githubUrl, liveDemoUrl) {
     prompt += `Description: ${context.deployedSite.description}\n\n`;
   }
 
-  if (context.screenshotAnalysis) {
-    prompt += `**Visual Analysis from Screenshots:**\n${context.screenshotAnalysis}\n\n`;
-  }
-
   if (context.userNotes) {
-    prompt += `**User Notes:**\n${context.userNotes}\n\n`;
+    prompt += `**Project Details:**\n${context.userNotes}\n\n`;
   }
 
   if (githubUrl) {
