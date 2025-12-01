@@ -50,6 +50,7 @@ export const postsAPI = {
     return response.data
   },
 
+  // Upload screenshots to S3
   uploadPostScreenshots: async (postId, files) => {
     const formData = new FormData()
     
