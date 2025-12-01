@@ -182,7 +182,7 @@ const PostDetailPage = () => {
                 Upload Screenshots
               </Button>
             </div>
-)}
+            )}
 
           <div className="space-y-4">
             <div>
