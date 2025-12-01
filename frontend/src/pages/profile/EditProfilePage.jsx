@@ -54,7 +54,13 @@ const EditProfilePage = () => {
   }
 
   const handleProfilePictureUploadSuccess = (updatedUser) => {
+    // Update user in context with new profile picture
     updateUser(updatedUser)
+    
+    toast({
+      title: "Profile picture updated",
+      description: "Your profile picture has been updated everywhere!",
+    })
   }
 
   return (
@@ -62,6 +68,7 @@ const EditProfilePage = () => {
       {/* Profile Picture Upload */}
       <ProfilePictureUpload
         userId={user?.id}
+        username={user?.username}
         currentImageUrl={user?.profileImageUrl}
         onUploadSuccess={handleProfilePictureUploadSuccess}
       />

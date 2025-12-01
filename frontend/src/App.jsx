@@ -5,6 +5,7 @@ import ErrorBoundary from '@/components/common/ErrorBoundary'
 import Layout from '@/components/layout/Layout'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
 
+
 // Auth Pages
 import LoginPage from '@/pages/auth/LoginPage'
 import RegisterPage from '@/pages/auth/RegisterPage'
@@ -18,6 +19,7 @@ import PostDetailPage from '@/pages/post/PostDetailPage'
 import CreatePostPage from '@/pages/post/CreatePostPage'
 import EditPostPage from '@/pages/post/EditPostPage'
 import SearchPage from '@/pages/post/SearchPage'
+import UploadScreenshotsPage from '@/pages/post/UploadScreenshotsPage'
 
 // Profile Pages
 import ProfilePage from '@/pages/profile/ProfilePage'
@@ -45,6 +47,7 @@ function App() {
               <Route path="search" element={<SearchPage />} />
               <Route path="posts/:postId" element={<PostDetailPage />} />
               <Route path="profile/:userId" element={<ProfilePage />} />
+              <Route path="/posts/:postId/upload-screenshots" element={<UploadScreenshotsPage />} />
 
               {/* Protected Routes */}
               <Route

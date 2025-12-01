@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom'
 import { usersAPI } from '@/api/users'
 import { postsAPI } from '@/api/posts'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import PostCard from '@/components/post/PostCard'
 import { useAuth } from '@/hooks/useAuth'
@@ -63,11 +64,14 @@ const ProfilePage = () => {
         <CardHeader>
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-4">
-              <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center">
-                <span className="text-3xl font-bold text-primary">
+              {/* Use Avatar component instead of div */}
+              <Avatar className="w-20 h-20">
+                <AvatarImage src={profile.profileImageUrl} alt={profile.username} />
+                <AvatarFallback className="text-3xl">
                   {profile.username?.charAt(0).toUpperCase()}
-                </span>
-              </div>
+                </AvatarFallback>
+              </Avatar>
+              
               <div>
                 <CardTitle className="text-2xl">{profile.username}</CardTitle>
                 <p className="text-sm text-muted-foreground flex items-center gap-2 mt-1">

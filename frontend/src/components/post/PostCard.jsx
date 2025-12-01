@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { formatRelativeTime } from '@/lib/utils'
 import { MessageCircle, ExternalLink, Github, ChevronDown, ChevronUp } from 'lucide-react'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import LikeButton from './LikeButton'
 import LivePreview from './LivePreview'
 
@@ -18,28 +19,29 @@ const PostCard = ({ post }) => {
   return (
     <Card className="hover:shadow-xl transition-all">
       {/* Compact Header */}
-      <div className="px-4 pt-4 pb-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Link to={`/profile/${post.userId}`}>
-              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center hover:bg-primary/20 transition-colors">
-                <span className="text-sm font-bold text-primary">
-                  {post.username?.charAt(0).toUpperCase()}
-                </span>
-              </div>
-            </Link>
-            <div>
-              <Link 
-                to={`/profile/${post.userId}`}
-                className="font-semibold hover:underline text-sm"
-              >
-                {post.username}
+        <div className="px-4 pt-4 pb-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Link to={`/profile/${post.userId}`}>
+                <Avatar className="w-10 h-10">
+                  <AvatarImage src={post.userProfileImageUrl} alt={post.username} />
+                  <AvatarFallback>
+                    {post.username?.charAt(0).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
               </Link>
-              <p className="text-xs text-muted-foreground">
-                {formatRelativeTime(post.createdAt)}
-              </p>
-            </div>
+              <div>
+                <Link 
+                  to={`/profile/${post.userId}`}
+                  className="font-semibold hover:underline text-sm"
+                >
+                  {post.username}
+                </Link>
+                <p className="text-xs text-muted-foreground">
+          {formatRelativeTime(post.createdAt)}
+            </p>
           </div>
+        </div>
           
           {/* Quick Action Links */}
           <div className="flex items-center gap-2">

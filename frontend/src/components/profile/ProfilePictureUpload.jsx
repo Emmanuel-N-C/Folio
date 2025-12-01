@@ -6,7 +6,7 @@ import { useToast } from '@/components/ui/use-toast'
 import { usersAPI } from '@/api/users'
 import { Upload, Loader2, X, Camera } from 'lucide-react'
 
-const ProfilePictureUpload = ({ userId, currentImageUrl, onUploadSuccess }) => {
+const ProfilePictureUpload = ({ userId, currentImageUrl, username, onUploadSuccess }) => {
   const [selectedFile, setSelectedFile] = useState(null)
   const [previewUrl, setPreviewUrl] = useState(null)
   const [uploading, setUploading] = useState(false)
@@ -96,7 +96,7 @@ const ProfilePictureUpload = ({ userId, currentImageUrl, onUploadSuccess }) => {
             <Avatar className="h-32 w-32">
               <AvatarImage src={previewUrl || currentImageUrl} alt="Profile" />
               <AvatarFallback className="text-4xl">
-                {userId?.toString().charAt(0) || 'U'}
+                {username?.charAt(0)?.toUpperCase() || 'U'}
               </AvatarFallback>
             </Avatar>
             <Button
