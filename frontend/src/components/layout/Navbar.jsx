@@ -9,7 +9,7 @@ import {
   DropdownMenuSeparator 
 } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Search, PlusCircle, User, LogOut, Settings, Shield, Home, TrendingUp } from 'lucide-react'
+import { Menu, Search, PlusCircle, User, LogOut, Settings, Shield } from 'lucide-react'
 
 const Navbar = () => {
   const { isAuthenticated, user, logout, isAdmin } = useAuth()
@@ -22,38 +22,19 @@ const Navbar = () => {
 
   return (
     <nav className="glass sticky top-0 z-50 border-b">
-      <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-        {/* Logo Section */}
-        <div className="flex items-center gap-8">
-          <Link to="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center">
-              <span className="text-white font-bold text-lg">F</span>
-            </div>
-            <span className="text-xl font-bold gradient-text hidden sm:inline">
-              Folio
-            </span>
-          </Link>
-          
-          {/* Navigation Links */}
-          <div className="hidden md:flex items-center gap-1">
-            <Link to="/feed">
-              <Button variant="ghost" className="gap-2">
-                <Home className="h-4 w-4" />
-                Feed
-              </Button>
-            </Link>
-            <Link to="/trending">
-              <Button variant="ghost" className="gap-2">
-                <TrendingUp className="h-4 w-4" />
-                Trending
-              </Button>
-            </Link>
+      <div className="px-4 h-16 flex items-center justify-between">
+        {/* Logo */}
+        <Link to="/" className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center">
+            <span className="text-white font-bold text-lg">F</span>
           </div>
-        </div>
+          <span className="text-xl font-bold gradient-text">
+            Folio
+          </span>
+        </Link>
 
         {/* Right Actions */}
-        <div className="flex items-center gap-3">
-          {/* Search Button */}
+        <div className="flex items-center gap-2">
           <Link to="/search">
             <Button variant="ghost" size="icon" className="rounded-full">
               <Search className="h-5 w-5" />
@@ -62,15 +43,12 @@ const Navbar = () => {
 
           {isAuthenticated ? (
             <>
-              {/* Create Post Button */}
               <Link to="/posts/create">
-                <Button className="gap-2 rounded-full shadow-md hover:shadow-lg transition-all">
-                  <PlusCircle className="h-4 w-4" />
-                  <span className="hidden sm:inline">Create</span>
+                <Button size="icon" className="rounded-full">
+                  <PlusCircle className="h-5 w-5" />
                 </Button>
               </Link>
 
-              {/* User Menu */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="relative h-10 w-10 rounded-full">
@@ -113,10 +91,10 @@ const Navbar = () => {
           ) : (
             <>
               <Link to="/login">
-                <Button variant="ghost" className="rounded-full">Login</Button>
+                <Button variant="ghost" size="sm">Login</Button>
               </Link>
               <Link to="/register">
-                <Button className="rounded-full shadow-md hover:shadow-lg transition-all">
+                <Button size="sm" className="rounded-full">
                   Sign Up
                 </Button>
               </Link>
