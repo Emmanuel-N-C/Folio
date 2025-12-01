@@ -7,8 +7,9 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { postsAPI } from '@/api/posts'
 import { useToast } from '@/components/ui/use-toast'
-import { X } from 'lucide-react'
+import { X, Loader2 } from 'lucide-react'
 import AIGenerateProjectFields from '@/components/ai/AIGenerateProjectFields'
+import ScreenshotUpload from '@/components/post/ScreenshotUpload'
 
 const CreatePostPage = () => {
   const [formData, setFormData] = useState({
@@ -17,9 +18,9 @@ const CreatePostPage = () => {
     techStack: '',
     liveDemoUrl: '',
     githubUrl: '',
-    screenshotUrls: [''],
     tags: ['']
   })
+  const [screenshotFiles, setScreenshotFiles] = useState([])
   const [showAIGenerator, setShowAIGenerator] = useState(true)
   const [aiGenerated, setAiGenerated] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -54,13 +55,34 @@ const CreatePostPage = () => {
     setLoading(true)
 
     try {
+      // Step 1: Create the post without screenshots
       const postData = {
         ...formData,
-        screenshotUrls: formData.screenshotUrls.filter(url => url.trim()),
+        screenshotUrls: [], // Empty initially
         tags: formData.tags.filter(tag => tag.trim())
       }
 
       const newPost = await postsAPI.createPost(postData)
+      
+      // Step 2: Upload screenshots if any
+      if (screenshotFiles.length > 0) {
+        toast({
+          title: "Uploading screenshots...",
+          description: `Uploading ${screenshotFiles.length} screenshot(s)`,
+        })
+        
+        try {
+          await postsAPI.uploadPostScreenshots(newPost.id, screenshotFiles)
+        } catch (uploadError) {
+          console.error('Screenshot upload failed:', uploadError)
+          toast({
+            title: "Warning",
+            description: "Post created but some screenshots failed to upload",
+            variant: "destructive"
+          })
+        }
+      }
+
       toast({
         title: "Success",
         description: "Post created successfully!",
@@ -75,23 +97,6 @@ const CreatePostPage = () => {
     } finally {
       setLoading(false)
     }
-  }
-
-  const addScreenshotUrl = () => {
-    setFormData({ ...formData, screenshotUrls: [...formData.screenshotUrls, ''] })
-  }
-
-  const removeScreenshotUrl = (index) => {
-    setFormData({ 
-      ...formData, 
-      screenshotUrls: formData.screenshotUrls.filter((_, i) => i !== index) 
-    })
-  }
-
-  const updateScreenshotUrl = (index, value) => {
-    const newUrls = [...formData.screenshotUrls]
-    newUrls[index] = value
-    setFormData({ ...formData, screenshotUrls: newUrls })
   }
 
   const addTag = () => {
@@ -120,7 +125,6 @@ const CreatePostPage = () => {
           initialData={{
             githubUrl: formData.githubUrl,
             liveDemoUrl: formData.liveDemoUrl,
-            screenshotUrls: formData.screenshotUrls,
           }}
         />
       )}
@@ -209,31 +213,14 @@ const CreatePostPage = () => {
               />
             </div>
 
+            {/* Screenshot Upload Component */}
             <div className="space-y-2">
-              <label className="text-sm font-medium">Screenshot URLs</label>
-              {formData.screenshotUrls.map((url, index) => (
-                <div key={index} className="flex gap-2">
-                  <Input
-                    type="url"
-                    placeholder="https://imgur.com/screenshot.png"
-                    value={url}
-                    onChange={(e) => updateScreenshotUrl(index, e.target.value)}
-                  />
-                  {formData.screenshotUrls.length > 1 && (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="icon"
-                      onClick={() => removeScreenshotUrl(index)}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  )}
-                </div>
-              ))}
-              <Button type="button" variant="outline" onClick={addScreenshotUrl}>
-                Add Screenshot
-              </Button>
+              <label className="text-sm font-medium">Project Screenshots</label>
+              <ScreenshotUpload
+                screenshots={screenshotFiles}
+                onScreenshotsChange={setScreenshotFiles}
+                maxFiles={5}
+              />
             </div>
 
             <div className="space-y-2">
@@ -264,12 +251,20 @@ const CreatePostPage = () => {
 
             <div className="flex gap-4">
               <Button type="submit" disabled={loading}>
-                {loading ? 'Creating...' : 'Create Post'}
+                {loading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  'Create Post'
+                )}
               </Button>
               <Button 
                 type="button" 
                 variant="outline" 
                 onClick={() => navigate(-1)}
+                disabled={loading}
               >
                 Cancel
               </Button>
