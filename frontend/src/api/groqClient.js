@@ -14,14 +14,12 @@ const MODELS = {
  */
 async function fetchGitHubReadme(githubUrl) {
   try {
-    // Extract owner and repo from GitHub URL
     const match = githubUrl.match(/github\.com\/([^\/]+)\/([^\/]+)/);
     if (!match) return null;
 
     const [, owner, repo] = match;
     const cleanRepo = repo.replace('.git', '');
     
-    // Try to fetch README
     const readmeUrl = `https://api.github.com/repos/${owner}/${cleanRepo}/readme`;
     const response = await fetch(readmeUrl, {
       headers: {
@@ -44,11 +42,9 @@ async function fetchGitHubReadme(githubUrl) {
  */
 async function fetchDeployedSiteContent(url) {
   try {
-    // Use a CORS proxy or direct fetch (may be blocked by CORS)
     const response = await fetch(url);
     const html = await response.text();
     
-    // Extract title and meta description
     const titleMatch = html.match(/<title>(.*?)<\/title>/i);
     const descMatch = html.match(/<meta\s+name=["']description["']\s+content=["'](.*?)["']/i);
     
@@ -64,15 +60,18 @@ async function fetchDeployedSiteContent(url) {
 }
 
 /**
- * Analyze screenshots using Groq's vision model
+ * Analyze screenshots using Groq's vision model (base64 images)
  */
-async function analyzeScreenshots(screenshotUrls) {
-  if (!screenshotUrls || screenshotUrls.length === 0) return null;
+async function analyzeScreenshots(screenshotBase64) {
+  if (!screenshotBase64 || screenshotBase64.length === 0) return null;
 
   try {
-    const imageMessages = screenshotUrls.map(url => ({
+    // Build image messages with base64 data
+    const imageMessages = screenshotBase64.map(base64Data => ({
       type: 'image_url',
-      image_url: { url },
+      image_url: {
+        url: base64Data, // Base64 data URL (data:image/png;base64,...)
+      },
     }));
 
     const response = await fetch(GROQ_API_URL, {
@@ -89,26 +88,27 @@ async function analyzeScreenshots(screenshotUrls) {
             content: [
               {
                 type: 'text',
-                text: 'Analyze these screenshots and describe: 1) What type of application this is, 2) Key features visible, 3) UI/UX style, 4) Likely tech stack used. Be concise.',
+                text: 'Analyze these project screenshots in detail. Describe: 1) What type of application/website this is, 2) All visible features and functionality, 3) UI/UX design style and color scheme, 4) Likely technologies and frameworks used based on the design patterns, 5) Target audience or use case. Be thorough and specific.',
               },
               ...imageMessages,
             ],
           },
         ],
         temperature: 0.7,
-        max_tokens: 500,
+        max_tokens: 800,
       }),
     });
 
     if (!response.ok) {
-      throw new Error(`Groq API error: ${response.statusText}`);
+      const errorData = await response.json();
+      throw new Error(errorData.error?.message || `Groq API error: ${response.statusText}`);
     }
 
     const data = await response.json();
     return data.choices[0]?.message?.content || null;
   } catch (error) {
     console.error('Error analyzing screenshots:', error);
-    return null;
+    throw error; // Propagate error to show user
   }
 }
 
@@ -118,7 +118,7 @@ async function analyzeScreenshots(screenshotUrls) {
 export async function generateProjectWithAI({
   githubUrl = '',
   liveDemoUrl = '',
-  screenshotUrls = [],
+  screenshotBase64 = [],
   userNotes = '',
 }) {
   if (!GROQ_API_KEY) {
@@ -130,7 +130,7 @@ export async function generateProjectWithAI({
     const context = {
       readme: githubUrl ? await fetchGitHubReadme(githubUrl) : null,
       deployedSite: liveDemoUrl ? await fetchDeployedSiteContent(liveDemoUrl) : null,
-      screenshotAnalysis: screenshotUrls.length > 0 ? await analyzeScreenshots(screenshotUrls) : null,
+      screenshotAnalysis: screenshotBase64.length > 0 ? await analyzeScreenshots(screenshotBase64) : null,
       userNotes,
     };
 
@@ -200,7 +200,7 @@ function buildPrompt(context, githubUrl, liveDemoUrl) {
   }
 
   if (context.screenshotAnalysis) {
-    prompt += `**Screenshot Analysis:**\n${context.screenshotAnalysis}\n\n`;
+    prompt += `**Visual Analysis from Screenshots:**\n${context.screenshotAnalysis}\n\n`;
   }
 
   if (context.userNotes) {
