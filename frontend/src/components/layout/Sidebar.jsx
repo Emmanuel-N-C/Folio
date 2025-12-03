@@ -1,4 +1,4 @@
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -13,13 +13,15 @@ import {
   Settings, 
   PlusCircle,
   Moon,
-  Sun
+  Sun,
+  LogOut
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 
 const Sidebar = () => {
-  const { isAuthenticated, user } = useAuth()
+  const { isAuthenticated, user, logout } = useAuth()
   const location = useLocation()
+  const navigate = useNavigate()
   const [theme, setTheme] = useState('light')
 
   useEffect(() => {
@@ -48,6 +50,11 @@ const Sidebar = () => {
     { icon: Bookmark, label: 'Bookmarks', path: '/bookmarks', show: isAuthenticated },
     { icon: BarChart3, label: 'Analytics', path: '/analytics', show: isAuthenticated },
   ]
+
+  const handleLogout = () => {
+    logout()
+    navigate('/login')
+  }
 
   return (
     <aside className="hidden lg:flex flex-col w-64 h-screen sticky top-0 border-r bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -145,13 +152,21 @@ const Sidebar = () => {
 
       {/* Create Post Button */}
       {isAuthenticated && (
-        <div className="p-4 border-t">
+        <div className="p-4 border-t space-y-2">
           <Link to="/posts/create">
             <Button className="w-full gap-2 h-12 text-base shadow-lg hover:shadow-xl transition-all">
               <PlusCircle className="h-5 w-5" />
               Create Post
             </Button>
           </Link>
+          <Button 
+            onClick={handleLogout}
+            variant="outline" 
+            className="w-full gap-2 h-12 text-base hover:bg-destructive hover:text-destructive-foreground transition-all"
+          >
+            <LogOut className="h-5 w-5" />
+            Logout
+          </Button>
         </div>
       )}
     </aside>
