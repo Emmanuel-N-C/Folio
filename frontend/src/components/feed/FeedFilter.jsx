@@ -5,16 +5,23 @@ import {
   DropdownMenuItem, 
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu'
-import { ChevronDown, Clock, ArrowUpDown, TrendingUp } from 'lucide-react'
-import { useState } from 'react'
+import { ChevronDown, Clock, ArrowUpDown, TrendingUp, Touchpad, ArrowBigUp } from 'lucide-react'
+import { useState, useEffect } from 'react'
 
-const FeedFilter = ({ onFilterChange }) => {
-  const [activeFilter, setActiveFilter] = useState('new')
+const FeedFilter = ({ onFilterChange, activeFilter: parentActiveFilter }) => {
+  const [activeFilter, setActiveFilter] = useState(parentActiveFilter || 'new')
+
+  // Sync with parent state if provided
+  useEffect(() => {
+    if (parentActiveFilter) {
+      setActiveFilter(parentActiveFilter)
+    }
+  }, [parentActiveFilter])
 
   const filters = [
     { id: 'new', label: 'New', icon: Clock, description: 'Most recent posts' },
     { id: 'old', label: 'Old', icon: ArrowUpDown, description: 'Oldest posts first' },
-    { id: 'top', label: 'Top', icon: TrendingUp, description: 'Most liked & commented' },
+    { id: 'top', label: 'Top', icon: ArrowBigUp, description: 'Most liked & commented' },
   ]
 
   const handleFilterClick = (filterId) => {

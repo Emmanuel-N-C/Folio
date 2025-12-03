@@ -1,5 +1,6 @@
 import { createContext, useState, useEffect } from 'react'
 import { authAPI } from '@/api/auth'
+import { usersAPI } from '@/api/users'
 
 export const AuthContext = createContext(null)
 
@@ -16,26 +17,54 @@ export const AuthProvider = ({ children }) => {
     if (storedToken && storedUser) {
       setToken(storedToken)
       setUser(JSON.parse(storedUser))
+      // Refresh user profile to get latest data including profile image
+      refreshUserProfile()
+    } else {
+      setLoading(false)
     }
-    setLoading(false)
   }, [])
+
+  const refreshUserProfile = async () => {
+    try {
+      const profileData = await usersAPI.getCurrentUserProfile()
+      const updatedUser = { ...profileData, userId: profileData.id }
+      setUser(updatedUser)
+      localStorage.setItem('user', JSON.stringify(updatedUser))
+    } catch (error) {
+      console.error('Failed to refresh user profile:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const login = async (credentials) => {
     try {
       const response = await authAPI.login(credentials)
       const { token: newToken, userId, ...userData } = response
 
-      // Normalize userId to id for consistency
-      const normalizedUser = { 
-        id: userId,
-        userId: userId,  // Keep both for compatibility
-        ...userData 
-      }
-
       setToken(newToken)
-      setUser(normalizedUser)
       localStorage.setItem('token', newToken)
-      localStorage.setItem('user', JSON.stringify(normalizedUser))
+
+      // Fetch full profile data including profileImageUrl
+      try {
+        const profileData = await usersAPI.getCurrentUserProfile()
+        const normalizedUser = { 
+          ...profileData,
+          id: profileData.id,
+          userId: profileData.id,
+        }
+        setUser(normalizedUser)
+        localStorage.setItem('user', JSON.stringify(normalizedUser))
+      } catch (profileError) {
+        // Fallback to basic user data if profile fetch fails
+        const normalizedUser = { 
+          id: userId,
+          userId: userId,
+          ...userData 
+        }
+        setUser(normalizedUser)
+        localStorage.setItem('user', JSON.stringify(normalizedUser))
+      }
 
       return { success: true }
     } catch (error) {
@@ -51,17 +80,29 @@ export const AuthProvider = ({ children }) => {
       const response = await authAPI.register(data)
       const { token: newToken, userId, ...userData } = response
 
-      // Normalize userId to id for consistency
-      const normalizedUser = { 
-        id: userId,
-        userId: userId,  // Keep both for compatibility
-        ...userData 
-      }
-
       setToken(newToken)
-      setUser(normalizedUser)
       localStorage.setItem('token', newToken)
-      localStorage.setItem('user', JSON.stringify(normalizedUser))
+
+      // Fetch full profile data including profileImageUrl
+      try {
+        const profileData = await usersAPI.getCurrentUserProfile()
+        const normalizedUser = { 
+          ...profileData,
+          id: profileData.id,
+          userId: profileData.id,
+        }
+        setUser(normalizedUser)
+        localStorage.setItem('user', JSON.stringify(normalizedUser))
+      } catch (profileError) {
+        // Fallback to basic user data if profile fetch fails
+        const normalizedUser = { 
+          id: userId,
+          userId: userId,
+          ...userData 
+        }
+        setUser(normalizedUser)
+        localStorage.setItem('user', JSON.stringify(normalizedUser))
+      }
 
       return { success: true }
     } catch (error) {
@@ -97,6 +138,7 @@ export const AuthProvider = ({ children }) => {
     register,
     logout,
     updateUser,
+    refreshUserProfile,
     isAuthenticated: !!token,
     isAdmin,
   }

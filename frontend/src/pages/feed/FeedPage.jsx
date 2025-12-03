@@ -94,7 +94,10 @@ const FeedPage = () => {
 
       {/* Filter Section - Thin line separator like LinkedIn */}
       <div className="fade-in" style={{ animationDelay: '0.1s' }}>
-        <FeedFilter onFilterChange={handleFilterChange} />
+        <FeedFilter 
+          onFilterChange={handleFilterChange} 
+          activeFilter={activeFilter}
+        />
       </div>
 
       {/* Posts */}

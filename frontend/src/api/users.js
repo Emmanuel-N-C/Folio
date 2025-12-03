@@ -6,6 +6,11 @@ export const usersAPI = {
     return response.data
   },
 
+  getCurrentUserProfile: async () => {
+    const response = await axiosInstance.get('/users/me')
+    return response.data
+  },
+
   updateProfile: async (data) => {
     const response = await axiosInstance.put('/users/me', data)
     return response.data
