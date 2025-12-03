@@ -56,6 +56,9 @@ const Sidebar = () => {
     navigate('/login')
   }
 
+  // Get profile image URL - handle both possible field names
+  const profileImageUrl = user?.profileImageUrl || user?.profilePictureUrl || null
+
   return (
     <aside className="hidden lg:flex flex-col w-64 h-screen sticky top-0 border-r bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       {/* Logo */}
@@ -75,9 +78,12 @@ const Sidebar = () => {
         <div className="p-4 border-b">
           <Link to={`/profile/${user.id}`} className="flex items-center gap-3 p-3 rounded-xl hover:bg-muted transition-all group">
             <Avatar className="w-12 h-12 ring-2 ring-primary/20 group-hover:ring-primary/40 transition-all">
-              <AvatarImage src={user.profileImageUrl} alt={user.username} />
+              <AvatarImage 
+                src={profileImageUrl} 
+                alt={user.username || 'User'} 
+              />
               <AvatarFallback className="bg-gradient-to-br from-primary to-blue-600 text-white font-semibold">
-                {user.username?.charAt(0).toUpperCase()}
+                {user.username?.charAt(0)?.toUpperCase() || 'U'}
               </AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">

@@ -2,7 +2,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Image, Video, FileText, Sparkles } from 'lucide-react'
+import { Image, Video, FileText } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
 const CreatePostCard = () => {
@@ -15,14 +15,20 @@ const CreatePostCard = () => {
     navigate('/posts/create')
   }
 
+  // Get profile image URL - handle both possible field names
+  const profileImageUrl = user?.profileImageUrl || user?.profilePictureUrl || null
+
   return (
     <Card className="p-4 bg-card border shadow-sm hover:shadow-md transition-shadow">
       {/* Start a post input */}
       <div className="flex items-center gap-3 mb-4">
         <Avatar className="w-12 h-12 ring-2 ring-primary/10">
-          <AvatarImage src={user?.profileImageUrl} alt={user?.username} />
+          <AvatarImage 
+            src={profileImageUrl} 
+            alt={user?.username || 'User'} 
+          />
           <AvatarFallback className="bg-gradient-to-br from-primary to-blue-600 text-white font-semibold">
-            {user?.username?.charAt(0).toUpperCase()}
+            {user?.username?.charAt(0)?.toUpperCase() || 'U'}
           </AvatarFallback>
         </Avatar>
         <button

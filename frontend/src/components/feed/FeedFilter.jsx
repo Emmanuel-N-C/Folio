@@ -1,15 +1,20 @@
 import { Button } from '@/components/ui/button'
-import { Card } from '@/components/ui/card'
-import { ListFilter, TrendingUp, Clock, Users } from 'lucide-react'
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuTrigger 
+} from '@/components/ui/dropdown-menu'
+import { ChevronDown, Clock, ArrowUpDown, TrendingUp } from 'lucide-react'
 import { useState } from 'react'
 
 const FeedFilter = ({ onFilterChange }) => {
-  const [activeFilter, setActiveFilter] = useState('recent')
+  const [activeFilter, setActiveFilter] = useState('new')
 
   const filters = [
-    { id: 'recent', label: 'Recent', icon: Clock },
-    { id: 'trending', label: 'Trending', icon: TrendingUp },
-    { id: 'following', label: 'Following', icon: Users },
+    { id: 'new', label: 'New', icon: Clock, description: 'Most recent posts' },
+    { id: 'old', label: 'Old', icon: ArrowUpDown, description: 'Oldest posts first' },
+    { id: 'top', label: 'Top', icon: TrendingUp, description: 'Most liked & commented' },
   ]
 
   const handleFilterClick = (filterId) => {
@@ -17,37 +22,51 @@ const FeedFilter = ({ onFilterChange }) => {
     onFilterChange?.(filterId)
   }
 
+  const activeFilterObj = filters.find(f => f.id === activeFilter)
+  const ActiveIcon = activeFilterObj?.icon
+
   return (
-    <Card className="p-3 bg-card border shadow-sm">
-      <div className="flex items-center gap-2 overflow-x-auto">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground mr-2">
-          <ListFilter className="h-4 w-4" />
-          <span className="font-medium whitespace-nowrap">Sort by:</span>
+    <div className="border-b bg-card">
+      <div className="px-4 py-2 flex items-center justify-between">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <span className="font-medium">Sort by:</span>
         </div>
         
-        <div className="flex gap-2">
-          {filters.map((filter) => {
-            const Icon = filter.icon
-            return (
-              <Button
-                key={filter.id}
-                variant={activeFilter === filter.id ? 'default' : 'ghost'}
-                size="sm"
-                onClick={() => handleFilterClick(filter.id)}
-                className={`gap-2 whitespace-nowrap ${
-                  activeFilter === filter.id 
-                    ? 'bg-primary text-primary-foreground' 
-                    : 'hover:bg-muted'
-                }`}
-              >
-                <Icon className="h-4 w-4" />
-                {filter.label}
-              </Button>
-            )
-          })}
-        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button 
+              variant="ghost" 
+              size="sm"
+              className="gap-2 font-semibold text-sm hover:bg-muted"
+            >
+              {ActiveIcon && <ActiveIcon className="h-4 w-4" />}
+              {activeFilterObj?.label}
+              <ChevronDown className="h-4 w-4 opacity-50" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-48">
+            {filters.map((filter) => {
+              const Icon = filter.icon
+              return (
+                <DropdownMenuItem
+                  key={filter.id}
+                  onClick={() => handleFilterClick(filter.id)}
+                  className={`gap-3 cursor-pointer ${
+                    activeFilter === filter.id ? 'bg-primary/10 text-primary font-semibold' : ''
+                  }`}
+                >
+                  <Icon className="h-4 w-4" />
+                  <div className="flex flex-col">
+                    <span>{filter.label}</span>
+                    <span className="text-xs text-muted-foreground">{filter.description}</span>
+                  </div>
+                </DropdownMenuItem>
+              )
+            })}
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
-    </Card>
+    </div>
   )
 }
 
