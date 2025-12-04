@@ -104,7 +104,9 @@ const Sidebar = () => {
               </AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
-              <p className="font-semibold text-sm truncate">{user.username}</p>
+              <p className="font-semibold text-sm truncate">
+                {user.displayName || user.username}
+              </p>
               <p className="text-xs text-muted-foreground truncate">@{user.username?.toLowerCase()}</p>
             </div>
           </Link>

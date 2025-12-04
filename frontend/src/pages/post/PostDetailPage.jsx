@@ -102,7 +102,7 @@ const PostDetailPage = () => {
                   to={`/profile/${post.userId}`}
                   className="font-semibold text-lg hover:underline"
                 >
-                  {post.username}
+                  {post.displayName || post.username}
                 </Link>
                 <p className="text-sm text-muted-foreground">
                   {formatRelativeTime(post.createdAt)}
