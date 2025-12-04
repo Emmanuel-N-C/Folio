@@ -11,4 +11,9 @@ public interface UserService {
     UserProfileResponse uploadProfilePicture(Long userId, MultipartFile file);
     User getCurrentUser();
     Long getCurrentUserId();
+
+    // NEW METHODS
+    boolean isUsernameExists(String username);
+    UserProfileResponse removeProfilePicture(Long userId);
+    void deleteUserAccount(Long userId);
 }

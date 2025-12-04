@@ -4,6 +4,7 @@ import com.folio.folio_backend.dto.UpdateProfileRequest;
 import com.folio.folio_backend.dto.UserProfileResponse;
 import com.folio.folio_backend.exception.BadRequestException;
 import com.folio.folio_backend.exception.ResourceNotFoundException;
+import com.folio.folio_backend.model.Post;
 import com.folio.folio_backend.model.User;
 import com.folio.folio_backend.repository.PostRepository;
 import com.folio.folio_backend.repository.UserRepository;
@@ -45,6 +46,19 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
 
+        // Update displayName
+        if (request.getDisplayName() != null) {
+            user.setDisplayName(request.getDisplayName());
+        }
+
+        // Update username with uniqueness check
+        if (request.getUsername() != null && !request.getUsername().equals(user.getUsername())) {
+            if (userRepository.existsByUsername(request.getUsername())) {
+                throw new BadRequestException("Username is already taken");
+            }
+            user.setUsername(request.getUsername());
+        }
+
         if (request.getBio() != null) {
             user.setBio(request.getBio());
         }
@@ -56,6 +70,14 @@ public class UserServiceImpl implements UserService {
         }
         if (request.getWebsiteUrl() != null) {
             user.setWebsiteUrl(request.getWebsiteUrl());
+        }
+
+        // Update new fields
+        if (request.getLocation() != null) {
+            user.setLocation(request.getLocation());
+        }
+        if (request.getProfession() != null) {
+            user.setProfession(request.getProfession());
         }
 
         User updatedUser = userRepository.save(user);
@@ -111,15 +133,83 @@ public class UserServiceImpl implements UserService {
         return mapToUserProfileResponse(user);
     }
 
+    // NEW METHOD: Check if username exists
+    @Override
+    public boolean isUsernameExists(String username) {
+        return userRepository.existsByUsername(username);
+    }
+
+    // NEW METHOD: Remove profile picture
+    @Override
+    @Transactional
+    public UserProfileResponse removeProfilePicture(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        // Delete from S3 if exists
+        if (user.getProfileImageUrl() != null && !user.getProfileImageUrl().isEmpty()) {
+            try {
+                String key = s3Service.extractKeyFromUrl(user.getProfileImageUrl());
+                s3Service.deleteFile(key);
+            } catch (Exception e) {
+                // Log error but continue
+                System.err.println("Failed to delete profile picture from S3: " + e.getMessage());
+            }
+        }
+
+        user.setProfileImageUrl(null);
+        userRepository.save(user);
+
+        return mapToUserProfileResponse(user);
+    }
+
+    // NEW METHOD: Delete user account
+    @Override
+    @Transactional
+    public void deleteUserAccount(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        // Delete profile picture from S3
+        if (user.getProfileImageUrl() != null && !user.getProfileImageUrl().isEmpty()) {
+            try {
+                String key = s3Service.extractKeyFromUrl(user.getProfileImageUrl());
+                s3Service.deleteFile(key);
+            } catch (Exception e) {
+                System.err.println("Failed to delete profile picture: " + e.getMessage());
+            }
+        }
+
+        // Delete all user's post screenshots from S3
+        for (Post post : user.getPosts()) {
+            if (post.getScreenshotUrls() != null) {
+                for (String screenshotUrl : post.getScreenshotUrls()) {
+                    try {
+                        String key = s3Service.extractKeyFromUrl(screenshotUrl);
+                        s3Service.deleteFile(key);
+                    } catch (Exception e) {
+                        System.err.println("Failed to delete screenshot: " + e.getMessage());
+                    }
+                }
+            }
+        }
+
+        // Cascade delete will handle posts, likes, comments
+        userRepository.delete(user);
+    }
+
     private UserProfileResponse mapToUserProfileResponse(User user) {
         UserProfileResponse response = new UserProfileResponse();
         response.setId(user.getId());
         response.setUsername(user.getUsername());
+        response.setDisplayName(user.getDisplayName());
         response.setEmail(user.getEmail());
         response.setBio(user.getBio());
         response.setProfileImageUrl(user.getProfileImageUrl());
         response.setGithubUrl(user.getGithubUrl());
         response.setWebsiteUrl(user.getWebsiteUrl());
+        response.setLocation(user.getLocation());
+        response.setProfession(user.getProfession());
         response.setCreatedAt(user.getCreatedAt());
 
         // Use repository count instead of accessing lazy collection
