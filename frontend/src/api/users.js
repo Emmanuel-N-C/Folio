@@ -31,4 +31,20 @@ export const usersAPI = {
     )
     return response.data
   },
+
+  // NEW METHODS
+  checkUsernameAvailability: async (username) => {
+    const response = await axiosInstance.get(`/users/check-username/${username}`)
+    return response.data
+  },
+
+  removeProfilePicture: async () => {
+    const response = await axiosInstance.delete('/users/me/profile-picture')
+    return response.data
+  },
+
+  deleteAccount: async () => {
+    const response = await axiosInstance.delete('/users/me')
+    return response.data
+  },
 }
