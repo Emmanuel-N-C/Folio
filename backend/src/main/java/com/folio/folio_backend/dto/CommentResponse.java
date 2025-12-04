@@ -14,6 +14,7 @@ public class CommentResponse {
     private String content;
     private Long userId;
     private String username;
+    private String displayName;
     private String userProfileImageUrl;
     private Long postId;
     private Long parentCommentId;  // null for top-level comments

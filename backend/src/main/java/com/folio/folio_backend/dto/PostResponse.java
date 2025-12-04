@@ -22,6 +22,7 @@ public class PostResponse {
     private List<String> tags = new ArrayList<>();
     private Long userId;
     private String username;
+    private String displayName;
     private String userProfileImageUrl;
     private int likesCount;
     private int commentsCount;

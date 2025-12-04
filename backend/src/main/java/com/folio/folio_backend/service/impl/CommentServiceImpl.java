@@ -216,6 +216,7 @@ public class CommentServiceImpl implements CommentService {
         response.setContent(comment.getContent());
         response.setUserId(comment.getUser().getId());
         response.setUsername(comment.getUser().getUsername());
+        response.setDisplayName(comment.getUser().getDisplayName());  // NEW LINE
         response.setUserProfileImageUrl(comment.getUser().getProfileImageUrl());
         response.setPostId(comment.getPost().getId());
         response.setParentCommentId(comment.getParentComment() != null ? comment.getParentComment().getId() : null);
@@ -225,9 +226,7 @@ public class CommentServiceImpl implements CommentService {
         response.setUpdatedAt(comment.getUpdatedAt());
 
         if (currentUserId != null) {
-            response.setLikedByCurrentUser(
-                    commentLikeRepository.existsByUserIdAndCommentId(currentUserId, comment.getId())
-            );
+            response.setLikedByCurrentUser(commentLikeRepository.existsByUserIdAndCommentId(currentUserId, comment.getId()));
         } else {
             response.setLikedByCurrentUser(false);
         }

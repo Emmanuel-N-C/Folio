@@ -245,6 +245,7 @@ public class PostServiceImpl implements PostService {
         // User fields (already fetched)
         response.setUserId(post.getPostedBy().getId());
         response.setUsername(post.getPostedBy().getUsername());
+        response.setDisplayName(post.getPostedBy().getDisplayName());  // NEW LINE
         response.setUserProfileImageUrl(post.getPostedBy().getProfileImageUrl());
 
         // Lazy load counts within transaction
