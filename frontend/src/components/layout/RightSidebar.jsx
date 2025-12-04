@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -6,11 +6,11 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { TrendingUp, Heart, MessageCircle, UserPlus, Bell } from 'lucide-react'
+import { Heart, MessageCircle, UserPlus, Bell } from 'lucide-react'
 
 const RightSidebar = () => {
   const { isAuthenticated } = useAuth()
-  const [notifications, setNotifications] = useState([
+  const [notifications] = useState([
     {
       id: 1,
       type: 'like',
@@ -35,14 +35,6 @@ const RightSidebar = () => {
       read: true
     },
   ])
-
-  const trendingTags = [
-    { tag: 'React', posts: 1234 },
-    { tag: 'NextJS', posts: 892 },
-    { tag: 'TailwindCSS', posts: 756 },
-    { tag: 'TypeScript', posts: 645 },
-    { tag: 'WebDev', posts: 523 },
-  ]
 
   const getNotificationIcon = (type) => {
     switch (type) {
@@ -128,69 +120,6 @@ const RightSidebar = () => {
                     View all notifications
                   </Button>
                 </Link>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Trending Tags */}
-          <Card className="border-0 shadow-md">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg font-bold flex items-center gap-2">
-                <TrendingUp className="h-5 w-5 text-primary" />
-                Trending Tags
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {trendingTags.map((item, index) => (
-                <Link
-                  key={item.tag}
-                  to={`/search?tag=${item.tag}`}
-                  className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors group"
-                >
-                  <div className="flex items-center gap-3">
-                    <span className="text-sm font-semibold text-muted-foreground w-5">
-                      {index + 1}
-                    </span>
-                    <div>
-                      <p className="font-semibold text-sm group-hover:text-primary transition-colors">
-                        #{item.tag}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {item.posts.toLocaleString()} posts
-                      </p>
-                    </div>
-                  </div>
-                  <TrendingUp className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                </Link>
-              ))}
-            </CardContent>
-          </Card>
-
-          {/* Suggested Users (if authenticated) */}
-          {isAuthenticated && (
-            <Card className="border-0 shadow-md">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg font-bold">Who to Follow</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <Avatar className="w-10 h-10">
-                        <AvatarFallback className="bg-gradient-to-br from-primary to-blue-600 text-white">
-                          U{i}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <p className="font-semibold text-sm">User {i}</p>
-                        <p className="text-xs text-muted-foreground">@user{i}</p>
-                      </div>
-                    </div>
-                    <Button size="sm" variant="outline" className="rounded-full">
-                      Follow
-                    </Button>
-                  </div>
-                ))}
               </CardContent>
             </Card>
           )}

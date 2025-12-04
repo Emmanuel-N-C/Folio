@@ -3,7 +3,7 @@ import { postsAPI } from '@/api/posts'
 import PostCard from '@/components/post/PostCard'
 import PostSkeleton from '@/components/post/PostSkeleton'
 import { useToast } from '@/components/ui/use-toast'
-import { TrendingUp } from 'lucide-react'
+import { ChartNoAxesCombined } from 'lucide-react'
 
 const TrendingPage = () => {
   const [posts, setPosts] = useState([])
@@ -40,7 +40,7 @@ const TrendingPage = () => {
   return (
     <div className="max-w-2xl mx-auto space-y-6">
       <div className="flex items-center gap-2">
-        <TrendingUp className="h-6 w-6 text-primary" />
+        <ChartNoAxesCombined className="h-6 w-6 text-primary" />
         <h1 className="text-3xl font-bold">Trending Projects</h1>
       </div>
 

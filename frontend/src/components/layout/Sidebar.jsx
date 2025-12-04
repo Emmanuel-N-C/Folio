@@ -6,9 +6,7 @@ import {
   Home, 
   Compass, 
   Bell, 
-  MessageSquare, 
-  Bookmark, 
-  BarChart3, 
+  Search,
   Palette, 
   Settings, 
   PlusCircle,
@@ -45,10 +43,8 @@ const Sidebar = () => {
   const navItems = [
     { icon: Home, label: 'Home', path: '/feed', show: true },
     { icon: Compass, label: 'Explore', path: '/trending', show: true },
+    { icon: Search, label: 'Search', path: '/search', show: true },
     { icon: Bell, label: 'Notifications', path: '/notifications', show: isAuthenticated, badge: 3 },
-    { icon: MessageSquare, label: 'Messages', path: '/messages', show: isAuthenticated },
-    { icon: Bookmark, label: 'Bookmarks', path: '/bookmarks', show: isAuthenticated },
-    { icon: BarChart3, label: 'Analytics', path: '/analytics', show: isAuthenticated },
   ]
 
   const handleLogout = () => {

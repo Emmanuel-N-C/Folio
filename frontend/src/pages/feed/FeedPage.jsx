@@ -6,7 +6,8 @@ import CreatePostCard from '@/components/post/CreatePostCard'
 import FeedFilter from '@/components/feed/FeedFilter'
 import { Button } from '@/components/ui/button'
 import { useToast } from '@/components/ui/use-toast'
-import { Sparkles } from 'lucide-react'
+import { Newspaper } from 'lucide-react'
+import { SquarePlus } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 
@@ -105,7 +106,7 @@ const FeedPage = () => {
         {posts.length === 0 ? (
           <div className="text-center py-20 fade-in">
             <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
-              <Sparkles className="h-8 w-8 text-muted-foreground" />
+              <Newspaper className="h-8 w-8 text-muted-foreground" />
             </div>
             <h3 className="text-xl font-semibold mb-2">No posts yet</h3>
             <p className="text-muted-foreground mb-6">
@@ -113,7 +114,7 @@ const FeedPage = () => {
             </p>
             <Link to="/posts/create">
               <Button className="gap-2 rounded-full">
-                <Sparkles className="h-4 w-4" />
+                <SquarePlus className="h-4 w-4" />
                 Create Your First Post
               </Button>
             </Link>
