@@ -5,7 +5,6 @@ import ErrorBoundary from '@/components/common/ErrorBoundary'
 import Layout from '@/components/layout/Layout'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
 
-
 // Auth Pages
 import LoginPage from '@/pages/auth/LoginPage'
 import RegisterPage from '@/pages/auth/RegisterPage'
@@ -24,6 +23,9 @@ import UploadScreenshotsPage from '@/pages/post/UploadScreenshotsPage'
 // Profile Pages
 import ProfilePage from '@/pages/profile/ProfilePage'
 import EditProfilePage from '@/pages/profile/EditProfilePage'
+
+// Notification Page
+import NotificationsPage from '@/pages/Notification/NotificationsPage'
 
 // Admin Pages
 import AdminDashboard from '@/pages/admin/AdminDashboard'
@@ -50,6 +52,14 @@ function App() {
               <Route path="/posts/:postId/upload-screenshots" element={<UploadScreenshotsPage />} />
 
               {/* Protected Routes */}
+              <Route
+                path="notifications"
+                element={
+                  <ProtectedRoute>
+                    <NotificationsPage />
+                  </ProtectedRoute>
+                }
+              />
               <Route
                 path="posts/create"
                 element={
