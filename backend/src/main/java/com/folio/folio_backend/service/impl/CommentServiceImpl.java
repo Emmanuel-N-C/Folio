@@ -9,6 +9,7 @@ import com.folio.folio_backend.repository.CommentLikeRepository;
 import com.folio.folio_backend.repository.CommentRepository;
 import com.folio.folio_backend.repository.PostRepository;
 import com.folio.folio_backend.service.CommentService;
+import com.folio.folio_backend.service.NotificationService;
 import com.folio.folio_backend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,9 +29,12 @@ public class CommentServiceImpl implements CommentService {
 
     @Autowired
     private UserService userService;
-    
+
     @Autowired
     private CommentLikeRepository commentLikeRepository;
+
+    @Autowired
+    private NotificationService notificationService;
 
     @Override
     @Transactional
@@ -47,6 +51,10 @@ public class CommentServiceImpl implements CommentService {
         comment.setParentComment(null);  // Top-level comment
 
         Comment savedComment = commentRepository.save(comment);
+
+        // Create notification for post owner
+        notificationService.createPostCommentNotification(postId, savedComment.getId(), currentUser.getId());
+
         return mapToCommentResponse(savedComment, currentUser.getId());
     }
 
@@ -79,7 +87,7 @@ public class CommentServiceImpl implements CommentService {
                 .orElseThrow(() -> new ResourceNotFoundException("Comment not found with id: " + commentId));
 
         User currentUser = userService.getCurrentUser();
-        
+
         // Get the post to check if user is post owner
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new ResourceNotFoundException("Post not found with id: " + postId));
@@ -88,7 +96,7 @@ public class CommentServiceImpl implements CommentService {
         boolean isCommentAuthor = comment.getUser().getId().equals(currentUser.getId());
         boolean isPostOwner = post.getPostedBy().getId().equals(currentUser.getId());
         boolean isAdmin = currentUser.getRoles().contains(Role.ROLE_ADMIN);
-        
+
         if (!isCommentAuthor && !isPostOwner && !isAdmin) {
             throw new BadRequestException("You are not authorized to delete this comment");
         }
@@ -118,20 +126,23 @@ public class CommentServiceImpl implements CommentService {
     @Transactional
     public CommentResponse likeComment(Long commentId) {
         User currentUser = userService.getCurrentUser();
-        
+
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Comment not found with id: " + commentId));
-        
+
         // Check if already liked
         if (commentLikeRepository.existsByUserIdAndCommentId(currentUser.getId(), commentId)) {
             throw new BadRequestException("You have already liked this comment");
         }
-        
+
         CommentLike like = new CommentLike();
         like.setUser(currentUser);
         like.setComment(comment);
         commentLikeRepository.save(like);
-        
+
+        // Create notification for comment owner
+        notificationService.createCommentLikeNotification(commentId, currentUser.getId());
+
         return mapToCommentResponse(comment, currentUser.getId());
     }
 
@@ -139,15 +150,15 @@ public class CommentServiceImpl implements CommentService {
     @Transactional
     public CommentResponse unlikeComment(Long commentId) {
         User currentUser = userService.getCurrentUser();
-        
+
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Comment not found with id: " + commentId));
-        
+
         CommentLike like = commentLikeRepository.findByUserIdAndCommentId(currentUser.getId(), commentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Like not found"));
-        
+
         commentLikeRepository.delete(like);
-        
+
         return mapToCommentResponse(comment, currentUser.getId());
     }
 
@@ -155,22 +166,26 @@ public class CommentServiceImpl implements CommentService {
     @Transactional
     public CommentResponse createReply(Long commentId, CreateCommentRequest request) {
         User currentUser = userService.getCurrentUser();
-        
+
         Comment parentComment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Comment not found with id: " + commentId));
-        
+
         // Prevent replies to replies (one level deep only)
         if (parentComment.getParentComment() != null) {
             throw new BadRequestException("Cannot reply to a reply. Please reply to the original comment.");
         }
-        
+
         Comment reply = new Comment();
         reply.setContent(request.getContent());
         reply.setUser(currentUser);
         reply.setPost(parentComment.getPost());
         reply.setParentComment(parentComment);
-        
+
         Comment savedReply = commentRepository.save(reply);
+
+        // Create notification for parent comment owner
+        notificationService.createCommentReplyNotification(commentId, savedReply.getId(), currentUser.getId());
+
         return mapToCommentResponse(savedReply, currentUser.getId());
     }
 
@@ -180,14 +195,14 @@ public class CommentServiceImpl implements CommentService {
         if (!commentRepository.existsById(commentId)) {
             throw new ResourceNotFoundException("Comment not found with id: " + commentId);
         }
-        
+
         Long currentUserId = null;
         try {
             currentUserId = userService.getCurrentUserId();
         } catch (Exception e) {
             // User not authenticated
         }
-        
+
         List<Comment> replies = commentRepository.findRepliesByParentCommentId(commentId);
         final Long userId = currentUserId;
         return replies.stream()
@@ -208,15 +223,15 @@ public class CommentServiceImpl implements CommentService {
         response.setRepliesCount(comment.getRepliesCount());
         response.setCreatedAt(comment.getCreatedAt());
         response.setUpdatedAt(comment.getUpdatedAt());
-        
+
         if (currentUserId != null) {
             response.setLikedByCurrentUser(
-                commentLikeRepository.existsByUserIdAndCommentId(currentUserId, comment.getId())
+                    commentLikeRepository.existsByUserIdAndCommentId(currentUserId, comment.getId())
             );
         } else {
             response.setLikedByCurrentUser(false);
         }
-        
+
         return response;
     }
 }
