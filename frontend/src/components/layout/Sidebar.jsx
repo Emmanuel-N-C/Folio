@@ -15,12 +15,14 @@ import {
   LogOut
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
+import { notificationsAPI } from '@/api/notifications'
 
 const Sidebar = () => {
   const { isAuthenticated, user, logout } = useAuth()
   const location = useLocation()
   const navigate = useNavigate()
   const [theme, setTheme] = useState('light')
+  const [unreadCount, setUnreadCount] = useState(0)
 
   useEffect(() => {
     // Check for saved theme preference or default to 'light'
@@ -28,6 +30,25 @@ const Sidebar = () => {
     setTheme(savedTheme)
     document.documentElement.classList.toggle('dark', savedTheme === 'dark')
   }, [])
+
+  useEffect(() => {
+    // Fetch unread notification count
+    if (isAuthenticated) {
+      fetchUnreadCount()
+      // Poll every 30 seconds
+      const interval = setInterval(fetchUnreadCount, 30000)
+      return () => clearInterval(interval)
+    }
+  }, [isAuthenticated])
+
+  const fetchUnreadCount = async () => {
+    try {
+      const count = await notificationsAPI.getUnreadCount()
+      setUnreadCount(count)
+    } catch (error) {
+      console.error('Failed to fetch unread count:', error)
+    }
+  }
 
   const toggleTheme = () => {
     const newTheme = theme === 'light' ? 'dark' : 'light'
@@ -44,7 +65,7 @@ const Sidebar = () => {
     { icon: Home, label: 'Home', path: '/feed', show: true },
     { icon: Compass, label: 'Explore', path: '/trending', show: true },
     { icon: Search, label: 'Search', path: '/search', show: true },
-    { icon: Bell, label: 'Notifications', path: '/notifications', show: isAuthenticated, badge: 3 },
+    { icon: Bell, label: 'Notifications', path: '/notifications', show: isAuthenticated, badge: unreadCount },
   ]
 
   const handleLogout = () => {
@@ -108,9 +129,9 @@ const Sidebar = () => {
               >
                 <Icon className={`h-5 w-5 ${active ? 'text-primary' : ''}`} />
                 <span className="font-medium">{item.label}</span>
-                {item.badge && (
-                  <span className="ml-auto bg-primary text-primary-foreground text-xs font-bold px-2 py-0.5 rounded-full">
-                    {item.badge}
+                {item.badge > 0 && (
+                  <span className="ml-auto bg-primary text-primary-foreground text-xs font-bold px-2 py-0.5 rounded-full min-w-[20px] text-center">
+                    {item.badge > 99 ? '99+' : item.badge}
                   </span>
                 )}
               </Button>
