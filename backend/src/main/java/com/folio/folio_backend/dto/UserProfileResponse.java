@@ -12,12 +12,14 @@ import java.time.LocalDateTime;
 public class UserProfileResponse {
     private Long id;
     private String username;
+    private String displayName;
     private String email;
     private String bio;
     private String profileImageUrl;
     private String githubUrl;
     private String websiteUrl;
+    private String location;
+    private String profession;
     private LocalDateTime createdAt;
     private int postsCount;
 }
-

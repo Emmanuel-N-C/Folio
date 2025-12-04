@@ -8,9 +8,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UpdateProfileRequest {
+    private String displayName;
+    private String username;
     private String bio;
     private String profileImageUrl;
     private String githubUrl;
     private String websiteUrl;
+    private String location;
+    private String profession;
 }
-

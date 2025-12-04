@@ -56,6 +56,13 @@ public class User {
 
     private String websiteUrl;
 
+    // NEW FIELDS
+    private String displayName;
+
+    private String location;
+
+    private String profession;
+
     @CreationTimestamp
     @Column(updatable = false)
     private LocalDateTime createdAt;
