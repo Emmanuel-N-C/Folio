@@ -10,6 +10,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/users")
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -45,5 +47,30 @@ public class UserController {
             @RequestParam("file") MultipartFile file) {
         UserProfileResponse response = userService.uploadProfilePicture(userId, file);
         return ResponseEntity.ok(response);
+    }
+
+    // NEW ENDPOINT: Check username availability
+    @GetMapping("/check-username/{username}")
+    public ResponseEntity<Map<String, Boolean>> checkUsernameAvailability(@PathVariable String username) {
+        boolean available = !userService.isUsernameExists(username);
+        return ResponseEntity.ok(Map.of("available", available));
+    }
+
+    // NEW ENDPOINT: Remove profile picture
+    @DeleteMapping("/me/profile-picture")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<UserProfileResponse> removeProfilePicture() {
+        Long currentUserId = userService.getCurrentUserId();
+        UserProfileResponse response = userService.removeProfilePicture(currentUserId);
+        return ResponseEntity.ok(response);
+    }
+
+    // NEW ENDPOINT: Delete account
+    @DeleteMapping("/me")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Map<String, String>> deleteAccount() {
+        Long currentUserId = userService.getCurrentUserId();
+        userService.deleteUserAccount(currentUserId);
+        return ResponseEntity.ok(Map.of("message", "Account deleted successfully"));
     }
 }
