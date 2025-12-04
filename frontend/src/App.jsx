@@ -22,7 +22,9 @@ import UploadScreenshotsPage from '@/pages/post/UploadScreenshotsPage'
 
 // Profile Pages
 import ProfilePage from '@/pages/profile/ProfilePage'
-import EditProfilePage from '@/pages/profile/EditProfilePage'
+
+// Settings Pages (NEW)
+import SettingsPage from '@/pages/settings/SettingsPage'
 
 // Notification Page
 import NotificationsPage from '@/pages/Notification/NotificationsPage'
@@ -80,7 +82,7 @@ function App() {
                 path="settings"
                 element={
                   <ProtectedRoute>
-                    <EditProfilePage />
+                    <SettingsPage />
                   </ProtectedRoute>
                 }
               />
