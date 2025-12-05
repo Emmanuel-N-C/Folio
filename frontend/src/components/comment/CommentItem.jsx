@@ -124,7 +124,7 @@ const CommentItem = ({ comment, postId, postOwnerId, onDeleted, onUpdated }) => 
         <div className="flex-1 space-y-2">
           <div className="flex items-center justify-between">
             <div>
-              <span className="font-semibold text-sm">{comment.username}</span>
+              <span className="font-semibold text-sm">{comment.displayName || comment.username}</span>
               <span className="text-xs text-muted-foreground ml-2">
                 {formatRelativeTime(comment.createdAt)}
                 {comment.updatedAt !== comment.createdAt && ' (edited)'}
@@ -329,7 +329,7 @@ const ReplyItem = ({ reply, postId, postOwnerId, onDeleted, onUpdated }) => {
     <div className="flex-1 space-y-1">
       <div className="flex items-center justify-between">
         <div>
-          <span className="font-semibold text-sm">{reply.username}</span>
+          <span className="font-semibold text-sm">{reply.displayName || reply.username}</span>
           <span className="text-xs text-muted-foreground ml-2">
             {formatRelativeTime(reply.createdAt)}
             {reply.updatedAt !== reply.createdAt && ' (edited)'}

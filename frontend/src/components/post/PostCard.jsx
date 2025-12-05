@@ -34,7 +34,7 @@ const PostCard = ({ post }) => {
                 to={`/profile/${post.userId}`}
                 className="font-semibold hover:text-primary transition-colors"
               >
-                {post.username}
+                {post.displayName || post.username}
               </Link>
               <p className="text-xs text-muted-foreground">
                 {formatRelativeTime(post.createdAt)}
