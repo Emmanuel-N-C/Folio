@@ -52,6 +52,20 @@ const CreatePostPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    
+    // Validate that user has provided either live demo URL or screenshots
+    const hasLiveDemoUrl = formData.liveDemoUrl && formData.liveDemoUrl.trim() !== ''
+    const hasScreenshots = screenshotFiles.length > 0
+    
+    if (!hasLiveDemoUrl && !hasScreenshots) {
+      toast({
+        title: "Media Required",
+        description: "Please provide either a live demo URL or upload at least one screenshot to showcase your project",
+        variant: "destructive"
+      })
+      return
+    }
+    
     setLoading(true)
 
     try {
@@ -194,7 +208,9 @@ const CreatePostPage = () => {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">Live Demo URL</label>
+              <label className="text-sm font-medium">
+                Live Demo URL <span className="text-muted-foreground">(Required if no screenshots)</span>
+              </label>
               <Input
                 type="url"
                 placeholder="https://myproject.vercel.app"
@@ -215,12 +231,17 @@ const CreatePostPage = () => {
 
             {/* Screenshot Upload Component */}
             <div className="space-y-2">
-              <label className="text-sm font-medium">Project Screenshots</label>
+              <label className="text-sm font-medium">
+                Project Screenshots <span className="text-muted-foreground">(Required if no live demo URL)</span>
+              </label>
               <ScreenshotUpload
                 screenshots={screenshotFiles}
                 onScreenshotsChange={setScreenshotFiles}
                 maxFiles={5}
               />
+              <p className="text-xs text-muted-foreground">
+                At least one screenshot is required to showcase your project.
+              </p>
             </div>
 
             <div className="space-y-2">
