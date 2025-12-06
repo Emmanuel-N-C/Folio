@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { postsAPI } from '@/api/posts'
 import { useToast } from '@/components/ui/use-toast'
-import { X, Loader2 } from 'lucide-react'
+import { X, Loader2, AlertCircle } from 'lucide-react'
 import AIGenerateProjectFields from '@/components/ai/AIGenerateProjectFields'
 import ScreenshotUpload from '@/components/post/ScreenshotUpload'
 
@@ -24,8 +24,39 @@ const CreatePostPage = () => {
   const [showAIGenerator, setShowAIGenerator] = useState(true)
   const [aiGenerated, setAiGenerated] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [errors, setErrors] = useState({})
+  const [touched, setTouched] = useState(false)
   const navigate = useNavigate()
   const { toast } = useToast()
+
+  // Real-time validation - clear errors as user types
+  useEffect(() => {
+    if (touched) {
+      const newErrors = {}
+      
+      if (!formData.title.trim()) {
+        newErrors.title = 'Project title is required'
+      }
+      
+      if (!formData.description.trim()) {
+        newErrors.description = 'Description is required'
+      }
+      
+      if (!formData.techStack.trim()) {
+        newErrors.techStack = 'Tech stack is required'
+      }
+      
+      // Validate that user has provided either live demo URL or screenshots
+      const hasLiveDemoUrl = formData.liveDemoUrl && formData.liveDemoUrl.trim() !== ''
+      const hasScreenshots = screenshotFiles.length > 0
+      
+      if (!hasLiveDemoUrl && !hasScreenshots) {
+        newErrors.media = 'Either a live demo URL or at least one screenshot is required'
+      }
+      
+      setErrors(newErrors)
+    }
+  }, [formData, screenshotFiles, touched])
 
   const handleAIGenerate = (aiResult) => {
     // Populate form with AI-generated data
@@ -50,17 +81,41 @@ const CreatePostPage = () => {
     }, 100)
   }
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
+  const validateForm = () => {
+    const newErrors = {}
+    
+    if (!formData.title.trim()) {
+      newErrors.title = 'Project title is required'
+    }
+    
+    if (!formData.description.trim()) {
+      newErrors.description = 'Description is required'
+    }
+    
+    if (!formData.techStack.trim()) {
+      newErrors.techStack = 'Tech stack is required'
+    }
     
     // Validate that user has provided either live demo URL or screenshots
     const hasLiveDemoUrl = formData.liveDemoUrl && formData.liveDemoUrl.trim() !== ''
     const hasScreenshots = screenshotFiles.length > 0
     
     if (!hasLiveDemoUrl && !hasScreenshots) {
+      newErrors.media = 'Either a live demo URL or at least one screenshot is required'
+    }
+    
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    setTouched(true)
+    
+    if (!validateForm()) {
       toast({
-        title: "Media Required",
-        description: "Please provide either a live demo URL or upload at least one screenshot to showcase your project",
+        title: "Validation Error",
+        description: "Please fill in all required fields",
         variant: "destructive"
       })
       return
@@ -175,15 +230,21 @@ const CreatePostPage = () => {
           )}
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6" noValidate>
             <div className="space-y-2">
               <label className="text-sm font-medium">Project Title *</label>
               <Input
                 placeholder="My Awesome Project"
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                required
+                className={touched && errors.title ? 'border-red-500 focus-visible:ring-red-500' : ''}
               />
+              {touched && errors.title && (
+                <p className="text-sm text-red-500 flex items-center gap-1">
+                  <AlertCircle className="h-3 w-3" />
+                  {errors.title}
+                </p>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -193,8 +254,14 @@ const CreatePostPage = () => {
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 rows={6}
-                required
+                className={touched && errors.description ? 'border-red-500 focus-visible:ring-red-500' : ''}
               />
+              {touched && errors.description && (
+                <p className="text-sm text-red-500 flex items-center gap-1">
+                  <AlertCircle className="h-3 w-3" />
+                  {errors.description}
+                </p>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -203,8 +270,14 @@ const CreatePostPage = () => {
                 placeholder="React, Node.js, MongoDB"
                 value={formData.techStack}
                 onChange={(e) => setFormData({ ...formData, techStack: e.target.value })}
-                required
+                className={touched && errors.techStack ? 'border-red-500 focus-visible:ring-red-500' : ''}
               />
+              {touched && errors.techStack && (
+                <p className="text-sm text-red-500 flex items-center gap-1">
+                  <AlertCircle className="h-3 w-3" />
+                  {errors.techStack}
+                </p>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -216,6 +289,7 @@ const CreatePostPage = () => {
                 placeholder="https://myproject.vercel.app"
                 value={formData.liveDemoUrl}
                 onChange={(e) => setFormData({ ...formData, liveDemoUrl: e.target.value })}
+                className={touched && errors.media && !formData.liveDemoUrl ? 'border-red-500 focus-visible:ring-red-500' : ''}
               />
             </div>
 
@@ -234,11 +308,19 @@ const CreatePostPage = () => {
               <label className="text-sm font-medium">
                 Project Screenshots <span className="text-muted-foreground">(Required if no live demo URL)</span>
               </label>
-              <ScreenshotUpload
-                screenshots={screenshotFiles}
-                onScreenshotsChange={setScreenshotFiles}
-                maxFiles={5}
-              />
+              <div className={touched && errors.media && screenshotFiles.length === 0 ? 'border-2 border-red-500 rounded-lg p-1' : ''}>
+                <ScreenshotUpload
+                  screenshots={screenshotFiles}
+                  onScreenshotsChange={setScreenshotFiles}
+                  maxFiles={5}
+                />
+              </div>
+              {touched && errors.media && (
+                <p className="text-sm text-red-500 flex items-center gap-1">
+                  <AlertCircle className="h-3 w-3" />
+                  {errors.media}
+                </p>
+              )}
               <p className="text-xs text-muted-foreground">
                 At least one screenshot or a live demo URL is required
               </p>
