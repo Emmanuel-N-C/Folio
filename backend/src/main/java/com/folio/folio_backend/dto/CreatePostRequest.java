@@ -27,5 +27,11 @@ public class CreatePostRequest {
     private List<String> screenshotUrls = new ArrayList<>();
     
     private List<String> tags = new ArrayList<>();
+    
+    // Custom validation method
+    public boolean hasMediaContent() {
+        return (liveDemoUrl != null && !liveDemoUrl.trim().isEmpty()) ||
+               (screenshotUrls != null && !screenshotUrls.isEmpty());
+    }
 }
 

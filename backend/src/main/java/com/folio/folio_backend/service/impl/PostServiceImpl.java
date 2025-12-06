@@ -42,6 +42,13 @@ public class PostServiceImpl implements PostService {
     public PostResponse createPost(CreatePostRequest request) {
         User currentUser = userService.getCurrentUser();
 
+        // Validate that at least one media type is provided
+        if (!request.hasMediaContent()) {
+            throw new BadRequestException(
+                "Please provide either a live demo URL or upload at least one screenshot"
+            );
+        }
+
         Post post = new Post();
         post.setTitle(request.getTitle());
         post.setDescription(request.getDescription());
