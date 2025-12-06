@@ -90,6 +90,7 @@ public class AdminServiceImpl implements AdminService {
         response.setWebsiteUrl(user.getWebsiteUrl());
         response.setCreatedAt(user.getCreatedAt());
         response.setPostsCount(0); // Set to 0 for admin list to avoid N+1 queries
+        response.setRoles(user.getRoles());
         return response;
     }
 }
