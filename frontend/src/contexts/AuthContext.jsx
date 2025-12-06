@@ -1,33 +1,33 @@
 import { createContext, useState, useEffect } from 'react'
 import { authAPI } from '@/api/auth'
 import { usersAPI } from '@/api/users'
-
 export const AuthContext = createContext(null)
-
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null)
   const [token, setToken] = useState(null)
   const [loading, setLoading] = useState(true)
-
   useEffect(() => {
     // Load user from localStorage on mount
     const storedToken = localStorage.getItem('token')
     const storedUser = localStorage.getItem('user')
-
     if (storedToken && storedUser) {
       setToken(storedToken)
       setUser(JSON.parse(storedUser))
-      // Refresh user profile to get latest data including profile image
+      // Refresh user profile to get latest data including profile image and roles
       refreshUserProfile()
     } else {
       setLoading(false)
     }
   }, [])
-
   const refreshUserProfile = async () => {
     try {
       const profileData = await usersAPI.getCurrentUserProfile()
-      const updatedUser = { ...profileData, userId: profileData.id }
+      const updatedUser = { 
+        ...profileData, 
+        userId: profileData.id,
+        // Ensure roles are included
+        roles: profileData.roles || []
+      }
       setUser(updatedUser)
       localStorage.setItem('user', JSON.stringify(updatedUser))
     } catch (error) {
@@ -36,22 +36,21 @@ export const AuthProvider = ({ children }) => {
       setLoading(false)
     }
   }
-
   const login = async (credentials) => {
     try {
       const response = await authAPI.login(credentials)
-      const { token: newToken, userId, ...userData } = response
-
+      const { token: newToken, userId, roles, ...userData } = response
       setToken(newToken)
       localStorage.setItem('token', newToken)
-
-      // Fetch full profile data including profileImageUrl
+      // Fetch full profile data including profileImageUrl and roles
       try {
         const profileData = await usersAPI.getCurrentUserProfile()
         const normalizedUser = { 
           ...profileData,
           id: profileData.id,
           userId: profileData.id,
+          // Ensure roles are preserved - use profileData.roles first, fallback to response.roles
+          roles: profileData.roles || roles || []
         }
         setUser(normalizedUser)
         localStorage.setItem('user', JSON.stringify(normalizedUser))
@@ -60,12 +59,12 @@ export const AuthProvider = ({ children }) => {
         const normalizedUser = { 
           id: userId,
           userId: userId,
+          roles: roles || [], // Preserve roles from login response
           ...userData 
         }
         setUser(normalizedUser)
         localStorage.setItem('user', JSON.stringify(normalizedUser))
       }
-
       return { success: true }
     } catch (error) {
       return { 
@@ -74,22 +73,21 @@ export const AuthProvider = ({ children }) => {
       }
     }
   }
-
   const register = async (data) => {
     try {
       const response = await authAPI.register(data)
-      const { token: newToken, userId, ...userData } = response
-
+      const { token: newToken, userId, roles, ...userData } = response
       setToken(newToken)
       localStorage.setItem('token', newToken)
-
-      // Fetch full profile data including profileImageUrl
+      // Fetch full profile data including profileImageUrl and roles
       try {
         const profileData = await usersAPI.getCurrentUserProfile()
         const normalizedUser = { 
           ...profileData,
           id: profileData.id,
           userId: profileData.id,
+          // Ensure roles are preserved - use profileData.roles first, fallback to response.roles
+          roles: profileData.roles || roles || []
         }
         setUser(normalizedUser)
         localStorage.setItem('user', JSON.stringify(normalizedUser))
@@ -98,12 +96,12 @@ export const AuthProvider = ({ children }) => {
         const normalizedUser = { 
           id: userId,
           userId: userId,
+          roles: roles || [], // Preserve roles from register response
           ...userData 
         }
         setUser(normalizedUser)
         localStorage.setItem('user', JSON.stringify(normalizedUser))
       }
-
       return { success: true }
     } catch (error) {
       return { 
@@ -112,24 +110,26 @@ export const AuthProvider = ({ children }) => {
       }
     }
   }
-
   const logout = () => {
     setUser(null)
     setToken(null)
     localStorage.removeItem('token')
     localStorage.removeItem('user')
   }
-
   const updateUser = (updatedData) => {
-    const updatedUser = { ...user, ...updatedData }
+    const updatedUser = { 
+      ...user, 
+      ...updatedData,
+      // Preserve roles if not in updatedData
+      roles: updatedData.roles || user?.roles || []
+    }
     setUser(updatedUser)
     localStorage.setItem('user', JSON.stringify(updatedUser))
   }
-
   const isAdmin = () => {
+    // Check if user has ROLE_ADMIN in their roles array
     return user?.roles?.includes('ROLE_ADMIN') || false
   }
-
   const value = {
     user,
     token,
@@ -142,6 +142,5 @@ export const AuthProvider = ({ children }) => {
     isAuthenticated: !!token,
     isAdmin,
   }
-
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

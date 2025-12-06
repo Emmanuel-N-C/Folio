@@ -12,13 +12,14 @@ import {
   PlusCircle,
   Moon,
   Sun,
-  LogOut
+  LogOut,
+  Shield
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { notificationsAPI } from '@/api/notifications'
 
 const Sidebar = () => {
-  const { isAuthenticated, user, logout } = useAuth()
+  const { isAuthenticated, user, logout, isAdmin } = useAuth()
   const location = useLocation()
   const navigate = useNavigate()
   const [theme, setTheme] = useState('light')
@@ -61,12 +62,13 @@ const Sidebar = () => {
     return location.pathname === path || location.pathname.startsWith(path + '/')
   }
 
-  const navItems = [
-    { icon: Home, label: 'Home', path: '/feed', show: true },
-    { icon: Compass, label: 'Explore', path: '/trending', show: true },
-    { icon: Search, label: 'Search', path: '/search', show: true },
-    { icon: Bell, label: 'Notifications', path: '/notifications', show: isAuthenticated, badge: unreadCount },
-  ]
+  const navItems =[
+  { icon: Home, label: 'Home', path: '/feed', show: true },
+  { icon: Compass, label: 'Explore', path: '/trending', show: true },
+  { icon: Search, label: 'Search', path: '/search', show: true },
+  { icon: Bell, label: 'Notifications', path: '/notifications', show: isAuthenticated, badge: unreadCount },
+  { icon: Shield, label: 'Admin Dashboard', path: '/admin', show: isAuthenticated && isAdmin() },
+]
 
   const handleLogout = () => {
     logout()

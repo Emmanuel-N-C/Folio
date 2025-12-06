@@ -70,4 +70,9 @@ export const postsAPI = {
     )
     return response.data
   },
+  // Get all posts (for admin)
+  getAllPosts: async (page = 0, size = 50) => {
+    const response = await axiosInstance.get(`/feed?page=${page}&size=${size}`)
+    return response.data
+  },
 }
