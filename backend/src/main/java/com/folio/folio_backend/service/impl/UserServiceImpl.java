@@ -211,6 +211,7 @@ public class UserServiceImpl implements UserService {
         response.setLocation(user.getLocation());
         response.setProfession(user.getProfession());
         response.setCreatedAt(user.getCreatedAt());
+        response.setRoles(user.getRoles());
 
         // Use repository count instead of accessing lazy collection
         response.setPostsCount((int) postRepository.findByPostedByIdOrderByCreatedAtDesc(user.getId()).stream().count());
