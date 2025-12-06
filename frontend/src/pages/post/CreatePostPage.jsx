@@ -240,7 +240,7 @@ const CreatePostPage = () => {
                 maxFiles={5}
               />
               <p className="text-xs text-muted-foreground">
-                At least one screenshot is required to showcase your project.
+                At least one screenshot or a live demo URL is required
               </p>
             </div>
 
