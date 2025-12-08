@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams, Link } from 'react-router-dom'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -26,6 +26,21 @@ const ResetPasswordPage = () => {
   
   const navigate = useNavigate()
   const { toast } = useToast()
+
+  // Remove token from URL immediately after reading it
+  useEffect(() => {
+    if (token) {
+      // Store token in sessionStorage (more secure than URL)
+      sessionStorage.setItem('resetToken', token)
+      // Remove token from URL
+      window.history.replaceState({}, document.title, '/reset-password')
+    }
+  }, [token])
+
+  // Get token from sessionStorage instead of URL
+  const getToken = () => {
+    return sessionStorage.getItem('resetToken')
+  }
 
   // Validate password with detailed requirements
   const validatePassword = (password) => {
@@ -63,12 +78,15 @@ const ResetPasswordPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault()
 
-    if (!token) {
+    const resetToken = getToken()
+
+    if (!resetToken) {
       toast({
         title: "Invalid Link",
-        description: "Reset token is missing. Please use the link from your email.",
+        description: "Reset token is missing or expired. Please request a new password reset.",
         variant: "destructive"
       })
+      navigate('/forgot-password')
       return
     }
 
@@ -101,14 +119,17 @@ const ResetPasswordPage = () => {
 
     try {
       const response = await authAPI.resetPassword({
-        token,
+        token: resetToken,
         newPassword: formData.newPassword
       })
+
+      // Clear token from sessionStorage
+      sessionStorage.removeItem('resetToken')
 
       setResetSuccess(true)
       
       toast({
-        title: "Password Reset!",
+        title: "Password Reset! ✅",
         description: response.message || "Your password has been reset successfully",
       })
 
@@ -118,6 +139,9 @@ const ResetPasswordPage = () => {
       }, 2000)
       
     } catch (error) {
+      // Clear token if it's invalid/expired
+      sessionStorage.removeItem('resetToken')
+      
       toast({
         title: "Reset Failed",
         description: error.response?.data?.message || "Invalid or expired reset token",
@@ -138,7 +162,7 @@ const ResetPasswordPage = () => {
     return formData.newPassword !== formData.confirmPassword ? 'border-red-500 focus-visible:ring-red-500' : 'border-green-500 focus-visible:ring-green-500'
   }
 
-  if (!token) {
+  if (!token && !getToken()) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background">
         <Card className="w-full max-w-md">
@@ -241,7 +265,7 @@ const ResetPasswordPage = () => {
               <div className="relative">
                 <Input
                   type={showConfirmPassword ? "text" : "password"}
-                  placeholder="password"
+                  placeholder="••••••••"
                   value={formData.confirmPassword}
                   onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
                   onBlur={() => handleBlur('confirmPassword')}
