@@ -7,7 +7,7 @@ import { useAuth } from '@/hooks/useAuth'
 import { useToast } from '@/components/ui/use-toast'
 import { useDebounce } from '@/hooks/useDebounce'
 import { usersAPI } from '@/api/users'
-import { Eye, EyeOff, Check, X, Loader2 } from 'lucide-react'
+import { Eye, EyeOff, Check, X, Loader2, AlertCircle } from 'lucide-react'
 
 const RegisterPage = () => {
   const [formData, setFormData] = useState({
@@ -20,9 +20,21 @@ const RegisterPage = () => {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   
+  // Field touched states
+  const [touched, setTouched] = useState({
+    username: false,
+    email: false,
+    password: false,
+    confirmPassword: false
+  })
+  
   // Username availability check states
   const [usernameAvailable, setUsernameAvailable] = useState(null)
   const [checkingUsername, setCheckingUsername] = useState(false)
+  const [usernameError, setUsernameError] = useState('')
+  
+  // Password validation states
+  const [passwordErrors, setPasswordErrors] = useState([])
   
   const { register } = useAuth()
   const navigate = useNavigate()
@@ -31,10 +43,122 @@ const RegisterPage = () => {
   // Debounce username input
   const debouncedUsername = useDebounce(formData.username, 500)
 
+  // Validate username format
+  const validateUsername = (username) => {
+    if (!username) return 'Username is required'
+    
+    if (username.length < 3) {
+      return 'Username must be at least 3 characters'
+    }
+    if (username.length > 20) {
+      return 'Username must be at most 20 characters'
+    }
+    if (username.includes(' ')) {
+      return 'Username cannot contain spaces'
+    }
+    
+    // Must start with a letter
+    if (!/^[a-zA-Z]/.test(username)) {
+      return 'Username must start with a letter'
+    }
+    
+    // Must end with a letter or number
+    if (!/[a-zA-Z0-9]$/.test(username)) {
+      return 'Username must end with a letter or number'
+    }
+    
+    // Can only contain letters, numbers, dots, underscores, hyphens
+    if (!/^[a-zA-Z0-9._-]+$/.test(username)) {
+      return 'Username can only contain letters, numbers, dots (.), underscores (_), and hyphens (-)'
+    }
+    
+    // Check for consecutive special characters
+    if (/[._-]{2,}/.test(username)) {
+      return 'Username cannot have consecutive special characters'
+    }
+    
+    return ''
+  }
+
+ // Validate password with detailed requirements
+const validatePassword = (password) => {
+  const errors = []
+  
+  if (!password) {
+    return ['Password is required']
+  }
+  
+  if (password.length < 8) {
+    errors.push('At least 8 characters')
+  }
+  if (!/[a-z]/.test(password)) {
+    errors.push('One lowercase letter')
+  }
+  if (!/[A-Z]/.test(password)) {
+    errors.push('One uppercase letter')
+  }
+  if (!/\d/.test(password)) {
+    errors.push('One number')
+  }
+  if (!/[^A-Za-z0-9]/.test(password)) {
+    errors.push('One special character (!@#$%^&*...)')
+  }
+  
+  return errors
+}
+
+  // Validate email
+  const validateEmail = (email) => {
+    if (!email) return 'Email is required'
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return 'Please enter a valid email address'
+    }
+    return ''
+  }
+
+  // Handle username input change
+  const handleUsernameChange = (e) => {
+    const value = e.target.value
+    setFormData({ ...formData, username: value })
+    
+    if (touched.username) {
+      const error = validateUsername(value)
+      setUsernameError(error)
+      
+      if (error) {
+        setUsernameAvailable(null)
+      }
+    }
+  }
+
+  // Handle password input change
+  const handlePasswordChange = (e) => {
+    const value = e.target.value
+    setFormData({ ...formData, password: value })
+    
+    if (touched.password) {
+      const errors = validatePassword(value)
+      setPasswordErrors(errors)
+    }
+  }
+
+  // Handle field blur
+  const handleBlur = (field) => {
+    setTouched({ ...touched, [field]: true })
+    
+    if (field === 'username') {
+      const error = validateUsername(formData.username)
+      setUsernameError(error)
+    } else if (field === 'password') {
+      const errors = validatePassword(formData.password)
+      setPasswordErrors(errors)
+    }
+  }
+
   // Check username availability
   useEffect(() => {
     const checkUsername = async () => {
-      if (debouncedUsername && debouncedUsername.length >= 3) {
+      if (debouncedUsername && debouncedUsername.length >= 3 && !usernameError) {
         setCheckingUsername(true)
         try {
           const response = await usersAPI.checkUsernameAvailability(debouncedUsername)
@@ -51,15 +175,71 @@ const RegisterPage = () => {
     }
 
     checkUsername()
-  }, [debouncedUsername])
+  }, [debouncedUsername, usernameError])
+
+  // Check if form is valid
+  const isFormValid = () => {
+    return (
+      formData.username &&
+      !usernameError &&
+      usernameAvailable === true &&
+      formData.email &&
+      !validateEmail(formData.email) &&
+      formData.password &&
+      passwordErrors.length === 0 &&
+      formData.confirmPassword &&
+      formData.password === formData.confirmPassword
+    )
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
 
+    // Mark all fields as touched
+    setTouched({
+      username: true,
+      email: true,
+      password: true,
+      confirmPassword: true
+    })
+
+    // Validate all fields
+    const usernameValidationError = validateUsername(formData.username)
+    const emailValidationError = validateEmail(formData.email)
+    const passwordValidationErrors = validatePassword(formData.password)
+
+    if (usernameValidationError) {
+      setUsernameError(usernameValidationError)
+      toast({
+        title: "Invalid Username",
+        description: usernameValidationError,
+        variant: "destructive"
+      })
+      return
+    }
+
+    if (emailValidationError) {
+      toast({
+        title: "Invalid Email",
+        description: emailValidationError,
+        variant: "destructive"
+      })
+      return
+    }
+
+    if (passwordValidationErrors.length > 0) {
+      toast({
+        title: "Invalid Password",
+        description: `Password must have: ${passwordValidationErrors.join(', ')}`,
+        variant: "destructive"
+      })
+      return
+    }
+
     if (formData.password !== formData.confirmPassword) {
       toast({
-        title: "Error",
-        description: "Passwords do not match",
+        title: "Passwords Don't Match",
+        description: "Please make sure your passwords match",
         variant: "destructive"
       })
       return
@@ -67,8 +247,8 @@ const RegisterPage = () => {
 
     if (usernameAvailable === false) {
       toast({
-        title: "Error",
-        description: "Username is already taken",
+        title: "Username Taken",
+        description: "This username is already taken. Please choose another.",
         variant: "destructive"
       })
       return
@@ -78,7 +258,7 @@ const RegisterPage = () => {
 
     const result = await register({
       username: formData.username,
-      email: formData.email,
+      email: formData.email.toLowerCase(),
       password: formData.password
     })
     
@@ -90,13 +270,41 @@ const RegisterPage = () => {
       navigate('/')
     } else {
       toast({
-        title: "Error",
-        description: result.error,
+        title: "Registration Failed",
+        description: result.error || "Something went wrong. Please try again.",
         variant: "destructive"
       })
     }
     
     setLoading(false)
+  }
+
+  // Determine username input styling
+  const getUsernameInputClass = () => {
+    if (!touched.username || !formData.username) return ''
+    if (usernameError) return 'border-red-500 focus-visible:ring-red-500'
+    if (usernameAvailable === true) return 'border-green-500 focus-visible:ring-green-500'
+    if (usernameAvailable === false) return 'border-red-500 focus-visible:ring-red-500'
+    return ''
+  }
+
+  // Determine email input styling
+  const getEmailInputClass = () => {
+    if (!touched.email || !formData.email) return ''
+    const error = validateEmail(formData.email)
+    return error ? 'border-red-500 focus-visible:ring-red-500' : 'border-green-500 focus-visible:ring-green-500'
+  }
+
+  // Determine password input styling
+  const getPasswordInputClass = () => {
+    if (!touched.password || !formData.password) return ''
+    return passwordErrors.length > 0 ? 'border-red-500 focus-visible:ring-red-500' : 'border-green-500 focus-visible:ring-green-500'
+  }
+
+  // Determine confirm password input styling
+  const getConfirmPasswordInputClass = () => {
+    if (!touched.confirmPassword || !formData.confirmPassword) return ''
+    return formData.password !== formData.confirmPassword ? 'border-red-500 focus-visible:ring-red-500' : 'border-green-500 focus-visible:ring-green-500'
   }
 
   return (
@@ -107,29 +315,22 @@ const RegisterPage = () => {
           <CardDescription>Join Folio and showcase your projects</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Username Field with Availability Check */}
+          <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+            {/* Username Field */}
             <div className="space-y-2">
               <label className="text-sm font-medium">Username</label>
               <div className="relative">
                 <Input
                   type="text"
-                  placeholder="Username"
+                  placeholder="username"
                   value={formData.username}
-                  onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                  required
+                  onChange={handleUsernameChange}
+                  onBlur={() => handleBlur('username')}
                   minLength={3}
-                  className={
-                    formData.username.length >= 3
-                      ? usernameAvailable === true
-                        ? 'border-green-500 focus-visible:ring-green-500'
-                        : usernameAvailable === false
-                        ? 'border-red-500 focus-visible:ring-red-500'
-                        : ''
-                      : ''
-                  }
+                  maxLength={20}
+                  className={getUsernameInputClass()}
                 />
-                {formData.username.length >= 3 && (
+                {touched.username && formData.username.length >= 3 && !usernameError && (
                   <div className="absolute right-3 top-1/2 -translate-y-1/2">
                     {checkingUsername ? (
                       <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
@@ -140,11 +341,21 @@ const RegisterPage = () => {
                     ) : null}
                   </div>
                 )}
+                {touched.username && usernameError && (
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                    <AlertCircle className="h-4 w-4 text-red-500" />
+                  </div>
+                )}
               </div>
-              {formData.username.length >= 3 && usernameAvailable === false && (
+              
+              {/* Error/Success Messages */}
+              {touched.username && usernameError && (
+                <p className="text-xs text-red-500">{usernameError}</p>
+              )}
+              {touched.username && !usernameError && formData.username.length >= 3 && usernameAvailable === false && (
                 <p className="text-xs text-red-500">Username is already taken</p>
               )}
-              {formData.username.length >= 3 && usernameAvailable === true && (
+              {touched.username && !usernameError && formData.username.length >= 3 && usernameAvailable === true && (
                 <p className="text-xs text-green-500">Username is available</p>
               )}
             </div>
@@ -152,27 +363,42 @@ const RegisterPage = () => {
             {/* Email Field */}
             <div className="space-y-2">
               <label className="text-sm font-medium">Email</label>
-              <Input
-                type="email"
-                placeholder="Email"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                required
-              />
+              <div className="relative">
+                <Input
+                  type="email"
+                  placeholder="email"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value.toLowerCase() })}
+                  onBlur={() => handleBlur('email')}
+                  className={getEmailInputClass()}
+                />
+                {touched.email && formData.email && (
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                    {validateEmail(formData.email) ? (
+                      <AlertCircle className="h-4 w-4 text-red-500" />
+                    ) : (
+                      <Check className="h-4 w-4 text-green-500" />
+                    )}
+                  </div>
+                )}
+              </div>
+              {touched.email && validateEmail(formData.email) && (
+                <p className="text-xs text-red-500">{validateEmail(formData.email)}</p>
+              )}
             </div>
 
-            {/* Password Field with Visibility Toggle */}
+            {/* Password Field */}
             <div className="space-y-2">
               <label className="text-sm font-medium">Password</label>
               <div className="relative">
                 <Input
                   type={showPassword ? "text" : "password"}
-                  placeholder="Password"
+                  placeholder="password"
                   value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  required
-                  minLength={6}
-                  className="pr-10"
+                  onChange={handlePasswordChange}
+                  onBlur={() => handleBlur('password')}
+                  minLength={8}
+                  className={`pr-10 ${getPasswordInputClass()}`}
                 />
                 <button
                   type="button"
@@ -186,20 +412,41 @@ const RegisterPage = () => {
                   )}
                 </button>
               </div>
-              <p className="text-xs text-muted-foreground">At least 6 characters</p>
+              
+              {/* Password Requirements */}
+              {touched.password && formData.password && passwordErrors.length > 0 && (
+                <div className="space-y-1">
+                  <p className="text-xs font-medium text-muted-foreground">Password must have:</p>
+                  <ul className="text-xs space-y-0.5">
+                    {passwordErrors.map((error, index) => (
+                      <li key={index} className="text-red-500 flex items-center gap-1">
+                        <X className="h-3 w-3" />
+                        {error}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              
+              {touched.password && formData.password && passwordErrors.length === 0 && (
+                <p className="text-xs text-green-500 flex items-center gap-1">
+                  <Check className="h-3 w-3" />
+                  Password meets all requirements
+                </p>
+              )}
             </div>
 
-            {/* Confirm Password Field with Visibility Toggle */}
+            {/* Confirm Password Field */}
             <div className="space-y-2">
               <label className="text-sm font-medium">Confirm Password</label>
               <div className="relative">
                 <Input
                   type={showConfirmPassword ? "text" : "password"}
-                  placeholder="Password"
+                  placeholder="••••••••"
                   value={formData.confirmPassword}
                   onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                  required
-                  className="pr-10"
+                  onBlur={() => handleBlur('confirmPassword')}
+                  className={`pr-10 ${getConfirmPasswordInputClass()}`}
                 />
                 <button
                   type="button"
@@ -213,12 +460,25 @@ const RegisterPage = () => {
                   )}
                 </button>
               </div>
-              {formData.confirmPassword && formData.password !== formData.confirmPassword && (
-                <p className="text-xs text-red-500">Passwords do not match</p>
+              {touched.confirmPassword && formData.confirmPassword && formData.password !== formData.confirmPassword && (
+                <p className="text-xs text-red-500 flex items-center gap-1">
+                  <X className="h-3 w-3" />
+                  Passwords do not match
+                </p>
+              )}
+              {touched.confirmPassword && formData.confirmPassword && formData.password === formData.confirmPassword && (
+                <p className="text-xs text-green-500 flex items-center gap-1">
+                  <Check className="h-3 w-3" />
+                  Passwords match
+                </p>
               )}
             </div>
 
-            <Button type="submit" className="w-full" disabled={loading || checkingUsername || usernameAvailable === false}>
+            <Button 
+              type="submit" 
+              className="w-full" 
+              disabled={!isFormValid() || loading || checkingUsername}
+            >
               {loading ? 'Creating account...' : 'Sign Up'}
             </Button>
 
