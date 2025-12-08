@@ -3,6 +3,7 @@ package com.folio.folio_backend.model;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -27,13 +28,17 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank
-    @Size(min = 3, max = 50)
-    @Column(unique = true, nullable = false)
+    @NotBlank(message = "Username is required")
+    @Size(min = 3, max = 20, message = "Username must be between 3 and 20 characters")
+    @Pattern(
+            regexp = "^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*$",
+            message = "Username must start with a letter, end with a letter or number, and cannot have consecutive special characters"
+    )
+    @Column(unique = true, nullable = false, length = 20)
     private String username;
 
-    @NotBlank
-    @Email
+    @NotBlank(message = "Email is required")
+    @Email(message = "Email must be valid")
     @Column(unique = true, nullable = false)
     private String email;
 
@@ -56,7 +61,6 @@ public class User {
 
     private String websiteUrl;
 
-    // NEW FIELDS
     private String displayName;
 
     private String location;
@@ -78,4 +82,16 @@ public class User {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
+
+    // Automatically normalize username and email to lowercase before saving
+    @PrePersist
+    @PreUpdate
+    private void normalizeFields() {
+        if (this.username != null) {
+            this.username = this.username.toLowerCase().trim();
+        }
+        if (this.email != null) {
+            this.email = this.email.toLowerCase().trim();
+        }
+    }
 }
