@@ -33,14 +33,20 @@ const RegisterPage = () => {
   const [checkingUsername, setCheckingUsername] = useState(false)
   const [usernameError, setUsernameError] = useState('')
   
+  // Email availability check states
+  const [emailAvailable, setEmailAvailable] = useState(null)
+  const [checkingEmail, setCheckingEmail] = useState(false)
+  const [emailError, setEmailError] = useState('')
+  
   // Password validation states
   const [passwordErrors, setPasswordErrors] = useState([])
   
   const navigate = useNavigate()
   const { toast } = useToast()
   
-  // Debounce username input
+  // Debounce username and email inputs
   const debouncedUsername = useDebounce(formData.username, 500)
+  const debouncedEmail = useDebounce(formData.email, 500)
 
   // Validate username format
   const validateUsername = (username) => {
@@ -130,6 +136,21 @@ const RegisterPage = () => {
     }
   }
 
+  // Handle email input change
+  const handleEmailChange = (e) => {
+    const value = e.target.value.toLowerCase()
+    setFormData({ ...formData, email: value })
+    
+    if (touched.email) {
+      const error = validateEmail(value)
+      setEmailError(error)
+      
+      if (error) {
+        setEmailAvailable(null)
+      }
+    }
+  }
+
   // Handle password input change
   const handlePasswordChange = (e) => {
     const value = e.target.value
@@ -148,6 +169,9 @@ const RegisterPage = () => {
     if (field === 'username') {
       const error = validateUsername(formData.username)
       setUsernameError(error)
+    } else if (field === 'email') {
+      const error = validateEmail(formData.email)
+      setEmailError(error)
     } else if (field === 'password') {
       const errors = validatePassword(formData.password)
       setPasswordErrors(errors)
@@ -176,6 +200,28 @@ const RegisterPage = () => {
     checkUsername()
   }, [debouncedUsername, usernameError])
 
+  // Check email availability
+  useEffect(() => {
+    const checkEmail = async () => {
+      if (debouncedEmail && !emailError) {
+        setCheckingEmail(true)
+        try {
+          const response = await usersAPI.checkEmailAvailability(debouncedEmail)
+          setEmailAvailable(response.available)
+        } catch (error) {
+          console.error('Error checking email:', error)
+          setEmailAvailable(null)
+        } finally {
+          setCheckingEmail(false)
+        }
+      } else {
+        setEmailAvailable(null)
+      }
+    }
+
+    checkEmail()
+  }, [debouncedEmail, emailError])
+
   // Check if form is valid
   const isFormValid = () => {
     return (
@@ -183,7 +229,8 @@ const RegisterPage = () => {
       !usernameError &&
       usernameAvailable === true &&
       formData.email &&
-      !validateEmail(formData.email) &&
+      !emailError &&
+      emailAvailable === true &&
       formData.password &&
       passwordErrors.length === 0 &&
       formData.confirmPassword &&
@@ -218,6 +265,7 @@ const RegisterPage = () => {
     }
 
     if (emailValidationError) {
+      setEmailError(emailValidationError)
       toast({
         title: "Invalid Email",
         description: emailValidationError,
@@ -248,6 +296,15 @@ const RegisterPage = () => {
       toast({
         title: "Username Taken",
         description: "This username is already taken. Please choose another.",
+        variant: "destructive"
+      })
+      return
+    }
+
+    if (emailAvailable === false) {
+      toast({
+        title: "Email Already Registered",
+        description: "This email is already registered. Please use another email or try logging in.",
         variant: "destructive"
       })
       return
@@ -302,8 +359,10 @@ const RegisterPage = () => {
   // Determine email input styling
   const getEmailInputClass = () => {
     if (!touched.email || !formData.email) return ''
-    const error = validateEmail(formData.email)
-    return error ? 'border-red-500 focus-visible:ring-red-500' : 'border-green-500 focus-visible:ring-green-500'
+    if (emailError) return 'border-red-500 focus-visible:ring-red-500'
+    if (emailAvailable === true) return 'border-green-500 focus-visible:ring-green-500'
+    if (emailAvailable === false) return 'border-red-500 focus-visible:ring-red-500'
+    return ''
   }
 
   // Determine password input styling
@@ -379,22 +438,37 @@ const RegisterPage = () => {
                   type="email"
                   placeholder="email"
                   value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value.toLowerCase() })}
+                  onChange={handleEmailChange}
                   onBlur={() => handleBlur('email')}
                   className={getEmailInputClass()}
                 />
-                {touched.email && formData.email && (
+                {touched.email && formData.email && !emailError && (
                   <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                    {validateEmail(formData.email) ? (
-                      <AlertCircle className="h-4 w-4 text-red-500" />
-                    ) : (
+                    {checkingEmail ? (
+                      <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                    ) : emailAvailable === true ? (
                       <Check className="h-4 w-4 text-green-500" />
-                    )}
+                    ) : emailAvailable === false ? (
+                      <X className="h-4 w-4 text-red-500" />
+                    ) : null}
+                  </div>
+                )}
+                {touched.email && emailError && (
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                    <AlertCircle className="h-4 w-4 text-red-500" />
                   </div>
                 )}
               </div>
-              {touched.email && validateEmail(formData.email) && (
-                <p className="text-xs text-red-500">{validateEmail(formData.email)}</p>
+              
+              {/* Error/Success Messages */}
+              {touched.email && emailError && (
+                <p className="text-xs text-red-500">{emailError}</p>
+              )}
+              {touched.email && !emailError && formData.email && emailAvailable === false && (
+                <p className="text-xs text-red-500">Email is already registered</p>
+              )}
+              {touched.email && !emailError && formData.email && emailAvailable === true && (
+                <p className="text-xs text-green-500">Email is available</p>
               )}
             </div>
 
@@ -488,7 +562,7 @@ const RegisterPage = () => {
             <Button 
               type="submit" 
               className="w-full" 
-              disabled={!isFormValid() || loading || checkingUsername}
+              disabled={!isFormValid() || loading || checkingUsername || checkingEmail}
             >
               {loading ? 'Creating account...' : 'Sign Up'}
             </Button>

@@ -19,22 +19,23 @@ export const usersAPI = {
   uploadProfilePicture: async (userId, file) => {
     const formData = new FormData()
     formData.append('file', file)
-
-    const response = await axiosInstance.post(
-      `/users/${userId}/profile-picture`,
-      formData,
-      {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      }
-    )
+    
+    const response = await axiosInstance.post(`/users/${userId}/profile-picture`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    })
     return response.data
   },
 
-  // NEW METHODS
   checkUsernameAvailability: async (username) => {
     const response = await axiosInstance.get(`/users/check-username/${username}`)
+    return response.data
+  },
+
+  // NEW: Check email availability
+  checkEmailAvailability: async (email) => {
+    const response = await axiosInstance.get(`/users/check-email/${encodeURIComponent(email)}`)
     return response.data
   },
 

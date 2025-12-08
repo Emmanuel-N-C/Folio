@@ -63,7 +63,7 @@ const LoginPage = () => {
         title: "Invalid Input",
         description: usernameOrEmailError,
         variant: "destructive",
-        duration: 5000, // 5 seconds
+        duration: 5000,
       })
       return
     }
@@ -73,7 +73,7 @@ const LoginPage = () => {
         title: "Invalid Input",
         description: passwordError,
         variant: "destructive",
-        duration: 5000, // 5 seconds
+        duration: 5000,
       })
       return
     }
@@ -86,16 +86,35 @@ const LoginPage = () => {
       toast({
         title: "Welcome Back!",
         description: "You've successfully logged in.",
-        duration: 4000, // 4 seconds
+        duration: 4000,
       })
       navigate('/')
     } else {
-      toast({
-        title: "Login Failed",
-        description: result.error || "Invalid username/email or password. Please try again.",
-        variant: "destructive",
-        duration: 6000, // 6 seconds - longer for errors
-      })
+      // Check if the error is about unverified account
+      const errorMessage = result.error || "Invalid username/email or password. Please try again."
+      
+      if (errorMessage.includes("not verified") || errorMessage.includes("verification code has been sent")) {
+        toast({
+          title: "Account Not Verified",
+          description: "A new verification code has been sent to your email. Redirecting to verification page...",
+          variant: "destructive",
+          duration: 4000,
+        })
+        
+        // Redirect to verification page with email
+        // Extract email from formData.usernameOrEmail (it might be username or email)
+        const emailOrUsername = formData.usernameOrEmail.trim()
+        setTimeout(() => {
+          navigate(`/verify-email?email=${encodeURIComponent(emailOrUsername)}`)
+        }, 2000)
+      } else {
+        toast({
+          title: "Login Failed",
+          description: errorMessage,
+          variant: "destructive",
+          duration: 6000,
+        })
+      }
     }
     
     setLoading(false)
@@ -178,7 +197,8 @@ const LoginPage = () => {
                 </p>
               )}
             </div>
-                        <div className="flex items-center justify-end">
+            
+            <div className="flex items-center justify-end">
               <Link 
                 to="/forgot-password" 
                 className="text-sm text-primary hover:underline"
