@@ -39,17 +39,33 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public AuthResponse register(RegisterRequest request) {
-        if (userRepository.existsByUsername(request.getUsername())) {
+        // Normalize username and email to lowercase
+        String normalizedUsername = request.getUsername().toLowerCase().trim();
+        String normalizedEmail = request.getEmail().toLowerCase().trim();
+
+        // Additional validation for username format
+        if (normalizedUsername.contains(" ")) {
+            throw new BadRequestException("Username cannot contain spaces");
+        }
+
+        // Validate username pattern after normalization
+        if (!normalizedUsername.matches("^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*$")) {
+            throw new BadRequestException("Username must start with a letter, end with a letter or number, and cannot have consecutive special characters");
+        }
+
+        // Check username availability (case-insensitive)
+        if (userRepository.existsByUsername(normalizedUsername)) {
             throw new BadRequestException("Username is already taken");
         }
 
-        if (userRepository.existsByEmail(request.getEmail())) {
+        // Check email availability (case-insensitive)
+        if (userRepository.existsByEmail(normalizedEmail)) {
             throw new BadRequestException("Email is already in use");
         }
 
         User user = new User();
-        user.setUsername(request.getUsername());
-        user.setEmail(request.getEmail());
+        user.setUsername(normalizedUsername); // Store as lowercase
+        user.setEmail(normalizedEmail); // Store as lowercase
         user.setPassword(passwordEncoder.encode(request.getPassword()));
 
         Set<Role> roles = new HashSet<>();
@@ -58,8 +74,9 @@ public class AuthServiceImpl implements AuthService {
 
         userRepository.save(user);
 
+        // Authenticate with normalized username
         Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
+                new UsernamePasswordAuthenticationToken(normalizedUsername, request.getPassword())
         );
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -70,18 +87,20 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public AuthResponse login(LoginRequest request) {
+        // Find user case-insensitively
+        User user = userRepository.findByUsernameOrEmailIgnoreCase(request.getUsernameOrEmail())
+                .orElseThrow(() -> new BadRequestException("Invalid credentials"));
+
+        // Authenticate using the stored username (lowercase)
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                        request.getUsernameOrEmail(),
+                        user.getUsername(), // Stored lowercase username
                         request.getPassword()
                 )
         );
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String token = jwtTokenProvider.generateToken(authentication);
-
-        User user = userRepository.findByUsernameOrEmail(request.getUsernameOrEmail(), request.getUsernameOrEmail())
-                .orElseThrow(() -> new BadRequestException("Invalid credentials"));
 
         return new AuthResponse(token, user.getId(), user.getUsername(), user.getEmail(), user.getRoles());
     }
