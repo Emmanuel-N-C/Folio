@@ -51,12 +51,33 @@ public class UserServiceImpl implements UserService {
             user.setDisplayName(request.getDisplayName());
         }
 
-        // Update username with uniqueness check
-        if (request.getUsername() != null && !request.getUsername().equals(user.getUsername())) {
-            if (userRepository.existsByUsername(request.getUsername())) {
-                throw new BadRequestException("Username is already taken");
+        // Update username with normalization and uniqueness check
+        if (request.getUsername() != null) {
+            String normalizedUsername = request.getUsername().toLowerCase().trim();
+
+            // Check if it's different from current username
+            if (!normalizedUsername.equals(user.getUsername())) {
+                // Validate length
+                if (normalizedUsername.length() < 3 || normalizedUsername.length() > 20) {
+                    throw new BadRequestException("Username must be between 3 and 20 characters");
+                }
+
+                // Validate no spaces
+                if (normalizedUsername.contains(" ")) {
+                    throw new BadRequestException("Username cannot contain spaces");
+                }
+
+                // Validate pattern
+                if (!normalizedUsername.matches("^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*$")) {
+                    throw new BadRequestException("Username must start with a letter, end with a letter or number, and cannot have consecutive special characters");
+                }
+
+                // Check availability
+                if (userRepository.existsByUsername(normalizedUsername)) {
+                    throw new BadRequestException("Username is already taken");
+                }
+                user.setUsername(normalizedUsername);
             }
-            user.setUsername(request.getUsername());
         }
 
         if (request.getBio() != null) {
@@ -120,7 +141,6 @@ public class UserServiceImpl implements UserService {
                 String oldKey = s3Service.extractKeyFromUrl(user.getProfileImageUrl());
                 s3Service.deleteFile(oldKey);
             } catch (Exception e) {
-                // Log error but continue with upload
                 System.err.println("Failed to delete old profile picture: " + e.getMessage());
             }
         }
@@ -133,26 +153,24 @@ public class UserServiceImpl implements UserService {
         return mapToUserProfileResponse(user);
     }
 
-    // NEW METHOD: Check if username exists
+    // Check username availability (normalize input)
     @Override
     public boolean isUsernameExists(String username) {
-        return userRepository.existsByUsername(username);
+        String normalizedUsername = username.toLowerCase().trim();
+        return userRepository.existsByUsername(normalizedUsername);
     }
 
-    // NEW METHOD: Remove profile picture
     @Override
     @Transactional
     public UserProfileResponse removeProfilePicture(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        // Delete from S3 if exists
         if (user.getProfileImageUrl() != null && !user.getProfileImageUrl().isEmpty()) {
             try {
                 String key = s3Service.extractKeyFromUrl(user.getProfileImageUrl());
                 s3Service.deleteFile(key);
             } catch (Exception e) {
-                // Log error but continue
                 System.err.println("Failed to delete profile picture from S3: " + e.getMessage());
             }
         }
@@ -163,14 +181,12 @@ public class UserServiceImpl implements UserService {
         return mapToUserProfileResponse(user);
     }
 
-    // NEW METHOD: Delete user account
     @Override
     @Transactional
     public void deleteUserAccount(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        // Delete profile picture from S3
         if (user.getProfileImageUrl() != null && !user.getProfileImageUrl().isEmpty()) {
             try {
                 String key = s3Service.extractKeyFromUrl(user.getProfileImageUrl());
@@ -180,7 +196,6 @@ public class UserServiceImpl implements UserService {
             }
         }
 
-        // Delete all user's post screenshots from S3
         for (Post post : user.getPosts()) {
             if (post.getScreenshotUrls() != null) {
                 for (String screenshotUrl : post.getScreenshotUrls()) {
@@ -194,7 +209,6 @@ public class UserServiceImpl implements UserService {
             }
         }
 
-        // Cascade delete will handle posts, likes, comments
         userRepository.delete(user);
     }
 
@@ -213,7 +227,6 @@ public class UserServiceImpl implements UserService {
         response.setCreatedAt(user.getCreatedAt());
         response.setRoles(user.getRoles());
 
-        // Use repository count instead of accessing lazy collection
         response.setPostsCount((int) postRepository.findByPostedByIdOrderByCreatedAtDesc(user.getId()).stream().count());
 
         return response;
