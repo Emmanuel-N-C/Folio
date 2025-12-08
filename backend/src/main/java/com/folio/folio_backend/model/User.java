@@ -67,6 +67,21 @@ public class User {
 
     private String profession;
 
+    // Email verification fields
+    @Column(nullable = false)
+    private boolean verified = false;
+
+    @Column(length = 6)
+    private String verificationCode;
+
+    private LocalDateTime verificationCodeExpiration;
+
+    // Password reset fields
+    @Column(length = 36)
+    private String passwordResetToken;
+
+    private LocalDateTime passwordResetTokenExpiration;
+
     @CreationTimestamp
     @Column(updatable = false)
     private LocalDateTime createdAt;
