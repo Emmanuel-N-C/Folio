@@ -41,11 +41,14 @@ function App() {
       <Router>
         <AuthProvider>
           <Routes>
+            {/* Auth Routes - WITHOUT Layout (no sidebars) */}
+            <Route path="login" element={<LoginPage />} />
+            <Route path="register" element={<RegisterPage />} />
+
+            {/* All other routes - WITH Layout (with sidebars) */}
             <Route path="/" element={<Layout />}>
               {/* Public Routes */}
               <Route index element={<Navigate to="/feed" replace />} />
-              <Route path="login" element={<LoginPage />} />
-              <Route path="register" element={<RegisterPage />} />
               <Route path="feed" element={<FeedPage />} />
               <Route path="trending" element={<TrendingPage />} />
               <Route path="search" element={<SearchPage />} />
