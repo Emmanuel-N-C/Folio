@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/hooks/useAuth'
 import { useToast } from '@/components/ui/use-toast'
-import { Eye, EyeOff } from 'lucide-react'
+import { Eye, EyeOff, AlertCircle } from 'lucide-react'
 
 const LoginPage = () => {
   const [formData, setFormData] = useState({
@@ -15,31 +15,102 @@ const LoginPage = () => {
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   
+  const [touched, setTouched] = useState({
+    usernameOrEmail: false,
+    password: false
+  })
+  
   const { login } = useAuth()
   const navigate = useNavigate()
   const { toast } = useToast()
 
+  const validateUsernameOrEmail = (value) => {
+    if (!value) return 'Username or email is required'
+    if (value.trim().length === 0) return 'Username or email cannot be empty'
+    return ''
+  }
+
+  const validatePassword = (value) => {
+    if (!value) return 'Password is required'
+    if (value.length === 0) return 'Password cannot be empty'
+    return ''
+  }
+
+  const handleBlur = (field) => {
+    setTouched({ ...touched, [field]: true })
+  }
+
+  const isFormValid = () => {
+    return (
+      formData.usernameOrEmail.trim().length > 0 &&
+      formData.password.length > 0
+    )
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
+
+    setTouched({
+      usernameOrEmail: true,
+      password: true
+    })
+
+    const usernameOrEmailError = validateUsernameOrEmail(formData.usernameOrEmail)
+    const passwordError = validatePassword(formData.password)
+
+    if (usernameOrEmailError) {
+      toast({
+        title: "Invalid Input",
+        description: usernameOrEmailError,
+        variant: "destructive",
+        duration: 5000, // 5 seconds
+      })
+      return
+    }
+
+    if (passwordError) {
+      toast({
+        title: "Invalid Input",
+        description: passwordError,
+        variant: "destructive",
+        duration: 5000, // 5 seconds
+      })
+      return
+    }
+
     setLoading(true)
 
     const result = await login(formData)
     
     if (result.success) {
       toast({
-        title: "Success",
-        description: "Logged in successfully!",
+        title: "Welcome Back!",
+        description: "You've successfully logged in.",
+        duration: 4000, // 4 seconds
       })
       navigate('/')
     } else {
       toast({
-        title: "Error",
-        description: result.error,
-        variant: "destructive"
+        title: "Login Failed",
+        description: result.error || "Invalid username/email or password. Please try again.",
+        variant: "destructive",
+        duration: 6000, // 6 seconds - longer for errors
       })
     }
     
     setLoading(false)
+  }
+
+  const getUsernameOrEmailInputClass = () => {
+    if (!touched.usernameOrEmail || !formData.usernameOrEmail) return ''
+    const error = validateUsernameOrEmail(formData.usernameOrEmail)
+    return error ? 'border-red-500 focus-visible:ring-red-500' : ''
+  }
+
+  const getPasswordInputClass = () => {
+    if (!touched.password || !formData.password) return ''
+    const error = validatePassword(formData.password)
+    return error ? 'border-red-500 focus-visible:ring-red-500' : ''
   }
 
   return (
@@ -50,16 +121,30 @@ const LoginPage = () => {
           <CardDescription>Login to your Folio account</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4" noValidate>
             <div className="space-y-2">
               <label className="text-sm font-medium">Username or Email</label>
-              <Input
-                type="text"
-                placeholder="johndoe or john@example.com"
-                value={formData.usernameOrEmail}
-                onChange={(e) => setFormData({ ...formData, usernameOrEmail: e.target.value })}
-                required
-              />
+              <div className="relative">
+                <Input
+                  type="text"
+                  placeholder="johndoe or john@example.com"
+                  value={formData.usernameOrEmail}
+                  onChange={(e) => setFormData({ ...formData, usernameOrEmail: e.target.value })}
+                  onBlur={() => handleBlur('usernameOrEmail')}
+                  className={getUsernameOrEmailInputClass()}
+                  autoComplete="username"
+                />
+                {touched.usernameOrEmail && validateUsernameOrEmail(formData.usernameOrEmail) && (
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                    <AlertCircle className="h-4 w-4 text-red-500" />
+                  </div>
+                )}
+              </div>
+              {touched.usernameOrEmail && validateUsernameOrEmail(formData.usernameOrEmail) && (
+                <p className="text-xs text-red-500">
+                  {validateUsernameOrEmail(formData.usernameOrEmail)}
+                </p>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -70,13 +155,15 @@ const LoginPage = () => {
                   placeholder="••••••••"
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  required
-                  className="pr-10"
+                  onBlur={() => handleBlur('password')}
+                  className={`pr-10 ${getPasswordInputClass()}`}
+                  autoComplete="current-password"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  tabIndex={-1}
                 >
                   {showPassword ? (
                     <EyeOff className="h-4 w-4" />
@@ -85,9 +172,18 @@ const LoginPage = () => {
                   )}
                 </button>
               </div>
+              {touched.password && validatePassword(formData.password) && (
+                <p className="text-xs text-red-500">
+                  {validatePassword(formData.password)}
+                </p>
+              )}
             </div>
 
-            <Button type="submit" className="w-full" disabled={loading}>
+            <Button 
+              type="submit" 
+              className="w-full" 
+              disabled={!isFormValid() || loading}
+            >
               {loading ? 'Logging in...' : 'Login'}
             </Button>
 
