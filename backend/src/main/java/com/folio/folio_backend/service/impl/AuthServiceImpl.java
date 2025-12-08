@@ -143,6 +143,9 @@ public class AuthServiceImpl implements AuthService {
         user.setVerificationCodeExpiration(null);
         userRepository.save(user);
 
+        // Send welcome email after successful verification
+        emailService.sendWelcomeEmail(user);
+
         return new MessageResponse("Email verified successfully. You can now log in.");
     }
 

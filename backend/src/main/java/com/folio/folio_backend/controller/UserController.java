@@ -49,14 +49,21 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-    // NEW ENDPOINT: Check username availability
+    // Check username availability
     @GetMapping("/check-username/{username}")
     public ResponseEntity<Map<String, Boolean>> checkUsernameAvailability(@PathVariable String username) {
         boolean available = !userService.isUsernameExists(username);
         return ResponseEntity.ok(Map.of("available", available));
     }
 
-    // NEW ENDPOINT: Remove profile picture
+    // NEW ENDPOINT: Check email availability
+    @GetMapping("/check-email/{email}")
+    public ResponseEntity<Map<String, Boolean>> checkEmailAvailability(@PathVariable String email) {
+        boolean available = !userService.isEmailExists(email);
+        return ResponseEntity.ok(Map.of("available", available));
+    }
+
+    // Remove profile picture
     @DeleteMapping("/me/profile-picture")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<UserProfileResponse> removeProfilePicture() {
@@ -65,7 +72,7 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-    // NEW ENDPOINT: Delete account
+    // Delete account
     @DeleteMapping("/me")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Map<String, String>> deleteAccount() {

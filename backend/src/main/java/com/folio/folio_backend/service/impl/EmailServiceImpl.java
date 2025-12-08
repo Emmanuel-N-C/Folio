@@ -47,6 +47,13 @@ public class EmailServiceImpl implements EmailService {
         sendEmail(user.getEmail(), subject, htmlContent);
     }
 
+    @Override
+    public void sendWelcomeEmail(User user) {
+        String subject = "Welcome to Folio!";
+        String htmlContent = buildWelcomeEmailTemplate(user);
+        sendEmail(user.getEmail(), subject, htmlContent);
+    }
+
     private void sendEmail(String toEmail, String subject, String htmlContent) {
         Email from = new Email(fromEmail, fromName);
         Email to = new Email(toEmail);
@@ -164,6 +171,78 @@ public class EmailServiceImpl implements EmailService {
                 "        <div class=\"footer\">" +
                 "            <p>&copy; 2024 Folio. All rights reserved.</p>" +
                 "            <p>Secure. Simple. Reliable.</p>" +
+                "        </div>" +
+                "    </div>" +
+                "</body>" +
+                "</html>";
+    }
+
+    private String buildWelcomeEmailTemplate(User user) {
+        String loginUrl = frontendUrl + "/login";
+        String exploreUrl = frontendUrl + "/feed";
+
+        return "<!DOCTYPE html>" +
+                "<html lang=\"en\">" +
+                "<head>" +
+                "    <meta charset=\"UTF-8\">" +
+                "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">" +
+                "    <title>Welcome to Folio</title>" +
+                "    <style>" +
+                "        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f4f9; margin: 0; padding: 0; }" +
+                "        .container { max-width: 600px; margin: 40px auto; background: #ffffff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); overflow: hidden; }" +
+                "        .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #ffffff; padding: 40px 30px; text-align: center; }" +
+                "        .header h1 { margin: 0; font-size: 32px; font-weight: 600; }" +
+                "        .header p { margin: 10px 0 0; font-size: 16px; opacity: 0.95; }" +
+                "        .content { padding: 40px 30px; }" +
+                "        .content p { color: #333333; line-height: 1.6; margin: 0 0 20px; font-size: 16px; }" +
+                "        .highlight { color: #667eea; font-weight: 600; }" +
+                "        .features { background: #f8f9fa; border-radius: 8px; padding: 25px; margin: 25px 0; }" +
+                "        .features h3 { color: #667eea; margin: 0 0 15px; font-size: 18px; }" +
+                "        .features ul { margin: 0; padding-left: 20px; }" +
+                "        .features li { color: #333333; margin: 10px 0; line-height: 1.5; }" +
+                "        .button-container { text-align: center; margin: 30px 0; }" +
+                "        .button { display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #ffffff; padding: 15px 40px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; margin: 0 10px; }" +
+                "        .button:hover { opacity: 0.9; }" +
+                "        .button-secondary { background: #ffffff; color: #667eea; border: 2px solid #667eea; }" +
+                "        .footer { background: #f8f9fa; padding: 20px 30px; text-align: center; color: #666666; font-size: 14px; }" +
+                "        .footer p { margin: 5px 0; }" +
+                "        .celebration { font-size: 48px; text-align: center; margin: 20px 0; }" +
+                "    </style>" +
+                "</head>" +
+                "<body>" +
+                "    <div class=\"container\">" +
+                "        <div class=\"header\">" +
+                "            <div class=\"celebration\">🎉</div>" +
+                "            <h1>Welcome to Folio!</h1>" +
+                "            <p>Your account is now verified and ready to use</p>" +
+                "        </div>" +
+                "        <div class=\"content\">" +
+                "            <p>Hi <span class=\"highlight\">" + user.getUsername() + "</span>,</p>" +
+                "            <p>Congratulations! Your email has been successfully verified, and your Folio account is now active. You're all set to start showcasing your amazing projects to the world!</p>" +
+                "            " +
+                "            <div class=\"features\">" +
+                "                <h3>What you can do now:</h3>" +
+                "                <ul>" +
+                "                    <li><strong>Create Projects:</strong> Share your work with detailed descriptions, screenshots, and live demos</li>" +
+                "                    <li><strong>Build Your Profile:</strong> Customize your profile to showcase your skills and experience</li>" +
+                "                    <li><strong>Connect & Engage:</strong> Like, comment, and follow other developers' projects</li>" +
+                "                    <li><strong>Get Discovered:</strong> Let recruiters and collaborators find your amazing work</li>" +
+                "                </ul>" +
+                "            </div>" +
+                "            " +
+                "            <p>Ready to get started? Log in to your account and begin your journey!</p>" +
+                "            " +
+                "            <div class=\"button-container\">" +
+                "                <a href=\"" + loginUrl + "\" class=\"button\">Log In Now</a>" +
+                "                <a href=\"" + exploreUrl + "\" class=\"button button-secondary\">Explore Projects</a>" +
+                "            </div>" +
+                "            " +
+                "            <p>If you have any questions or need help getting started, feel free to reach out to our support team.</p>" +
+                "            <p>Happy showcasing! 🚀</p>" +
+                "        </div>" +
+                "        <div class=\"footer\">" +
+                "            <p>&copy; 2024 Folio. All rights reserved.</p>" +
+                "            <p>Building the future of project showcasing.</p>" +
                 "        </div>" +
                 "    </div>" +
                 "</body>" +

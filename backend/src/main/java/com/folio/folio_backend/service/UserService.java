@@ -14,6 +14,7 @@ public interface UserService {
 
     // NEW METHODS
     boolean isUsernameExists(String username);
+    boolean isEmailExists(String email);
     UserProfileResponse removeProfilePicture(Long userId);
     void deleteUserAccount(Long userId);
 }

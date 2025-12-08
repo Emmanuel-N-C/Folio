@@ -180,6 +180,11 @@ public class UserServiceImpl implements UserService {
 
         return mapToUserProfileResponse(user);
     }
+    @Override
+    public boolean isEmailExists(String email) {
+        String normalizedEmail = email.toLowerCase().trim();
+        return userRepository.findByEmail(normalizedEmail).isPresent();
+    }
 
     @Override
     @Transactional
