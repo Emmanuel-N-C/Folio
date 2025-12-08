@@ -3,10 +3,10 @@ import { Link, useNavigate } from 'react-router-dom'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { useAuth } from '@/hooks/useAuth'
 import { useToast } from '@/components/ui/use-toast'
 import { useDebounce } from '@/hooks/useDebounce'
 import { usersAPI } from '@/api/users'
+import { authAPI } from '@/api/auth'
 import { Eye, EyeOff, Check, X, Loader2, AlertCircle } from 'lucide-react'
 
 const RegisterPage = () => {
@@ -36,7 +36,6 @@ const RegisterPage = () => {
   // Password validation states
   const [passwordErrors, setPasswordErrors] = useState([])
   
-  const { register } = useAuth()
   const navigate = useNavigate()
   const { toast } = useToast()
   
@@ -80,32 +79,32 @@ const RegisterPage = () => {
     return ''
   }
 
- // Validate password with detailed requirements
-const validatePassword = (password) => {
-  const errors = []
-  
-  if (!password) {
-    return ['Password is required']
+  // Validate password with detailed requirements
+  const validatePassword = (password) => {
+    const errors = []
+    
+    if (!password) {
+      return ['Password is required']
+    }
+    
+    if (password.length < 8) {
+      errors.push('At least 8 characters')
+    }
+    if (!/[a-z]/.test(password)) {
+      errors.push('One lowercase letter')
+    }
+    if (!/[A-Z]/.test(password)) {
+      errors.push('One uppercase letter')
+    }
+    if (!/\d/.test(password)) {
+      errors.push('One number')
+    }
+    if (!/[^A-Za-z0-9]/.test(password)) {
+      errors.push('One special character (!@#$%^&*...)')
+    }
+    
+    return errors
   }
-  
-  if (password.length < 8) {
-    errors.push('At least 8 characters')
-  }
-  if (!/[a-z]/.test(password)) {
-    errors.push('One lowercase letter')
-  }
-  if (!/[A-Z]/.test(password)) {
-    errors.push('One uppercase letter')
-  }
-  if (!/\d/.test(password)) {
-    errors.push('One number')
-  }
-  if (!/[^A-Za-z0-9]/.test(password)) {
-    errors.push('One special character (!@#$%^&*...)')
-  }
-  
-  return errors
-}
 
   // Validate email
   const validateEmail = (email) => {
@@ -256,27 +255,39 @@ const validatePassword = (password) => {
 
     setLoading(true)
 
-    const result = await register({
-      username: formData.username,
-      email: formData.email.toLowerCase(),
-      password: formData.password
-    })
-    
-    if (result.success) {
-      toast({
-        title: "Success",
-        description: "Account created successfully!",
+    try {
+      const response = await authAPI.register({
+        username: formData.username,
+        email: formData.email.toLowerCase(),
+        password: formData.password
       })
-      navigate('/')
-    } else {
+      
+      toast({
+        title: "Registration Successful!",
+        description: response.message || "Please check your email for verification code",
+      })
+      
+      // Redirect to verification page with email
+      navigate(`/verify-email?email=${encodeURIComponent(formData.email.toLowerCase())}`)
+      
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || "Something went wrong. Please try again."
+      
       toast({
         title: "Registration Failed",
-        description: result.error || "Something went wrong. Please try again.",
+        description: errorMessage,
         variant: "destructive"
       })
+      
+      // If email already exists but not verified, redirect to verification
+      if (errorMessage.includes("not verified")) {
+        setTimeout(() => {
+          navigate(`/verify-email?email=${encodeURIComponent(formData.email.toLowerCase())}`)
+        }, 2000)
+      }
+    } finally {
+      setLoading(false)
     }
-    
-    setLoading(false)
   }
 
   // Determine username input styling

@@ -8,6 +8,9 @@ import ProtectedRoute from '@/components/auth/ProtectedRoute'
 // Auth Pages
 import LoginPage from '@/pages/auth/LoginPage'
 import RegisterPage from '@/pages/auth/RegisterPage'
+import VerifyEmailPage from '@/pages/auth/VerifyEmailPage'
+import ForgotPasswordPage from '@/pages/auth/ForgotPasswordPage'
+import ResetPasswordPage from '@/pages/auth/ResetPasswordPage'
 
 // Feed Pages
 import FeedPage from '@/pages/feed/FeedPage'
@@ -23,7 +26,7 @@ import UploadScreenshotsPage from '@/pages/post/UploadScreenshotsPage'
 // Profile Pages
 import ProfilePage from '@/pages/profile/ProfilePage'
 
-// Settings Pages (NEW)
+// Settings Pages
 import SettingsPage from '@/pages/settings/SettingsPage'
 
 // Notification Page
@@ -44,6 +47,9 @@ function App() {
             {/* Auth Routes - WITHOUT Layout (no sidebars) */}
             <Route path="login" element={<LoginPage />} />
             <Route path="register" element={<RegisterPage />} />
+            <Route path="verify-email" element={<VerifyEmailPage />} />
+            <Route path="forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="reset-password" element={<ResetPasswordPage />} />
 
             {/* All other routes - WITH Layout (with sidebars) */}
             <Route path="/" element={<Layout />}>
