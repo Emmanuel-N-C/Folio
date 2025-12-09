@@ -96,6 +96,7 @@ public class AuthServiceImpl implements AuthService {
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setVerified(false);
 
+
         // Generate verification code
         String verificationCode = generateVerificationCode();
         user.setVerificationCode(verificationCode);
