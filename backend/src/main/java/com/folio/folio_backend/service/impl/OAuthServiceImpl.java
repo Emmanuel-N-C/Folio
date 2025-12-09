@@ -49,6 +49,7 @@ public class OAuthServiceImpl implements OAuthService {
             String name;
             String profileImageUrl;
             String oauthId;
+            AuthProvider provider;
 
             if ("google".equalsIgnoreCase(request.getProvider())) {
                 // Verify Google ID token
@@ -57,6 +58,7 @@ public class OAuthServiceImpl implements OAuthService {
                 name = (String) payload.get("name");
                 profileImageUrl = (String) payload.get("picture");
                 oauthId = payload.getSubject();
+                provider = AuthProvider.GOOGLE;
             } else if ("github".equalsIgnoreCase(request.getProvider())) {
                 // Verify GitHub access token
                 JsonNode userInfo = gitHubTokenVerifier.verifyTokenAndGetUserInfo(request.getToken());
@@ -66,12 +68,16 @@ public class OAuthServiceImpl implements OAuthService {
                         : userInfo.get("login").asText();
                 profileImageUrl = userInfo.has("avatar_url") ? userInfo.get("avatar_url").asText() : null;
                 oauthId = userInfo.get("id").asText();
+                provider = AuthProvider.GITHUB;
             } else {
                 throw new BadRequestException("Unsupported OAuth provider: " + request.getProvider());
             }
 
-            // Check if user exists
-            Optional<User> existingUser = userRepository.findByEmail(email.toLowerCase().trim());
+            // Check if user exists with this email AND provider combination
+            Optional<User> existingUser = userRepository.findByEmailAndAuthProvider(
+                    email.toLowerCase().trim(),
+                    provider
+            );
 
             return OAuthCheckResponse.builder()
                     .exists(existingUser.isPresent())
@@ -91,33 +97,36 @@ public class OAuthServiceImpl implements OAuthService {
     public OAuthResponse loginOAuthUser(OAuthLoginRequest request) {
         try {
             String email;
+            String oauthId;
             AuthProvider provider = AuthProvider.valueOf(request.getProvider().toUpperCase());
 
             if ("google".equalsIgnoreCase(request.getProvider())) {
                 Payload payload = googleTokenVerifier.verifyToken(request.getToken());
                 email = payload.getEmail();
+                oauthId = payload.getSubject();
             } else if ("github".equalsIgnoreCase(request.getProvider())) {
+                JsonNode userInfo = gitHubTokenVerifier.verifyTokenAndGetUserInfo(request.getToken());
                 email = gitHubTokenVerifier.getPrimaryEmail(request.getToken());
+                oauthId = userInfo.get("id").asText();
             } else {
                 throw new BadRequestException("Unsupported OAuth provider");
             }
 
-            // Find user by email
-            User user = userRepository.findByEmail(email.toLowerCase().trim())
-                    .orElseThrow(() -> new BadRequestException("User not found"));
+            // Find user by email and provider
+            User user = userRepository.findByEmailAndAuthProvider(email.toLowerCase().trim(), provider)
+                    .orElseThrow(() -> new BadRequestException("User not found. Please register first."));
 
-            // Verify provider matches
-            if (user.getAuthProvider() != provider) {
-                throw new BadRequestException(
-                        "This email is registered with " + user.getAuthProvider() + ". Please use that provider to login."
-                );
+            // Update OAuth ID if it changed (rare but possible)
+            if (!oauthId.equals(user.getOauthId())) {
+                user.setOauthId(oauthId);
+                userRepository.save(user);
             }
 
             // Generate JWT token
             String token = generateJwtToken(user);
 
             return OAuthResponse.builder()
-                    .requiresOnboarding(false)
+                    .requiresOnboarding(!user.isOnboardingComplete())
                     .token(token)
                     .userId(user.getId())
                     .username(user.getUsername())
@@ -171,9 +180,23 @@ public class OAuthServiceImpl implements OAuthService {
                 throw new BadRequestException("Username is already taken");
             }
 
-            // Check if email already exists
-            if (userRepository.existsByEmail(email.toLowerCase().trim())) {
-                throw new BadRequestException("Email is already registered");
+            // Check if email already exists WITH THIS PROVIDER
+            Optional<User> existingUserWithProvider = userRepository.findByEmailAndAuthProvider(
+                    email.toLowerCase().trim(),
+                    provider
+            );
+            if (existingUserWithProvider.isPresent()) {
+                throw new BadRequestException("An account with this email and provider already exists. Please login instead.");
+            }
+
+            // Check if email exists with a DIFFERENT provider
+            Optional<User> existingUserDifferentProvider = userRepository.findByEmail(email.toLowerCase().trim());
+            if (existingUserDifferentProvider.isPresent()) {
+                User existingUser = existingUserDifferentProvider.get();
+                throw new BadRequestException(
+                        "This email is already registered with " + existingUser.getAuthProvider() +
+                                ". Please use " + existingUser.getAuthProvider() + " to login."
+                );
             }
 
             // Create new user
@@ -186,9 +209,9 @@ public class OAuthServiceImpl implements OAuthService {
             user.setOauthId(oauthId);
             user.setVerified(true); // OAuth emails are pre-verified
             user.setOnboardingComplete(true);
-            user.setPassword(null); // No password for OAuth users
+            user.setPassword(""); // Empty string for OAuth users (will be handled by CustomUserDetailsService)
 
-            // Set default role
+
             Set<Role> roles = new HashSet<>();
             roles.add(Role.ROLE_USER);
             user.setRoles(roles);
@@ -213,17 +236,37 @@ public class OAuthServiceImpl implements OAuthService {
                     .username(user.getUsername())
                     .build();
 
+        } catch (BadRequestException e) {
+            // Re-throw BadRequestException as-is
+            throw e;
         } catch (Exception e) {
             throw new BadRequestException("OAuth registration failed: " + e.getMessage());
+        }
+    }
+    @Override
+    public GitHubTokenResponse exchangeGitHubCode(GitHubCodeExchangeRequest request) {
+        try {
+            String accessToken = gitHubTokenVerifier.exchangeCodeForToken(request.getCode(), request.getRedirectUri());
+
+            return GitHubTokenResponse.builder()
+                    .accessToken(accessToken)
+                    .build();
+
+        } catch (Exception e) {
+            throw new BadRequestException("Failed to exchange GitHub code: " + e.getMessage());
         }
     }
 
     private String generateJwtToken(User user) {
         // Create a UserDetails object from the User entity
-        // Use fully qualified name to avoid conflict with com.folio.folio_backend.model.User
+        // Use a non-empty password placeholder for OAuth users
+        String password = (user.getPassword() == null || user.getPassword().trim().isEmpty())
+                ? "OAUTH_USER_NO_PASSWORD"
+                : user.getPassword();
+
         UserDetails userDetails = org.springframework.security.core.userdetails.User.builder()
                 .username(user.getUsername())
-                .password("") // OAuth users don't have passwords
+                .password(password)
                 .authorities(user.getRoles().stream()
                         .map(role -> new SimpleGrantedAuthority(role.name()))
                         .collect(Collectors.toList()))

@@ -16,6 +16,16 @@ public class OAuthController {
     private OAuthService oauthService;
 
     /**
+     * GitHub: Exchange authorization code for access token (SECURE - Server-side)
+     * This endpoint keeps the client secret secure on the backend
+     */
+    @PostMapping("/github/exchange-code")
+    public ResponseEntity<GitHubTokenResponse> exchangeGitHubCode(@Valid @RequestBody GitHubCodeExchangeRequest request) {
+        GitHubTokenResponse response = oauthService.exchangeGitHubCode(request);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
      * Step 1: Check if OAuth user exists
      * Frontend sends Google ID token or GitHub access token
      */

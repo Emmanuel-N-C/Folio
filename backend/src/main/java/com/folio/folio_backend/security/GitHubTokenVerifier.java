@@ -7,7 +7,8 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 @Component
 public class GitHubTokenVerifier {
@@ -22,10 +23,53 @@ public class GitHubTokenVerifier {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     /**
+     * Exchange GitHub authorization code for access token (SERVER-SIDE - SECURE)
+     */
+    public String exchangeCodeForToken(String code, String redirectUri) throws Exception {
+        String tokenUrl = "https://github.com/login/oauth/access_token";
+
+        Map<String, String> requestBody = new HashMap<>();
+        requestBody.put("client_id", githubClientId);
+        requestBody.put("client_secret", githubClientSecret);
+        requestBody.put("code", code);
+        requestBody.put("redirect_uri", redirectUri);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("Accept", "application/json");
+
+        HttpEntity<Map<String, String>> entity = new HttpEntity<>(requestBody, headers);
+
+        ResponseEntity<String> response = restTemplate.exchange(
+                tokenUrl,
+                HttpMethod.POST,
+                entity,
+                String.class
+        );
+
+        if (response.getStatusCode() != HttpStatus.OK) {
+            throw new IllegalArgumentException("Failed to exchange GitHub code for token");
+        }
+
+        JsonNode responseJson = objectMapper.readTree(response.getBody());
+
+        if (responseJson.has("error")) {
+            throw new IllegalArgumentException("GitHub OAuth error: " + responseJson.get("error_description").asText());
+        }
+
+        String accessToken = responseJson.get("access_token").asText();
+
+        if (accessToken == null || accessToken.isEmpty()) {
+            throw new IllegalArgumentException("No access token received from GitHub");
+        }
+
+        return accessToken;
+    }
+
+    /**
      * Verify GitHub access token and return user info
      */
     public JsonNode verifyTokenAndGetUserInfo(String accessToken) throws Exception {
-        // First, verify the token by getting user info
         String userInfoUrl = "https://api.github.com/user";
 
         HttpHeaders headers = new HttpHeaders();

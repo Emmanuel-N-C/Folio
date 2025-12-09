@@ -27,10 +27,27 @@ public class CustomUserDetailsService implements UserDetailsService {
         User user = userRepository.findByUsernameOrEmailIgnoreCase(usernameOrEmail)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with username or email: " + usernameOrEmail));
 
+        // FIX: Handle null or empty password for OAuth users
+        String password = user.getPassword();
+        if (password == null || password.trim().isEmpty()) {
+            // OAuth users don't have passwords, use a placeholder that can't be used for login
+            password = "{noop}OAUTH_USER_NO_PASSWORD_" + System.currentTimeMillis();
+        }
+
+        // Ensure roles are not empty
+        Collection<? extends GrantedAuthority> authorities = mapRolesToAuthorities(user);
+        if (authorities.isEmpty()) {
+            throw new UsernameNotFoundException("User has no roles assigned");
+        }
+
         return new org.springframework.security.core.userdetails.User(
                 user.getUsername(), // Return stored lowercase username
-                user.getPassword(),
-                mapRolesToAuthorities(user)
+                password,           // Now guaranteed to be non-null and non-empty
+                true,               // enabled
+                true,               // accountNonExpired
+                true,               // credentialsNonExpired
+                true,               // accountNonLocked
+                authorities
         );
     }
 
