@@ -20,10 +20,18 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @GetMapping("/{userId}")
-    public ResponseEntity<UserProfileResponse> getUserProfile(@PathVariable Long userId) {
-        UserProfileResponse response = userService.getUserProfile(userId);
-        return ResponseEntity.ok(response);
+    // Check username availability - MOVED TO TOP TO AVOID CONFLICT
+    @GetMapping("/check-username")
+    public ResponseEntity<Map<String, Boolean>> checkUsernameAvailability(@RequestParam String username) {
+        boolean available = !userService.isUsernameExists(username);
+        return ResponseEntity.ok(Map.of("available", available));
+    }
+
+    // Check email availability - MOVED TO TOP TO AVOID CONFLICT
+    @GetMapping("/check-email")
+    public ResponseEntity<Map<String, Boolean>> checkEmailAvailability(@RequestParam String email) {
+        boolean available = !userService.isEmailExists(email);
+        return ResponseEntity.ok(Map.of("available", available));
     }
 
     @GetMapping("/me")
@@ -40,27 +48,13 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping(value = "/{userId}/profile-picture", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/me/profile-picture", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<UserProfileResponse> uploadProfilePicture(
-            @PathVariable Long userId,
             @RequestParam("file") MultipartFile file) {
-        UserProfileResponse response = userService.uploadProfilePicture(userId, file);
+        Long currentUserId = userService.getCurrentUserId();
+        UserProfileResponse response = userService.uploadProfilePicture(currentUserId, file);
         return ResponseEntity.ok(response);
-    }
-
-    // Check username availability
-    @GetMapping("/check-username/{username}")
-    public ResponseEntity<Map<String, Boolean>> checkUsernameAvailability(@PathVariable String username) {
-        boolean available = !userService.isUsernameExists(username);
-        return ResponseEntity.ok(Map.of("available", available));
-    }
-
-    // NEW ENDPOINT: Check email availability
-    @GetMapping("/check-email/{email}")
-    public ResponseEntity<Map<String, Boolean>> checkEmailAvailability(@PathVariable String email) {
-        boolean available = !userService.isEmailExists(email);
-        return ResponseEntity.ok(Map.of("available", available));
     }
 
     // Remove profile picture
@@ -79,5 +73,21 @@ public class UserController {
         Long currentUserId = userService.getCurrentUserId();
         userService.deleteUserAccount(currentUserId);
         return ResponseEntity.ok(Map.of("message", "Account deleted successfully"));
+    }
+
+    // Get user profile by ID - MOVED TO BOTTOM TO AVOID CATCHING OTHER ROUTES
+    @GetMapping("/{userId}")
+    public ResponseEntity<UserProfileResponse> getUserProfile(@PathVariable Long userId) {
+        UserProfileResponse response = userService.getUserProfile(userId);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping(value = "/{userId}/profile-picture", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<UserProfileResponse> uploadProfilePictureById(
+            @PathVariable Long userId,
+            @RequestParam("file") MultipartFile file) {
+        UserProfileResponse response = userService.uploadProfilePicture(userId, file);
+        return ResponseEntity.ok(response);
     }
 }
