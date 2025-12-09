@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -218,13 +219,23 @@ public class OAuthServiceImpl implements OAuthService {
     }
 
     private String generateJwtToken(User user) {
-        Authentication authentication = new UsernamePasswordAuthenticationToken(
-                user.getUsername(),
-                null,
-                user.getRoles().stream()
+        // Create a UserDetails object from the User entity
+        // Use fully qualified name to avoid conflict with com.folio.folio_backend.model.User
+        UserDetails userDetails = org.springframework.security.core.userdetails.User.builder()
+                .username(user.getUsername())
+                .password("") // OAuth users don't have passwords
+                .authorities(user.getRoles().stream()
                         .map(role -> new SimpleGrantedAuthority(role.name()))
-                        .collect(Collectors.toList())
+                        .collect(Collectors.toList()))
+                .build();
+
+        // Create Authentication with UserDetails as principal
+        Authentication authentication = new UsernamePasswordAuthenticationToken(
+                userDetails,  // Principal must be UserDetails
+                null,         // Credentials
+                userDetails.getAuthorities()  // Authorities
         );
+
         return jwtTokenProvider.generateToken(authentication);
     }
 
