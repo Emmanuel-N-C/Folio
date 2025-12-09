@@ -1,5 +1,6 @@
 package com.folio.folio_backend.repository;
 
+import com.folio.folio_backend.model.AuthProvider;
 import com.folio.folio_backend.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -22,4 +23,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     // Existence checks (normalize input before calling)
     Boolean existsByUsername(String username);
     Boolean existsByEmail(String email);
+
+    // OAuth queries
+    Optional<User> findByEmailAndAuthProvider(String email, AuthProvider authProvider);
+    Optional<User> findByOauthIdAndAuthProvider(String oauthId, AuthProvider authProvider);
 }

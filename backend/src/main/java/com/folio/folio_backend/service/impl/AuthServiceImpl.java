@@ -2,6 +2,7 @@ package com.folio.folio_backend.service.impl;
 
 import com.folio.folio_backend.dto.*;
 import com.folio.folio_backend.exception.BadRequestException;
+import com.folio.folio_backend.model.AuthProvider;
 import com.folio.folio_backend.model.Role;
 import com.folio.folio_backend.model.User;
 import com.folio.folio_backend.repository.UserRepository;
@@ -95,7 +96,8 @@ public class AuthServiceImpl implements AuthService {
         user.setEmail(normalizedEmail);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setVerified(false);
-
+        user.setAuthProvider(AuthProvider.LOCAL); // Set auth provider to LOCAL
+        user.setOnboardingComplete(true); // Email/password users complete onboarding immediately
 
         // Generate verification code
         String verificationCode = generateVerificationCode();
@@ -201,6 +203,11 @@ public class AuthServiceImpl implements AuthService {
             throw new BadRequestException("Account not verified. A new verification code has been sent to your email.");
         }
 
+        // Check if this is an OAuth user trying to login with password
+        if (user.getAuthProvider() != null && user.getAuthProvider() != AuthProvider.LOCAL) {
+            throw new BadRequestException("This account is registered with " + user.getAuthProvider() + ". Please use " + user.getAuthProvider() + " to login.");
+        }
+
         // Authenticate using the stored username (lowercase)
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -228,6 +235,11 @@ public class AuthServiceImpl implements AuthService {
         }
 
         User user = userOptional.get();
+
+        // Check if this is an OAuth user
+        if (user.getAuthProvider() != null && user.getAuthProvider() != AuthProvider.LOCAL) {
+            return new MessageResponse("If this account exists, a password reset link has been sent.");
+        }
 
         // Generate password reset token
         String resetToken = UUID.randomUUID().toString();
