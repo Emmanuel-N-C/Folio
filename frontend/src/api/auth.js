@@ -35,4 +35,15 @@ export const authAPI = {
     const response = await axiosInstance.get('/users/me')
     return response.data
   },
+
+  // OAuth endpoints
+  completeOAuthRegistration: async (data) => {
+    const response = await axiosInstance.post('/auth/oauth2/complete-registration', data)
+    return response.data
+  },
+
+  checkUsernameAvailability: async (username) => {
+    const response = await axiosInstance.get(`/users/check-username?username=${username}`)
+    return response.data
+  },
 }

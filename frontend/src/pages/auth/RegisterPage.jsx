@@ -467,9 +467,6 @@ const RegisterPage = () => {
               {touched.email && !emailError && formData.email && emailAvailable === false && (
                 <p className="text-xs text-red-500">Email is already registered</p>
               )}
-              {touched.email && !emailError && formData.email && emailAvailable === true && (
-                <p className="text-xs text-green-500">Email is available</p>
-              )}
             </div>
 
             {/* Password Field */}
