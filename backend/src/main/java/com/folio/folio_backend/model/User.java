@@ -28,13 +28,13 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "Username is required")
+    // Username can be null initially for OAuth users (set during onboarding)
     @Size(min = 3, max = 20, message = "Username must be between 3 and 20 characters")
     @Pattern(
             regexp = "^[a-z][a-z0-9]*(?:[._-][a-z0-9]+)*$",
             message = "Username must start with a letter, end with a letter or number, and cannot have consecutive special characters"
     )
-    @Column(unique = true, nullable = false, length = 20)
+    @Column(unique = true, length = 20)
     private String username;
 
     @NotBlank(message = "Email is required")
@@ -42,8 +42,8 @@ public class User {
     @Column(unique = true, nullable = false)
     private String email;
 
-    @NotBlank
-    @Column(nullable = false)
+    // Password can be null for OAuth users
+    @Column(nullable = true)
     private String password;
 
     @ElementCollection(fetch = FetchType.EAGER)
@@ -67,6 +67,14 @@ public class User {
 
     private String profession;
 
+    // OAuth fields
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    private AuthProvider authProvider; // GOOGLE, GITHUB, LOCAL
+
+    @Column(length = 100)
+    private String oauthId; // OAuth provider's user ID
+
     // Email verification fields
     @Column(nullable = false)
     private boolean verified = false;
@@ -81,6 +89,10 @@ public class User {
     private String passwordResetToken;
 
     private LocalDateTime passwordResetTokenExpiration;
+
+    // OAuth onboarding tracking
+    @Column(nullable = false)
+    private boolean onboardingComplete = false;
 
     @CreationTimestamp
     @Column(updatable = false)
