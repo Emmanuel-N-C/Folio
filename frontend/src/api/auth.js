@@ -36,14 +36,30 @@ export const authAPI = {
     return response.data
   },
 
-  // OAuth endpoints
-  completeOAuthRegistration: async (data) => {
-    const response = await axiosInstance.post('/auth/oauth2/complete-registration', data)
+  // NEW OAuth endpoints (client-side token verification)
+  checkOAuthUser: async (data) => {
+    const response = await axiosInstance.post('/auth/oauth/check', data)
+    return response.data
+  },
+
+  loginOAuthUser: async (data) => {
+    const response = await axiosInstance.post('/auth/oauth/login', data)
+    return response.data
+  },
+
+  registerOAuthUser: async (data) => {
+    const response = await axiosInstance.post('/auth/oauth/register', data)
     return response.data
   },
 
   checkUsernameAvailability: async (username) => {
     const response = await axiosInstance.get(`/users/check-username?username=${username}`)
+    return response.data
+  },
+
+  // GitHub: Exchange authorization code for access token
+  exchangeGitHubCode: async (data) => {
+    const response = await axiosInstance.post('/auth/oauth/github/exchange-code', data)
     return response.data
   },
 }

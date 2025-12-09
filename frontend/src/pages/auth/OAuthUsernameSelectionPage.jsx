@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { useToast } from '@/components/ui/use-toast'
 import { useDebounce } from '@/hooks/useDebounce'
+import { useAuth } from '@/hooks/useAuth'
 import { authAPI } from '@/api/auth'
 import { Check, X, Loader2, AlertCircle } from 'lucide-react'
 
@@ -13,8 +14,9 @@ const OAuthUsernameSelectionPage = () => {
   const location = useLocation()
   const navigate = useNavigate()
   const { toast } = useToast()
+  const { updateUser, refreshUserProfile } = useAuth()  // ✅ Get auth context methods
 
-  const { oauthToken, suggestedUsername, email, name, profileImageUrl } = location.state || {}
+  const { token, provider, email, name, profileImageUrl, suggestedUsername } = location.state || {}
 
   const [username, setUsername] = useState(suggestedUsername || '')
   const [loading, setLoading] = useState(false)
@@ -27,7 +29,7 @@ const OAuthUsernameSelectionPage = () => {
 
   // Redirect if no OAuth token
   useEffect(() => {
-    if (!oauthToken) {
+    if (!token || !provider) {
       toast({
         title: 'Invalid Access',
         description: 'Please start the OAuth flow from the login page.',
@@ -35,7 +37,7 @@ const OAuthUsernameSelectionPage = () => {
       })
       navigate('/login')
     }
-  }, [oauthToken, navigate, toast])
+  }, [token, provider, navigate, toast])
 
   // Validate username format
   const validateUsername = (value) => {
@@ -139,17 +141,21 @@ const OAuthUsernameSelectionPage = () => {
     setLoading(true)
 
     try {
-      const response = await authAPI.completeOAuthRegistration({
-        oauthToken,
+      const response = await authAPI.registerOAuthUser({
+        token,
+        provider,
         username: username.toLowerCase(),
       })
 
-      // Store token and user data
+      
       localStorage.setItem('token', response.token)
-      localStorage.setItem('user', JSON.stringify({ 
-        id: response.userId, 
-        username: response.username 
-      }))
+      
+     
+      const userData = {
+        id: response.userId,
+        username: response.username,
+      }
+      localStorage.setItem('user', JSON.stringify(userData))
 
       toast({
         title: 'Welcome to Folio!',
@@ -157,8 +163,9 @@ const OAuthUsernameSelectionPage = () => {
         duration: 4000,
       })
 
-      // Redirect to home
+     
       window.location.href = '/'
+      
     } catch (error) {
       const errorMessage = error.response?.data?.message || 'Failed to complete registration. Please try again.'
       toast({
