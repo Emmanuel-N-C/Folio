@@ -11,8 +11,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class OAuthRegisterRequest {
-    @NotBlank(message = "OAuth token is required")
-    private String oauthToken; // Temporary token to identify the OAuth session
+    @NotBlank(message = "Token is required")
+    private String token; // ID token from Google or access token from GitHub
+
+    @NotBlank(message = "Provider is required")
+    private String provider; // "google" or "github"
 
     @NotBlank(message = "Username is required")
     @Size(min = 3, max = 20, message = "Username must be between 3 and 20 characters")

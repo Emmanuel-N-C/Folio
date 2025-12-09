@@ -52,7 +52,6 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Public endpoints
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/auth/oauth2/**").permitAll() // OAuth endpoints
                         .requestMatchers(HttpMethod.GET, "/api/posts/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/users/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/feed/**").permitAll()
@@ -62,7 +61,7 @@ public class SecurityConfig {
                         // Admin only endpoints
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
-                        // Authenticated endpoints (including notifications)
+                        // Authenticated endpoints
                         .anyRequest().authenticated()
                 );
 
