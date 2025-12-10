@@ -10,7 +10,7 @@ const Layout = () => {
   const [rightSidebarOpen, setRightSidebarOpen] = useState(true)
 
   return (
-    <div className="min-h-screen flex bg-gray-50">
+    <div className="min-h-screen flex bg-background">
       {/* Left Sidebar */}
       <Sidebar />
 
@@ -29,7 +29,7 @@ const Layout = () => {
               onClick={() => setRightSidebarOpen(!rightSidebarOpen)}
               variant="outline"
               size="icon"
-              className="w-10 h-10 rounded-lg bg-white border-gray-300 shadow-sm hover:shadow-md transition-all"
+              className="w-10 h-10 rounded-lg shadow-sm hover:shadow-md transition-all"
             >
               {rightSidebarOpen ? (
                 <PanelRightClose size={18} strokeWidth={2} />
@@ -45,7 +45,7 @@ const Layout = () => {
         </main>
 
         {/* Footer */}
-        <footer className="border-t border-gray-200 py-6 text-center text-sm text-gray-600 bg-white">
+        <footer className="border-t py-6 text-center text-sm text-muted-foreground bg-card">
           <p>© 2025 Folio. Built with care for developers.</p>
         </footer>
       </div>

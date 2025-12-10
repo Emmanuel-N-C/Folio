@@ -65,20 +65,20 @@ const RightSidebar = () => {
   }
 
   return (
-    <aside className="hidden xl:flex flex-col w-80 h-screen sticky top-0 border-l border-gray-200 bg-white">
+    <aside className="hidden xl:flex flex-col w-80 h-screen sticky top-0 border-l bg-card">
       <ScrollArea className="flex-1 p-6">
         <div className="space-y-6">
           {/* Notifications Section */}
           {isAuthenticated && (
-            <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
-              <div className="p-4 border-b border-gray-200 bg-gray-50">
+            <div className="bg-card border rounded-2xl shadow-sm overflow-hidden">
+              <div className="p-4 border-b bg-muted">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                  <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
                     <Bell className="h-5 w-5" strokeWidth={2} />
                     Notifications
                   </h3>
                   {unreadCount > 0 && (
-                    <span className="bg-gray-900 text-white text-xs font-semibold px-2.5 py-1 rounded-full">
+                    <span className="bg-primary text-primary-foreground text-xs font-semibold px-2.5 py-1 rounded-full">
                       {unreadCount > 99 ? '99+' : unreadCount}
                     </span>
                   )}
@@ -86,7 +86,7 @@ const RightSidebar = () => {
               </div>
               <div className="p-3 space-y-2">
                 {notifications.length === 0 ? (
-                  <div className="text-center py-12 text-gray-500">
+                  <div className="text-center py-12 text-muted-foreground">
                     <Bell className="h-12 w-12 mx-auto mb-3 opacity-30" strokeWidth={1.5} />
                     <p className="text-sm">No notifications yet</p>
                   </div>
@@ -96,28 +96,28 @@ const RightSidebar = () => {
                       <Link
                         key={notification.id}
                         to={`/posts/${notification.postId}`}
-                        className={`flex items-start gap-3 p-3 rounded-xl hover:bg-gray-50 transition-all cursor-pointer group ${
-                          !notification.read ? 'bg-blue-50/50' : ''
+                        className={`flex items-start gap-3 p-3 rounded-xl hover:bg-muted transition-all cursor-pointer group ${
+                          !notification.read ? 'bg-blue-50/50 dark:bg-blue-950/20' : ''
                         }`}
                       >
-                        <Avatar className="w-10 h-10 ring-2 ring-gray-200">
+                        <Avatar className="w-10 h-10 ring-2 ring-border">
                           <AvatarImage src={notification.actor.profileImageUrl} />
-                          <AvatarFallback className="bg-gradient-to-br from-gray-900 to-gray-700 text-white text-xs font-semibold">
+                          <AvatarFallback className="bg-gradient-to-br from-primary to-primary/70 text-primary-foreground text-xs font-semibold">
                             {notification.actor.username.charAt(0).toUpperCase()}
                           </AvatarFallback>
                         </Avatar>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between gap-2">
                             <div className="flex-1">
-                              <p className="text-sm text-gray-900">
+                              <p className="text-sm text-foreground">
                                 <span className="font-semibold">{notification.actor.username}</span>
                                 {' '}
-                                <span className="text-gray-600">
+                                <span className="text-muted-foreground">
                                   {getNotificationText(notification)}
                                 </span>
                               </p>
                               <div className="flex items-center gap-2 mt-1">
-                                <p className="text-xs text-gray-500">
+                                <p className="text-xs text-muted-foreground">
                                   {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
                                 </p>
                                 {!notification.read && (
@@ -135,7 +135,7 @@ const RightSidebar = () => {
                     <Link to="/notifications" className="block pt-2">
                       <Button 
                         variant="ghost" 
-                        className="w-full text-sm font-medium rounded-xl hover:bg-gray-50"
+                        className="w-full text-sm font-medium rounded-xl"
                       >
                         View All Notifications
                       </Button>
