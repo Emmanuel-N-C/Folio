@@ -1,10 +1,8 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Heart, MessageCircle, Reply, Bell } from 'lucide-react'
 import { notificationsAPI } from '@/api/notifications'
@@ -18,7 +16,6 @@ const RightSidebar = () => {
   useEffect(() => {
     if (isAuthenticated) {
       fetchNotifications()
-      // Poll every 15 seconds for live updates
       const interval = setInterval(fetchNotifications, 15000)
       return () => clearInterval(interval)
     }
@@ -40,15 +37,15 @@ const RightSidebar = () => {
   const getNotificationIcon = (type) => {
     switch (type) {
       case 'POST_LIKE':
-        return <Heart className="h-4 w-4" strokeWidth={1.5} />
+        return <Heart className="h-4 w-4 text-red-500" strokeWidth={2} />
       case 'POST_COMMENT':
-        return <MessageCircle className="h-4 w-4" strokeWidth={1.5} />
+        return <MessageCircle className="h-4 w-4 text-blue-500" strokeWidth={2} />
       case 'COMMENT_REPLY':
-        return <Reply className="h-4 w-4" strokeWidth={1.5} />
+        return <Reply className="h-4 w-4 text-green-500" strokeWidth={2} />
       case 'COMMENT_LIKE':
-        return <Heart className="h-4 w-4" strokeWidth={1.5} />
+        return <Heart className="h-4 w-4 text-pink-500" strokeWidth={2} />
       default:
-        return <Bell className="h-4 w-4" strokeWidth={1.5} />
+        return <Bell className="h-4 w-4 text-gray-500" strokeWidth={2} />
     }
   }
 
@@ -68,30 +65,30 @@ const RightSidebar = () => {
   }
 
   return (
-    <aside className="hidden xl:flex flex-col w-80 h-screen sticky top-0 border-l-2 border-black bg-white">
+    <aside className="hidden xl:flex flex-col w-80 h-screen sticky top-0 border-l border-gray-200 bg-white">
       <ScrollArea className="flex-1 p-6">
         <div className="space-y-6">
           {/* Notifications Section */}
           {isAuthenticated && (
-            <div className="border-2 border-black">
-              <div className="p-4 border-b-2 border-black">
+            <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+              <div className="p-4 border-b border-gray-200 bg-gray-50">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-bold font-serif flex items-center gap-2">
-                    <Bell className="h-5 w-5" strokeWidth={1.5} />
+                  <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                    <Bell className="h-5 w-5" strokeWidth={2} />
                     Notifications
                   </h3>
                   {unreadCount > 0 && (
-                    <Badge variant="secondary" className="bg-black text-white border-2 border-black font-mono">
+                    <span className="bg-gray-900 text-white text-xs font-semibold px-2.5 py-1 rounded-full">
                       {unreadCount > 99 ? '99+' : unreadCount}
-                    </Badge>
+                    </span>
                   )}
                 </div>
               </div>
-              <div className="p-4 space-y-3">
+              <div className="p-3 space-y-2">
                 {notifications.length === 0 ? (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <Bell className="h-12 w-12 mx-auto mb-2 opacity-50" strokeWidth={1.5} />
-                    <p className="text-sm font-mono">No notifications yet</p>
+                  <div className="text-center py-12 text-gray-500">
+                    <Bell className="h-12 w-12 mx-auto mb-3 opacity-30" strokeWidth={1.5} />
+                    <p className="text-sm">No notifications yet</p>
                   </div>
                 ) : (
                   <>
@@ -99,43 +96,48 @@ const RightSidebar = () => {
                       <Link
                         key={notification.id}
                         to={`/posts/${notification.postId}`}
-                        className={`flex items-start gap-3 p-3 border-2 border-black hover:bg-black hover:text-white transition-colors duration-100 cursor-pointer group ${
-                          !notification.read ? 'bg-gray-100' : ''
+                        className={`flex items-start gap-3 p-3 rounded-xl hover:bg-gray-50 transition-all cursor-pointer group ${
+                          !notification.read ? 'bg-blue-50/50' : ''
                         }`}
                       >
-                        <Avatar className="w-10 h-10 border-2 border-black">
+                        <Avatar className="w-10 h-10 ring-2 ring-gray-200">
                           <AvatarImage src={notification.actor.profileImageUrl} />
-                          <AvatarFallback className="bg-black text-white text-xs font-serif">
+                          <AvatarFallback className="bg-gradient-to-br from-gray-900 to-gray-700 text-white text-xs font-semibold">
                             {notification.actor.username.charAt(0).toUpperCase()}
                           </AvatarFallback>
                         </Avatar>
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-start gap-2">
+                          <div className="flex items-start justify-between gap-2">
                             <div className="flex-1">
-                              <p className="text-sm">
+                              <p className="text-sm text-gray-900">
                                 <span className="font-semibold">{notification.actor.username}</span>
                                 {' '}
-                                <span className="group-hover:text-white">
+                                <span className="text-gray-600">
                                   {getNotificationText(notification)}
                                 </span>
                               </p>
-                              <p className="text-xs text-muted-foreground group-hover:text-white/70 mt-1 flex items-center gap-2 font-mono">
-                                {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
+                              <div className="flex items-center gap-2 mt-1">
+                                <p className="text-xs text-gray-500">
+                                  {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
+                                </p>
                                 {!notification.read && (
-                                  <span className="inline-block w-1.5 h-1.5 bg-black group-hover:bg-white" />
+                                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-blue-500" />
                                 )}
-                              </p>
+                              </div>
                             </div>
-                            <div className="mt-1">
+                            <div>
                               {getNotificationIcon(notification.type)}
                             </div>
                           </div>
                         </div>
                       </Link>
                     ))}
-                    <Link to="/notifications">
-                      <Button variant="ghost" className="w-full border-2 border-black hover:bg-black hover:text-white text-sm uppercase tracking-widest font-mono transition-colors duration-100">
-                        View all
+                    <Link to="/notifications" className="block pt-2">
+                      <Button 
+                        variant="ghost" 
+                        className="w-full text-sm font-medium rounded-xl hover:bg-gray-50"
+                      >
+                        View All Notifications
                       </Button>
                     </Link>
                   </>

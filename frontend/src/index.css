@@ -4,73 +4,70 @@
 
 @layer base {
   :root {
-    /* Pure Monochrome System */
+    /* Soft Minimal Color System */
     --background: 0 0% 100%;           /* Pure white */
-    --foreground: 0 0% 0%;             /* Pure black */
+    --foreground: 0 0% 10%;            /* Warm charcoal #1A1A1A */
     
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 0%;
+    --card-foreground: 0 0% 10%;
     
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 0%;
+    --popover-foreground: 0 0% 10%;
     
-    /* Black IS the primary/accent */
-    --primary: 0 0% 0%;
+    /* Warm dark gray for primary */
+    --primary: 0 0% 9%;                /* #171717 */
     --primary-foreground: 0 0% 100%;
     
-    --secondary: 0 0% 96%;             /* Off-white */
-    --secondary-foreground: 0 0% 0%;
+    --secondary: 0 0% 96%;             /* Soft gray #F5F5F5 */
+    --secondary-foreground: 0 0% 10%;
     
-    /* Muted for secondary text */
-    --muted: 0 0% 96%;
-    --muted-foreground: 0 0% 32%;      /* Dark gray */
+    /* Muted colors for calm feel */
+    --muted: 0 0% 96%;                 /* #F5F5F5 */
+    --muted-foreground: 0 0% 45%;      /* #737373 */
     
-    --accent: 0 0% 0%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 0 0% 96%;
+    --accent-foreground: 0 0% 10%;
     
-    --destructive: 0 0% 0%;
-    --destructive-foreground: 0 0% 100%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
     
-    /* Borders */
-    --border: 0 0% 90%;                /* Light gray for subtle borders */
-    --border-dark: 0 0% 0%;            /* Black for emphasis borders */
-    --input: 0 0% 0%;
-    --ring: 0 0% 0%;
+    /* Soft borders */
+    --border: 0 0% 89%;                /* #E3E3E3 */
+    --input: 0 0% 89%;
+    --ring: 0 0% 10%;
     
-    /* Zero radius - sharp corners everywhere */
-    --radius: 0rem;
+    /* Rounded corners for friendliness */
+    --radius: 0.75rem;                 /* 12px base */
   }
 
   .dark {
-    /* Inverted for dark sections */
-    --background: 0 0% 0%;
-    --foreground: 0 0% 100%;
+    --background: 0 0% 10%;
+    --foreground: 0 0% 98%;
     
-    --card: 0 0% 0%;
-    --card-foreground: 0 0% 100%;
+    --card: 0 0% 12%;
+    --card-foreground: 0 0% 98%;
     
-    --popover: 0 0% 0%;
-    --popover-foreground: 0 0% 100%;
+    --popover: 0 0% 12%;
+    --popover-foreground: 0 0% 98%;
     
-    --primary: 0 0% 100%;
-    --primary-foreground: 0 0% 0%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 0 0% 10%;
     
-    --secondary: 0 0% 10%;
-    --secondary-foreground: 0 0% 100%;
+    --secondary: 0 0% 20%;
+    --secondary-foreground: 0 0% 98%;
     
-    --muted: 0 0% 10%;
-    --muted-foreground: 0 0% 68%;
+    --muted: 0 0% 20%;
+    --muted-foreground: 0 0% 65%;
     
-    --accent: 0 0% 100%;
-    --accent-foreground: 0 0% 0%;
+    --accent: 0 0% 20%;
+    --accent-foreground: 0 0% 98%;
     
-    --destructive: 0 0% 100%;
-    --destructive-foreground: 0 0% 0%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
     
     --border: 0 0% 20%;
-    --border-dark: 0 0% 100%;
-    --input: 0 0% 100%;
-    --ring: 0 0% 100%;
+    --input: 0 0% 20%;
+    --ring: 0 0% 90%;
   }
 }
 
@@ -81,8 +78,10 @@
   
   body {
     @apply bg-background text-foreground;
-    font-family: 'Source Serif 4', Georgia, serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
     font-feature-settings: "rlig" 1, "calt" 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
   
   /* Smooth scrolling */
@@ -90,112 +89,45 @@
     scroll-behavior: smooth;
   }
   
-  /* Typography hierarchy */
+  /* Typography - Modern sans-serif hierarchy */
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Playfair Display', Georgia, serif;
     font-weight: 700;
-  }
-  
-  /* Monospace for labels/metadata */
-  .font-mono {
-    font-family: 'JetBrains Mono', monospace;
-  }
-}
-
-@layer components {
-  /* Horizontal line texture (global background) */
-  .texture-lines {
-    background-image: repeating-linear-gradient(
-      0deg,
-      transparent,
-      transparent 1px,
-      #000 1px,
-      #000 2px
-    );
-    background-size: 100% 4px;
-    opacity: 0.015;
-  }
-  
-  /* Grid texture for editorial sections */
-  .texture-grid {
-    background-image:
-      linear-gradient(#00000008 1px, transparent 1px),
-      linear-gradient(90deg, #00000008 1px, transparent 1px);
-    background-size: 40px 40px;
-  }
-  
-  /* Diagonal lines for process sections */
-  .texture-diagonal {
-    background-image: repeating-linear-gradient(
-      45deg,
-      transparent,
-      transparent 40px,
-      #00000008 40px,
-      #00000008 42px
-    );
-  }
-  
-  /* Noise texture for paper-like quality */
-  .texture-noise {
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-    opacity: 0.02;
-  }
-  
-  /* Inverted section textures (for dark backgrounds) */
-  .texture-lines-inverted {
-    background-image: repeating-linear-gradient(
-      90deg,
-      transparent,
-      transparent 1px,
-      #fff 1px,
-      #fff 2px
-    );
-    background-size: 4px 100%;
-    opacity: 0.03;
-  }
-  
-  .texture-radial-inverted {
-    background-image: radial-gradient(
-      circle at top center,
-      #ffffff,
-      transparent 70%
-    );
-    opacity: 0.05;
-  }
-  
-  /* Thick horizontal rule */
-  .rule-thick {
-    @apply w-full border-t-4 border-black;
-  }
-  
-  /* Hero decorative element */
-  .hero-decoration {
-    @apply flex items-center gap-4;
-  }
-  
-  .hero-decoration::before {
-    content: '';
-    @apply block w-24 h-1 bg-black;
-  }
-  
-  .hero-decoration::after {
-    content: '';
-    @apply block w-4 h-4 border-2 border-black;
+    letter-spacing: -0.02em;
   }
 }
 
 @layer utilities {
-  /* Sharp corners override */
-  .rounded-none {
-    border-radius: 0 !important;
+  /* Smooth animations for Soft Minimal */
+  .animate-in {
+    animation-duration: 300ms;
+    animation-fill-mode: both;
   }
   
-  /* Instant transitions for monochrome style */
-  .transition-instant {
-    transition-duration: 0ms;
+  .fade-in {
+    animation-name: fadeIn;
   }
   
-  .transition-fast {
-    transition-duration: 100ms;
+  .slide-in-from-top {
+    animation-name: slideInFromTop;
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  
+  @keyframes slideInFromTop {
+    from {
+      transform: translateY(-8px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
   }
 }
