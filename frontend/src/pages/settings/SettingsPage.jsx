@@ -365,42 +365,18 @@ const SettingsPage = () => {
             </p>
           </div>
 
-          {/* Username */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Username</label>
-            <div className="relative">
-              <Input
-                value={formData.username}
-                onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                disabled={!isEditing}
-                placeholder="username"
-                className="pr-10"
-              />
-              {isEditing && formData.username !== originalData.username && (
-                <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                  {checkingUsername ? (
-                    <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-                  ) : usernameAvailable === true ? (
-                    <CheckCircle2 className="h-4 w-4 text-green-500" />
-                  ) : usernameAvailable === false ? (
-                    <XCircle className="h-4 w-4 text-destructive" />
-                  ) : null}
-                </div>
-              )}
-            </div>
-            {isEditing && formData.username !== originalData.username && (
-              <p className={`text-xs ${usernameAvailable ? 'text-green-500' : 'text-destructive'}`}>
-                {checkingUsername
-                  ? 'Checking availability...'
-                  : usernameAvailable
-                  ? '✓ Username available'
-                  : '✗ Username already taken'}
-              </p>
-            )}
-            <p className="text-xs text-muted-foreground">
-              Your unique identifier. Must be unique.
-            </p>
-          </div>
+          {/* Username (Read-only) */}
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Username</label>
+          <Input 
+            value={user?.username || ''} 
+            disabled 
+            className="bg-muted cursor-not-allowed" 
+          />
+          <p className="text-xs text-muted-foreground">
+            Username cannot be changed. Use display name to change how your name appears.
+          </p>
+        </div>
 
           {/* Email (Read-only) */}
           <div className="space-y-2">
