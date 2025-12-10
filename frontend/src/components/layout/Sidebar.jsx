@@ -74,23 +74,23 @@ const Sidebar = () => {
   const profileImageUrl = user?.profileImageUrl || user?.profilePictureUrl || null
 
   return (
-    <aside className="hidden lg:flex flex-col w-64 h-screen sticky top-0 border-r bg-card">
-      {/* Logo */}
-      <div className="p-6 border-b">
-        <Link to="/" className="flex items-center gap-3 group">
-          <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary/70 rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-all duration-300 group-hover:scale-105">
-            <span className="font-bold text-xl text-primary-foreground">F</span>
-          </div>
-          <span className="text-2xl font-bold text-foreground">Folio</span>
-        </Link>
-      </div>
+    <aside className="hidden lg:flex flex-col w-64 h-screen sticky top-0 bg-background">
+      <div className="flex flex-col h-full p-4 space-y-4">
+        {/* Logo */}
+        <div className="pt-2 pb-2">
+          <Link to="/" className="flex items-center gap-3 group">
+            <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary/70 rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-all duration-300 group-hover:scale-105">
+              <span className="font-bold text-xl text-primary-foreground">F</span>
+            </div>
+            <span className="text-2xl font-bold text-foreground">Folio</span>
+          </Link>
+        </div>
 
-      {/* User Profile Card */}
-      {isAuthenticated && user && (
-        <div className="p-4 border-b">
+        {/* User Profile Card */}
+        {isAuthenticated && user && (
           <Link 
             to={`/profile/${user.id}`} 
-            className="flex items-center gap-3 p-3 rounded-xl hover:bg-muted transition-all group"
+            className="flex items-center gap-3 p-4 rounded-2xl bg-card hover:bg-muted transition-all group shadow-sm"
           >
             <Avatar className="w-12 h-12 ring-2 ring-border group-hover:ring-muted-foreground transition-all">
               <AvatarImage src={profileImageUrl} alt={user.username || 'User'} />
@@ -107,41 +107,39 @@ const Sidebar = () => {
               </p>
             </div>
           </Link>
-        </div>
-      )}
+        )}
 
-      {/* Navigation Items */}
-      <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-        {navItems.map((item) => {
-          if (!item.show) return null
-          
-          const Icon = item.icon
-          const active = isActive(item.path)
-          
-          return (
-            <Link key={item.path} to={item.path}>
-              <Button
-                variant="ghost"
-                className={`w-full justify-start gap-3 h-11 text-sm font-medium rounded-xl ${
-                  active 
-                    ? 'bg-secondary text-foreground hover:bg-secondary' 
-                    : 'text-muted-foreground hover:bg-muted hover:text-foreground'
-                }`}
-              >
-                <Icon className="h-5 w-5" strokeWidth={2} />
-                <span>{item.label}</span>
-                {item.badge > 0 && (
-                  <span className="ml-auto bg-primary text-primary-foreground text-xs font-semibold px-2 py-0.5 rounded-full min-w-[20px] text-center">
-                    {item.badge > 99 ? '99+' : item.badge}
-                  </span>
-                )}
-              </Button>
-            </Link>
-          )
-        })}
+        {/* Navigation Items */}
+        <nav className="flex-1 space-y-1 overflow-y-auto">
+          {navItems.map((item) => {
+            if (!item.show) return null
+            
+            const Icon = item.icon
+            const active = isActive(item.path)
+            
+            return (
+              <Link key={item.path} to={item.path}>
+                <Button
+                  variant="ghost"
+                  className={`w-full justify-start gap-3 h-11 text-sm font-medium rounded-xl ${
+                    active 
+                      ? 'bg-secondary text-foreground hover:bg-secondary' 
+                      : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                  }`}
+                >
+                  <Icon className="h-5 w-5" strokeWidth={2} />
+                  <span>{item.label}</span>
+                  {item.badge > 0 && (
+                    <span className="ml-auto bg-primary text-primary-foreground text-xs font-semibold px-2 py-0.5 rounded-full min-w-[20px] text-center">
+                      {item.badge > 99 ? '99+' : item.badge}
+                    </span>
+                  )}
+                </Button>
+              </Link>
+            )
+          })}
 
-        {/* Theme Toggle */}
-        <div className="pt-2">
+          {/* Theme Toggle */}
           <Button
             variant="ghost"
             onClick={toggleTheme}
@@ -155,44 +153,44 @@ const Sidebar = () => {
             <span>Theme</span>
             <span className="ml-auto text-xs text-muted-foreground capitalize">{theme}</span>
           </Button>
-        </div>
 
+          {isAuthenticated && (
+            <Link to="/settings">
+              <Button
+                variant="ghost"
+                className={`w-full justify-start gap-3 h-11 text-sm font-medium rounded-xl ${
+                  isActive('/settings')
+                    ? 'bg-secondary text-foreground hover:bg-secondary'
+                    : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                }`}
+              >
+                <Settings className="h-5 w-5" strokeWidth={2} />
+                <span>Settings</span>
+              </Button>
+            </Link>
+          )}
+        </nav>
+
+        {/* Action Buttons Card */}
         {isAuthenticated && (
-          <Link to="/settings">
-            <Button
-              variant="ghost"
-              className={`w-full justify-start gap-3 h-11 text-sm font-medium rounded-xl ${
-                isActive('/settings')
-                  ? 'bg-secondary text-foreground hover:bg-secondary'
-                  : 'text-muted-foreground hover:bg-muted hover:text-foreground'
-              }`}
+          <div className="space-y-2 p-4 rounded-2xl bg-card shadow-sm">
+            <Link to="/posts/create">
+              <Button className="w-full gap-2 h-11 text-sm font-medium rounded-xl shadow-md hover:shadow-lg transition-all">
+                <PlusCircle className="h-5 w-5" strokeWidth={2} />
+                Create Post
+              </Button>
+            </Link>
+            <Button 
+              onClick={handleLogout}
+              variant="outline" 
+              className="w-full gap-2 h-11 text-sm font-medium rounded-xl"
             >
-              <Settings className="h-5 w-5" strokeWidth={2} />
-              <span>Settings</span>
+              <LogOut className="h-5 w-5" strokeWidth={2} />
+              Sign Out
             </Button>
-          </Link>
+          </div>
         )}
-      </nav>
-
-      {/* Action Buttons */}
-      {isAuthenticated && (
-        <div className="p-4 border-t space-y-2">
-          <Link to="/posts/create">
-            <Button className="w-full gap-2 h-11 text-sm font-medium rounded-xl shadow-md hover:shadow-lg transition-all">
-              <PlusCircle className="h-5 w-5" strokeWidth={2} />
-              Create Post
-            </Button>
-          </Link>
-          <Button 
-            onClick={handleLogout}
-            variant="outline" 
-            className="w-full gap-2 h-11 text-sm font-medium rounded-xl"
-          >
-            <LogOut className="h-5 w-5" strokeWidth={2} />
-            Sign Out
-          </Button>
-        </div>
-      )}
+      </div>
     </aside>
   )
 }
