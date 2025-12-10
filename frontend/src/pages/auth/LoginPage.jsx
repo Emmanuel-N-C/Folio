@@ -227,7 +227,6 @@ const LoginPage = () => {
 
             <div className="space-y-3">
               <GoogleOAuthButton mode="login" />
-              <GitHubOAuthButton mode="login" />
             </div>
 
             <p className="text-center text-sm text-muted-foreground">

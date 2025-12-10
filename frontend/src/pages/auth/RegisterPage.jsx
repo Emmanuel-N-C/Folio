@@ -9,7 +9,6 @@ import { usersAPI } from '@/api/users'
 import { authAPI } from '@/api/auth'
 import { Eye, EyeOff, Check, X, Loader2, AlertCircle } from 'lucide-react'
 import GoogleOAuthButton from '@/components/auth/GoogleOAuthButton'
-import GitHubOAuthButton from '@/components/auth/GitHubOAuthButton'
 
 const RegisterPage = () => {
   const [formData, setFormData] = useState({
@@ -580,7 +579,6 @@ const RegisterPage = () => {
             {/* NEW OAuth Buttons */}
             <div className="space-y-3">
               <GoogleOAuthButton mode="register" />
-              <GitHubOAuthButton mode="register" />
             </div>
 
             <p className="text-center text-sm text-muted-foreground">

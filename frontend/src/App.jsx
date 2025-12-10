@@ -11,10 +11,7 @@ import RegisterPage from '@/pages/auth/RegisterPage'
 import VerifyEmailPage from '@/pages/auth/VerifyEmailPage'
 import ForgotPasswordPage from '@/pages/auth/ForgotPasswordPage'
 import ResetPasswordPage from '@/pages/auth/ResetPasswordPage'
-import OAuthCallbackPage from '@/pages/auth/OAuthCallbackPage'
-import GitHubCallbackPage from '@/pages/auth/GitHubCallbackPage'
 import OAuthUsernameSelectionPage from '@/pages/auth/OAuthUsernameSelectionPage'
-import OAuthErrorPage from '@/pages/auth/OAuthErrorPage'
 
 // Feed Pages
 import FeedPage from '@/pages/feed/FeedPage'
@@ -54,10 +51,10 @@ function App() {
             <Route path="verify-email" element={<VerifyEmailPage />} />
             <Route path="forgot-password" element={<ForgotPasswordPage />} />
             <Route path="reset-password" element={<ResetPasswordPage />} />
-            <Route path="auth/oauth/callback" element={<OAuthCallbackPage />} />
-            <Route path="auth/github/callback" element={<GitHubCallbackPage />} />
+            
+            {/* NEW OAuth Routes */}
             <Route path="auth/oauth/username-selection" element={<OAuthUsernameSelectionPage />} />
-            <Route path="auth/oauth/error" element={<OAuthErrorPage />} />
+            
 
             {/* All other routes - WITH Layout (with sidebars) */}
             <Route path="/" element={<Layout />}>
