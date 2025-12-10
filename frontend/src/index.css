@@ -4,82 +4,73 @@
 
 @layer base {
   :root {
-    /* Enhanced Color System */
-    --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
+    /* Pure Monochrome System */
+    --background: 0 0% 100%;           /* Pure white */
+    --foreground: 0 0% 0%;             /* Pure black */
     
-    /* Card with subtle elevation */
     --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
+    --card-foreground: 0 0% 0%;
     
-    /* Popover */
     --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
+    --popover-foreground: 0 0% 0%;
     
-    /* Modern blue primary */
-    --primary: 221.2 83.2% 53.3%;
-    --primary-foreground: 210 40% 98%;
+    /* Black IS the primary/accent */
+    --primary: 0 0% 0%;
+    --primary-foreground: 0 0% 100%;
     
-    /* Soft secondary */
-    --secondary: 240 4.8% 95.9%;
-    --secondary-foreground: 240 5.9% 10%;
+    --secondary: 0 0% 96%;             /* Off-white */
+    --secondary-foreground: 0 0% 0%;
     
-    /* Muted backgrounds */
-    --muted: 240 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
+    /* Muted for secondary text */
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 32%;      /* Dark gray */
     
-    /* Accent for highlights */
-    --accent: 240 4.8% 95.9%;
-    --accent-foreground: 240 5.9% 10%;
+    --accent: 0 0% 0%;
+    --accent-foreground: 0 0% 100%;
     
-    /* Destructive */
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
+    --destructive: 0 0% 0%;
+    --destructive-foreground: 0 0% 100%;
     
-    /* Borders - lighter for modern look */
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 221.2 83.2% 53.3%;
+    /* Borders */
+    --border: 0 0% 90%;                /* Light gray for subtle borders */
+    --border-dark: 0 0% 0%;            /* Black for emphasis borders */
+    --input: 0 0% 0%;
+    --ring: 0 0% 0%;
     
-    /* Smooth radius */
-    --radius: 0.75rem;
-    
-    /* Custom shadows for depth */
-    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
-    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+    /* Zero radius - sharp corners everywhere */
+    --radius: 0rem;
   }
 
   .dark {
-    /* Dark mode with rich blacks */
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
+    /* Inverted for dark sections */
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
     
-    --card: 240 10% 7%;
-    --card-foreground: 0 0% 98%;
+    --card: 0 0% 0%;
+    --card-foreground: 0 0% 100%;
     
-    --popover: 240 10% 7%;
-    --popover-foreground: 0 0% 98%;
+    --popover: 0 0% 0%;
+    --popover-foreground: 0 0% 100%;
     
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 0 0% 100%;
+    --primary-foreground: 0 0% 0%;
     
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
+    --secondary: 0 0% 10%;
+    --secondary-foreground: 0 0% 100%;
     
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
+    --muted: 0 0% 10%;
+    --muted-foreground: 0 0% 68%;
     
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 0 0% 98%;
+    --accent: 0 0% 100%;
+    --accent-foreground: 0 0% 0%;
     
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
+    --destructive: 0 0% 100%;
+    --destructive-foreground: 0 0% 0%;
     
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 217.2 91.2% 59.8%;
+    --border: 0 0% 20%;
+    --border-dark: 0 0% 100%;
+    --input: 0 0% 100%;
+    --ring: 0 0% 100%;
   }
 }
 
@@ -90,45 +81,121 @@
   
   body {
     @apply bg-background text-foreground;
+    font-family: 'Source Serif 4', Georgia, serif;
     font-feature-settings: "rlig" 1, "calt" 1;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
   }
   
   /* Smooth scrolling */
   html {
     scroll-behavior: smooth;
   }
+  
+  /* Typography hierarchy */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-weight: 700;
+  }
+  
+  /* Monospace for labels/metadata */
+  .font-mono {
+    font-family: 'JetBrains Mono', monospace;
+  }
 }
 
 @layer components {
-  /* Glass morphism effect */
-  .glass {
-    @apply bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border border-gray-200/50 dark:border-gray-800/50;
+  /* Horizontal line texture (global background) */
+  .texture-lines {
+    background-image: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 1px,
+      #000 1px,
+      #000 2px
+    );
+    background-size: 100% 4px;
+    opacity: 0.015;
   }
   
-  /* Gradient text */
-  .gradient-text {
-    @apply bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent;
+  /* Grid texture for editorial sections */
+  .texture-grid {
+    background-image:
+      linear-gradient(#00000008 1px, transparent 1px),
+      linear-gradient(90deg, #00000008 1px, transparent 1px);
+    background-size: 40px 40px;
   }
   
-  /* Hover lift effect */
-  .hover-lift {
-    @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-xl;
+  /* Diagonal lines for process sections */
+  .texture-diagonal {
+    background-image: repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 40px,
+      #00000008 40px,
+      #00000008 42px
+    );
   }
   
-  /* Smooth fade in animation */
-  .fade-in {
-    animation: fadeIn 0.5s ease-in;
+  /* Noise texture for paper-like quality */
+  .texture-noise {
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    opacity: 0.02;
   }
   
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+  /* Inverted section textures (for dark backgrounds) */
+  .texture-lines-inverted {
+    background-image: repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 1px,
+      #fff 1px,
+      #fff 2px
+    );
+    background-size: 4px 100%;
+    opacity: 0.03;
+  }
+  
+  .texture-radial-inverted {
+    background-image: radial-gradient(
+      circle at top center,
+      #ffffff,
+      transparent 70%
+    );
+    opacity: 0.05;
+  }
+  
+  /* Thick horizontal rule */
+  .rule-thick {
+    @apply w-full border-t-4 border-black;
+  }
+  
+  /* Hero decorative element */
+  .hero-decoration {
+    @apply flex items-center gap-4;
+  }
+  
+  .hero-decoration::before {
+    content: '';
+    @apply block w-24 h-1 bg-black;
+  }
+  
+  .hero-decoration::after {
+    content: '';
+    @apply block w-4 h-4 border-2 border-black;
+  }
+}
+
+@layer utilities {
+  /* Sharp corners override */
+  .rounded-none {
+    border-radius: 0 !important;
+  }
+  
+  /* Instant transitions for monochrome style */
+  .transition-instant {
+    transition-duration: 0ms;
+  }
+  
+  .transition-fast {
+    transition-duration: 100ms;
   }
 }

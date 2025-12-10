@@ -5,6 +5,9 @@ import ErrorBoundary from '@/components/common/ErrorBoundary'
 import Layout from '@/components/layout/Layout'
 import ProtectedRoute from '@/components/auth/ProtectedRoute'
 
+// Landing Page 
+import LandingPage from '@/pages/LandingPage/LandingPage.jsx'
+
 // Auth Pages
 import LoginPage from '@/pages/auth/LoginPage'
 import RegisterPage from '@/pages/auth/RegisterPage'
@@ -45,6 +48,9 @@ function App() {
       <Router>
         <AuthProvider>
           <Routes>
+            {/* Landing Page - No Layout (ADD THIS) */}
+            <Route path="/" element={<LandingPage />} />
+            
             {/* Auth Routes - WITHOUT Layout (no sidebars) */}
             <Route path="login" element={<LoginPage />} />
             <Route path="register" element={<RegisterPage />} />
@@ -57,15 +63,16 @@ function App() {
             
 
             {/* All other routes - WITH Layout (with sidebars) */}
-            <Route path="/" element={<Layout />}>
+            {/* CHANGE path from "/" to "/app" */}
+            <Route path="/app" element={<Layout />}>
               {/* Public Routes */}
-              <Route index element={<Navigate to="/feed" replace />} />
+              <Route index element={<Navigate to="/app/feed" replace />} />
               <Route path="feed" element={<FeedPage />} />
               <Route path="trending" element={<TrendingPage />} />
               <Route path="search" element={<SearchPage />} />
               <Route path="posts/:postId" element={<PostDetailPage />} />
               <Route path="profile/:userId" element={<ProfilePage />} />
-              <Route path="/posts/:postId/upload-screenshots" element={<UploadScreenshotsPage />} />
+              <Route path="posts/:postId/upload-screenshots" element={<UploadScreenshotsPage />} />
 
               {/* Protected Routes */}
               <Route
