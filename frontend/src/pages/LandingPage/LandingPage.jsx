@@ -27,10 +27,6 @@ export default function LandingPage() {
     {
       question: "How do I get my project featured?",
       answer: "Projects that receive significant engagement (likes, comments, views) and demonstrate high-quality work are automatically surfaced in the Trending section. Focus on creating great projects and engaging with the community!"
-    },
-    {
-      question: "What tech stack does Folio use?",
-      answer: "Folio is built with React + Vite on the frontend, Spring Boot + PostgreSQL on the backend, with AWS S3 for media storage. It's a full-stack project showcasing modern web development practices."
     }
   ];
 

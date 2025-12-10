@@ -29,13 +29,15 @@ export const usersAPI = {
   },
 
   checkUsernameAvailability: async (username) => {
-    const response = await axiosInstance.get(`/users/check-username/${username}`)
+    // FIXED: Use query parameter instead of path parameter
+    const response = await axiosInstance.get(`/users/check-username?username=${username}`)
     return response.data
   },
 
-  // NEW: Check email availability
+  // Check email availability
   checkEmailAvailability: async (email) => {
-    const response = await axiosInstance.get(`/users/check-email/${encodeURIComponent(email)}`)
+    // FIXED: Use query parameter instead of path parameter
+    const response = await axiosInstance.get(`/users/check-email?email=${encodeURIComponent(email)}`)
     return response.data
   },
 
