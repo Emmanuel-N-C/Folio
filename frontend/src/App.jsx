@@ -48,35 +48,30 @@ function App() {
       <Router>
         <AuthProvider>
           <Routes>
-            {/* Landing Page - No Layout (ADD THIS) */}
+            {/* Landing Page - No Layout */}
             <Route path="/" element={<LandingPage />} />
             
             {/* Auth Routes - WITHOUT Layout (no sidebars) */}
-            <Route path="login" element={<LoginPage />} />
-            <Route path="register" element={<RegisterPage />} />
-            <Route path="verify-email" element={<VerifyEmailPage />} />
-            <Route path="forgot-password" element={<ForgotPasswordPage />} />
-            <Route path="reset-password" element={<ResetPasswordPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+            <Route path="/verify-email" element={<VerifyEmailPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
+            <Route path="/auth/oauth/username-selection" element={<OAuthUsernameSelectionPage />} />
             
-            {/* NEW OAuth Routes */}
-            <Route path="auth/oauth/username-selection" element={<OAuthUsernameSelectionPage />} />
-            
-
-            {/* All other routes - WITH Layout (with sidebars) */}
-            {/* CHANGE path from "/" to "/app" */}
-            <Route path="/app" element={<Layout />}>
+            {/* App Routes - WITH Layout (with sidebars) */}
+            <Route element={<Layout />}>
               {/* Public Routes */}
-              <Route index element={<Navigate to="/app/feed" replace />} />
-              <Route path="feed" element={<FeedPage />} />
-              <Route path="trending" element={<TrendingPage />} />
-              <Route path="search" element={<SearchPage />} />
-              <Route path="posts/:postId" element={<PostDetailPage />} />
-              <Route path="profile/:userId" element={<ProfilePage />} />
-              <Route path="posts/:postId/upload-screenshots" element={<UploadScreenshotsPage />} />
+              <Route path="/feed" element={<FeedPage />} />
+              <Route path="/trending" element={<TrendingPage />} />
+              <Route path="/search" element={<SearchPage />} />
+              <Route path="/posts/:postId" element={<PostDetailPage />} />
+              <Route path="/profile/:userId" element={<ProfilePage />} />
+              <Route path="/posts/:postId/upload-screenshots" element={<UploadScreenshotsPage />} />
 
               {/* Protected Routes */}
               <Route
-                path="notifications"
+                path="/notifications"
                 element={
                   <ProtectedRoute>
                     <NotificationsPage />
@@ -84,7 +79,7 @@ function App() {
                 }
               />
               <Route
-                path="posts/create"
+                path="/posts/create"
                 element={
                   <ProtectedRoute>
                     <CreatePostPage />
@@ -92,7 +87,7 @@ function App() {
                 }
               />
               <Route
-                path="posts/:postId/edit"
+                path="/posts/:postId/edit"
                 element={
                   <ProtectedRoute>
                     <EditPostPage />
@@ -100,7 +95,7 @@ function App() {
                 }
               />
               <Route
-                path="settings"
+                path="/settings"
                 element={
                   <ProtectedRoute>
                     <SettingsPage />
@@ -110,7 +105,7 @@ function App() {
 
               {/* Admin Routes */}
               <Route
-                path="admin"
+                path="/admin"
                 element={
                   <ProtectedRoute adminOnly>
                     <AdminDashboard />

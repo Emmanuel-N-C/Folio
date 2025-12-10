@@ -90,7 +90,7 @@ const LoginPage = () => {
         description: "You've successfully logged in.",
         duration: 4000,
       })
-      navigate('feed')
+      navigate('/feed')
     } else {
       const errorMessage = result.error || "Invalid username/email or password. Please try again."
       
