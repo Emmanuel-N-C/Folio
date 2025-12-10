@@ -8,13 +8,13 @@ import { useToast } from '@/components/ui/use-toast'
 import { useDebounce } from '@/hooks/useDebounce'
 import { useAuth } from '@/hooks/useAuth'
 import { authAPI } from '@/api/auth'
-import { Check, X, Loader2, AlertCircle } from 'lucide-react'
+import { Check, X, Loader2, AlertCircle, ArrowLeft } from 'lucide-react'
 
 const OAuthUsernameSelectionPage = () => {
   const location = useLocation()
   const navigate = useNavigate()
   const { toast } = useToast()
-  const { updateUser, refreshUserProfile } = useAuth()  // ✅ Get auth context methods
+  const { updateUser, refreshUserProfile } = useAuth()  
 
   const { token, provider, email, name, profileImageUrl, suggestedUsername } = location.state || {}
 
@@ -178,6 +178,21 @@ const OAuthUsernameSelectionPage = () => {
     }
   }
 
+  // Handle back/cancel action
+  const handleCancel = () => {
+    // Clear any stored OAuth data
+    sessionStorage.removeItem('oauth_mode')
+    sessionStorage.removeItem('oauth_return_url')
+    
+    toast({
+      title: 'Registration Cancelled',
+      description: 'You can try again anytime.',
+      duration: 3000,
+    })
+    
+    navigate('/register')
+  }
+
   // Determine input styling
   const getUsernameInputClass = () => {
     if (!touched || !username) return ''
@@ -192,85 +207,99 @@ const OAuthUsernameSelectionPage = () => {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-background">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle>Choose Your Username</CardTitle>
-          <CardDescription>Complete your profile to get started</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {/* User Info Display */}
-          <div className="flex items-center gap-4 p-4 mb-6 bg-muted rounded-lg">
-            <Avatar className="h-16 w-16">
-              <AvatarImage src={profileImageUrl} alt={name} />
-              <AvatarFallback>{name?.charAt(0).toUpperCase()}</AvatarFallback>
-            </Avatar>
-            <div className="flex-1">
-              <p className="font-semibold">{name}</p>
-              <p className="text-sm text-muted-foreground">{email}</p>
-            </div>
-          </div>
+    <div className="flex items-center justify-center min-h-screen bg-background p-4">
+      <div className="w-full max-w-md space-y-4">
+        {/* Back button above card */}
+        <Button
+          variant="ghost"
+          onClick={handleCancel}
+          disabled={loading}
+          className="gap-2"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back
+        </Button>
 
-          <form onSubmit={handleSubmit} className="space-y-4" noValidate>
-            {/* Username Field */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Username</label>
-              <div className="relative">
-                <Input
-                  type="text"
-                  placeholder="username"
-                  value={username}
-                  onChange={handleUsernameChange}
-                  onBlur={() => setTouched(true)}
-                  minLength={3}
-                  maxLength={20}
-                  className={getUsernameInputClass()}
-                  autoFocus
-                />
-                {touched && username.length >= 3 && !usernameError && (
-                  <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                    {checkingUsername ? (
-                      <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-                    ) : usernameAvailable === true ? (
-                      <Check className="h-4 w-4 text-green-500" />
-                    ) : usernameAvailable === false ? (
-                      <X className="h-4 w-4 text-red-500" />
-                    ) : null}
-                  </div>
-                )}
+        <Card className="w-full">
+          <CardHeader>
+            <CardTitle>Choose Your Username</CardTitle>
+            <CardDescription>Complete your profile to get started</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {/* User Info Display */}
+            <div className="flex items-center gap-4 p-4 mb-6 bg-muted rounded-lg">
+              <Avatar className="h-16 w-16">
+                <AvatarImage src={profileImageUrl} alt={name} />
+                <AvatarFallback>{name?.charAt(0).toUpperCase()}</AvatarFallback>
+              </Avatar>
+              <div className="flex-1">
+                <p className="font-semibold">{name}</p>
+                <p className="text-sm text-muted-foreground">{email}</p>
+              </div>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-4" noValidate>
+              {/* Username Field */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Username</label>
+                <div className="relative">
+                  <Input
+                    type="text"
+                    placeholder="username"
+                    value={username}
+                    onChange={handleUsernameChange}
+                    onBlur={() => setTouched(true)}
+                    minLength={3}
+                    maxLength={20}
+                    className={getUsernameInputClass()}
+                    autoFocus
+                  />
+                  {touched && username.length >= 3 && !usernameError && (
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                      {checkingUsername ? (
+                        <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                      ) : usernameAvailable === true ? (
+                        <Check className="h-4 w-4 text-green-500" />
+                      ) : usernameAvailable === false ? (
+                        <X className="h-4 w-4 text-red-500" />
+                      ) : null}
+                    </div>
+                  )}
+                  {touched && usernameError && (
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                      <AlertCircle className="h-4 w-4 text-red-500" />
+                    </div>
+                  )}
+                </div>
+
+                {/* Error/Success Messages */}
                 {touched && usernameError && (
-                  <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                    <AlertCircle className="h-4 w-4 text-red-500" />
-                  </div>
+                  <p className="text-xs text-red-500">{usernameError}</p>
                 )}
+                {touched && !usernameError && username.length >= 3 && usernameAvailable === false && (
+                  <p className="text-xs text-red-500">Username is already taken</p>
+                )}
+                {touched && !usernameError && username.length >= 3 && usernameAvailable === true && (
+                  <p className="text-xs text-green-500">Username is available</p>
+                )}
+
+                <p className="text-xs text-muted-foreground">
+                  Your username must be 3-20 characters, start with a letter, and can contain letters, numbers, dots, underscores, and hyphens.
+                </p>
               </div>
 
-              {/* Error/Success Messages */}
-              {touched && usernameError && (
-                <p className="text-xs text-red-500">{usernameError}</p>
-              )}
-              {touched && !usernameError && username.length >= 3 && usernameAvailable === false && (
-                <p className="text-xs text-red-500">Username is already taken</p>
-              )}
-              {touched && !usernameError && username.length >= 3 && usernameAvailable === true && (
-                <p className="text-xs text-green-500">Username is available</p>
-              )}
-
-              <p className="text-xs text-muted-foreground">
-                Your username must be 3-20 characters, start with a letter, and can contain letters, numbers, dots, underscores, and hyphens.
-              </p>
-            </div>
-
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={!isFormValid() || loading || checkingUsername}
-            >
-              {loading ? 'Creating Account...' : 'Complete Registration'}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
+              {/* CHANGE THIS: Single button, full width */}
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={!isFormValid() || loading || checkingUsername}
+              >
+                {loading ? 'Creating Account...' : 'Complete Registration'}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }
