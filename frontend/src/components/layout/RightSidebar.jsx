@@ -65,13 +65,13 @@ const RightSidebar = () => {
   }
 
   return (
-    <aside className="hidden xl:flex flex-col w-80 h-screen sticky top-0 border-l bg-card">
+    <aside className="hidden xl:flex flex-col w-80 h-screen sticky top-0 bg-background">
       <ScrollArea className="flex-1 p-6">
         <div className="space-y-6">
           {/* Notifications Section */}
           {isAuthenticated && (
-            <div className="bg-card border rounded-2xl shadow-sm overflow-hidden">
-              <div className="p-4 border-b bg-muted">
+            <div className="bg-card rounded-2xl shadow-sm overflow-hidden">
+              <div className="p-4 bg-muted/50">
                 <div className="flex items-center justify-between">
                   <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
                     <Bell className="h-5 w-5" strokeWidth={2} />
