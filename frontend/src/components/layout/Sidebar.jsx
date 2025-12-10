@@ -79,14 +79,14 @@ const Sidebar = () => {
   const profileImageUrl = user?.profileImageUrl || user?.profilePictureUrl || null
 
   return (
-    <aside className="hidden lg:flex flex-col w-64 h-screen sticky top-0 border-r bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      {/* Logo */}
-      <div className="p-6 border-b">
+    <aside className="hidden lg:flex flex-col w-64 h-screen sticky top-0 border-r-2 border-black bg-white">
+      {/* Logo - Monochrome Style */}
+      <div className="p-6 border-b-2 border-black">
         <Link to="/" className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center shadow-lg">
-            <span className="text-white font-bold text-xl">F</span>
+          <div className="w-10 h-10 border-2 border-black flex items-center justify-center">
+            <span className="font-serif font-bold text-xl">F</span>
           </div>
-          <span className="text-2xl font-bold gradient-text">
+          <span className="text-2xl font-serif font-bold">
             Folio
           </span>
         </Link>
@@ -94,14 +94,14 @@ const Sidebar = () => {
 
       {/* User Profile Card */}
       {isAuthenticated && user && (
-        <div className="p-4 border-b">
-          <Link to={`/profile/${user.id}`} className="flex items-center gap-3 p-3 rounded-xl hover:bg-muted transition-all group">
-            <Avatar className="w-12 h-12 ring-2 ring-primary/20 group-hover:ring-primary/40 transition-all">
+        <div className="p-4 border-b-2 border-black">
+          <Link to={`/profile/${user.id}`} className="flex items-center gap-3 p-3 hover:bg-black hover:text-white transition-colors duration-100 group">
+            <Avatar className="w-12 h-12 border-2 border-black">
               <AvatarImage 
                 src={profileImageUrl} 
                 alt={user.username || 'User'} 
               />
-              <AvatarFallback className="bg-gradient-to-br from-primary to-blue-600 text-white font-semibold">
+              <AvatarFallback className="bg-black text-white font-semibold font-serif">
                 {user.username?.charAt(0)?.toUpperCase() || 'U'}
               </AvatarFallback>
             </Avatar>
@@ -109,7 +109,7 @@ const Sidebar = () => {
               <p className="font-semibold text-sm truncate">
                 {user.displayName || user.username}
               </p>
-              <p className="text-xs text-muted-foreground truncate">@{user.username?.toLowerCase()}</p>
+              <p className="text-xs text-muted-foreground truncate font-mono">@{user.username?.toLowerCase()}</p>
             </div>
           </Link>
         </div>
@@ -126,15 +126,15 @@ const Sidebar = () => {
           return (
             <Link key={item.path} to={item.path}>
               <Button
-                variant={active ? "secondary" : "ghost"}
-                className={`w-full justify-start gap-3 h-12 text-base relative ${
-                  active ? 'bg-primary/10 text-primary hover:bg-primary/20' : ''
+                variant="ghost"
+                className={`w-full justify-start gap-3 h-12 text-base relative uppercase tracking-widest text-xs font-mono transition-colors duration-100 ${
+                  active ? 'bg-black text-white hover:bg-black' : 'hover:bg-black hover:text-white'
                 }`}
               >
-                <Icon className={`h-5 w-5 ${active ? 'text-primary' : ''}`} />
+                <Icon className={`h-5 w-5`} strokeWidth={1.5} />
                 <span className="font-medium">{item.label}</span>
                 {item.badge > 0 && (
-                  <span className="ml-auto bg-primary text-primary-foreground text-xs font-bold px-2 py-0.5 rounded-full min-w-[20px] text-center">
+                  <span className="ml-auto bg-black text-white border border-black text-xs font-bold px-2 py-0.5 min-w-[20px] text-center">
                     {item.badge > 99 ? '99+' : item.badge}
                   </span>
                 )}
@@ -148,15 +148,15 @@ const Sidebar = () => {
           <Button
             variant="ghost"
             onClick={toggleTheme}
-            className="w-full justify-start gap-3 h-12 text-base"
+            className="w-full justify-start gap-3 h-12 text-base uppercase tracking-widest text-xs font-mono hover:bg-black hover:text-white transition-colors duration-100"
           >
-            <Palette className="h-5 w-5" />
+            <Palette className="h-5 w-5" strokeWidth={1.5} />
             <span className="font-medium">Customize</span>
             <div className="ml-auto">
               {theme === 'dark' ? (
-                <Moon className="h-4 w-4" />
+                <Moon className="h-4 w-4" strokeWidth={1.5} />
               ) : (
-                <Sun className="h-4 w-4" />
+                <Sun className="h-4 w-4" strokeWidth={1.5} />
               )}
             </div>
           </Button>
@@ -166,11 +166,11 @@ const Sidebar = () => {
           <Link to="/settings">
             <Button
               variant="ghost"
-              className={`w-full justify-start gap-3 h-12 text-base ${
-                isActive('/settings') ? 'bg-primary/10 text-primary' : ''
+              className={`w-full justify-start gap-3 h-12 text-base uppercase tracking-widest text-xs font-mono transition-colors duration-100 ${
+                isActive('/settings') ? 'bg-black text-white hover:bg-black' : 'hover:bg-black hover:text-white'
               }`}
             >
-              <Settings className={`h-5 w-5 ${isActive('/settings') ? 'text-primary' : ''}`} />
+              <Settings className={`h-5 w-5`} strokeWidth={1.5} />
               <span className="font-medium">Settings</span>
             </Button>
           </Link>
@@ -179,19 +179,19 @@ const Sidebar = () => {
 
       {/* Create Post Button */}
       {isAuthenticated && (
-        <div className="p-4 border-t space-y-2">
+        <div className="p-4 border-t-2 border-black space-y-2">
           <Link to="/posts/create">
-            <Button className="w-full gap-2 h-12 text-base shadow-lg hover:shadow-xl transition-all">
-              <PlusCircle className="h-5 w-5" />
+            <Button className="w-full gap-2 h-12 text-base bg-black text-white border-2 border-black hover:bg-white hover:text-black transition-colors duration-100 uppercase tracking-widest text-xs font-mono">
+              <PlusCircle className="h-5 w-5" strokeWidth={1.5} />
               Create Post
             </Button>
           </Link>
           <Button 
             onClick={handleLogout}
             variant="outline" 
-            className="w-full gap-2 h-12 text-base hover:bg-destructive hover:text-destructive-foreground transition-all"
+            className="w-full gap-2 h-12 text-base border-2 border-black hover:bg-black hover:text-white transition-colors duration-100 uppercase tracking-widest text-xs font-mono"
           >
-            <LogOut className="h-5 w-5" />
+            <LogOut className="h-5 w-5" strokeWidth={1.5} />
             Logout
           </Button>
         </div>

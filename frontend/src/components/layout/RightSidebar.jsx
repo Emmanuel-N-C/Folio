@@ -40,15 +40,15 @@ const RightSidebar = () => {
   const getNotificationIcon = (type) => {
     switch (type) {
       case 'POST_LIKE':
-        return <Heart className="h-4 w-4 text-red-500" />
+        return <Heart className="h-4 w-4" strokeWidth={1.5} />
       case 'POST_COMMENT':
-        return <MessageCircle className="h-4 w-4 text-blue-500" />
+        return <MessageCircle className="h-4 w-4" strokeWidth={1.5} />
       case 'COMMENT_REPLY':
-        return <Reply className="h-4 w-4 text-green-500" />
+        return <Reply className="h-4 w-4" strokeWidth={1.5} />
       case 'COMMENT_LIKE':
-        return <Heart className="h-4 w-4 text-pink-500" />
+        return <Heart className="h-4 w-4" strokeWidth={1.5} />
       default:
-        return <Bell className="h-4 w-4" />
+        return <Bell className="h-4 w-4" strokeWidth={1.5} />
     }
   }
 
@@ -68,30 +68,30 @@ const RightSidebar = () => {
   }
 
   return (
-    <aside className="hidden xl:flex flex-col w-80 h-screen sticky top-0 border-l bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <aside className="hidden xl:flex flex-col w-80 h-screen sticky top-0 border-l-2 border-black bg-white">
       <ScrollArea className="flex-1 p-6">
         <div className="space-y-6">
           {/* Notifications Section */}
           {isAuthenticated && (
-            <Card className="border-0 shadow-md">
-              <CardHeader className="pb-3">
+            <div className="border-2 border-black">
+              <div className="p-4 border-b-2 border-black">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg font-bold flex items-center gap-2">
-                    <Bell className="h-5 w-5 text-primary" />
+                  <h3 className="text-lg font-bold font-serif flex items-center gap-2">
+                    <Bell className="h-5 w-5" strokeWidth={1.5} />
                     Notifications
-                  </CardTitle>
+                  </h3>
                   {unreadCount > 0 && (
-                    <Badge variant="secondary" className="rounded-full">
+                    <Badge variant="secondary" className="bg-black text-white border-2 border-black font-mono">
                       {unreadCount > 99 ? '99+' : unreadCount}
                     </Badge>
                   )}
                 </div>
-              </CardHeader>
-              <CardContent className="space-y-3">
+              </div>
+              <div className="p-4 space-y-3">
                 {notifications.length === 0 ? (
                   <div className="text-center py-8 text-muted-foreground">
-                    <Bell className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                    <p className="text-sm">No notifications yet</p>
+                    <Bell className="h-12 w-12 mx-auto mb-2 opacity-50" strokeWidth={1.5} />
+                    <p className="text-sm font-mono">No notifications yet</p>
                   </div>
                 ) : (
                   <>
@@ -99,13 +99,13 @@ const RightSidebar = () => {
                       <Link
                         key={notification.id}
                         to={`/posts/${notification.postId}`}
-                        className={`flex items-start gap-3 p-2 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer ${
-                          !notification.read ? 'bg-primary/5' : ''
+                        className={`flex items-start gap-3 p-3 border-2 border-black hover:bg-black hover:text-white transition-colors duration-100 cursor-pointer group ${
+                          !notification.read ? 'bg-gray-100' : ''
                         }`}
                       >
-                        <Avatar className="w-10 h-10 ring-2 ring-background">
+                        <Avatar className="w-10 h-10 border-2 border-black">
                           <AvatarImage src={notification.actor.profileImageUrl} />
-                          <AvatarFallback className="bg-gradient-to-br from-primary to-blue-600 text-white text-xs">
+                          <AvatarFallback className="bg-black text-white text-xs font-serif">
                             {notification.actor.username.charAt(0).toUpperCase()}
                           </AvatarFallback>
                         </Avatar>
@@ -115,14 +115,14 @@ const RightSidebar = () => {
                               <p className="text-sm">
                                 <span className="font-semibold">{notification.actor.username}</span>
                                 {' '}
-                                <span className="text-muted-foreground">
+                                <span className="group-hover:text-white">
                                   {getNotificationText(notification)}
                                 </span>
                               </p>
-                              <p className="text-xs text-muted-foreground mt-1 flex items-center gap-2">
+                              <p className="text-xs text-muted-foreground group-hover:text-white/70 mt-1 flex items-center gap-2 font-mono">
                                 {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
                                 {!notification.read && (
-                                  <span className="inline-block w-1.5 h-1.5 rounded-full bg-primary" />
+                                  <span className="inline-block w-1.5 h-1.5 bg-black group-hover:bg-white" />
                                 )}
                               </p>
                             </div>
@@ -134,14 +134,14 @@ const RightSidebar = () => {
                       </Link>
                     ))}
                     <Link to="/notifications">
-                      <Button variant="ghost" className="w-full text-primary hover:text-primary text-sm">
-                        View all notifications
+                      <Button variant="ghost" className="w-full border-2 border-black hover:bg-black hover:text-white text-sm uppercase tracking-widest font-mono transition-colors duration-100">
+                        View all
                       </Button>
                     </Link>
                   </>
                 )}
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           )}
         </div>
       </ScrollArea>
