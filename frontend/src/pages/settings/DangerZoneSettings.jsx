@@ -99,24 +99,23 @@ const DangerZoneSettings = () => {
               <AlertDialogTitle className="text-destructive">
                 Are you absolutely sure?
               </AlertDialogTitle>
-              <AlertDialogDescription className="space-y-4">
-                <p>
-                  This action cannot be undone. This will permanently delete your account
-                  and remove all your data from our servers.
-                </p>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-foreground">
-                    Type <span className="font-bold">DELETE</span> to confirm:
-                  </label>
-                  <Input
-                    value={confirmText}
-                    onChange={(e) => setConfirmText(e.target.value)}
-                    placeholder="DELETE"
-                    className="font-mono"
-                  />
-                </div>
+              <AlertDialogDescription>
+                This action cannot be undone. This will permanently delete your account and remove all your data from our servers.
               </AlertDialogDescription>
             </AlertDialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-foreground">
+                  Type <span className="font-bold">DELETE</span> to confirm:
+                </label>
+                <Input
+                  value={confirmText}
+                  onChange={(e) => setConfirmText(e.target.value)}
+                  placeholder="DELETE"
+                  className="font-mono"
+                />
+              </div>
+            </div>
             <AlertDialogFooter>
               <AlertDialogCancel
                 disabled={deleting}

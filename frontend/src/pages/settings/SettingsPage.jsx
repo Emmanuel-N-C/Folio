@@ -519,48 +519,47 @@ const SettingsPage = () => {
 </AlertDialog>
 
 {/* Delete Account Dialog */}
-    <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Delete Account?</AlertDialogTitle>
-          <AlertDialogDescription className="space-y-4">
-            <p>
-              This action cannot be undone. This will permanently delete your account
-              and remove all your data from our servers.
-            </p>
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">
-                Type <span className="font-bold">DELETE</span> to confirm:
-              </label>
-              <Input
-                value={confirmText}
-                onChange={(e) => setConfirmText(e.target.value)}
-                placeholder="DELETE"
-                className="font-mono"
-              />
-            </div>
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel
-            disabled={deleting}
-            onClick={() => {
-              setConfirmText('')
-              setShowDeleteDialog(false)
-            }}
-          >
-            Cancel
-          </AlertDialogCancel>
-          <AlertDialogAction
-            onClick={handleDeleteAccount}
-            disabled={deleting || confirmText !== 'DELETE'}
-            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-          >
-            {deleting ? 'Deleting...' : 'Delete Account'}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+<AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+  <AlertDialogContent>
+    <AlertDialogHeader>
+      <AlertDialogTitle>Delete Account?</AlertDialogTitle>
+      <AlertDialogDescription>
+        This action cannot be undone. This will permanently delete your account and remove all your data from our servers.
+      </AlertDialogDescription>
+    </AlertDialogHeader>
+    <div className="space-y-4 py-4">
+      <div className="space-y-2">
+        <label className="text-sm font-medium text-foreground">
+          Type <span className="font-bold">DELETE</span> to confirm:
+        </label>
+        <Input
+          value={confirmText}
+          onChange={(e) => setConfirmText(e.target.value)}
+          placeholder="DELETE"
+          className="font-mono"
+        />
+      </div>
+    </div>
+    <AlertDialogFooter>
+      <AlertDialogCancel
+        disabled={deleting}
+        onClick={() => {
+          setConfirmText('')
+          setShowDeleteDialog(false)
+        }}
+      >
+        Cancel
+      </AlertDialogCancel>
+      <AlertDialogAction
+        onClick={handleDeleteAccount}
+        disabled={deleting || confirmText !== 'DELETE'}
+        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+      >
+        {deleting ? 'Deleting...' : 'Delete Account'}
+      </AlertDialogAction>
+    </AlertDialogFooter>
+  </AlertDialogContent>
+</AlertDialog>
     </div>
   )
 }
