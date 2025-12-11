@@ -10,6 +10,10 @@ const Layout = () => {
   const [rightSidebarOpen, setRightSidebarOpen] = useState(true)
   const [leftSidebarOpen, setLeftSidebarOpen] = useState(false)
 
+  const toggleLeftSidebar = () => {
+    setLeftSidebarOpen(!leftSidebarOpen)
+  }
+
   return (
     <div className="min-h-screen flex bg-background">
       {/* Left Sidebar - Desktop always visible, Mobile toggleable */}
@@ -22,7 +26,10 @@ const Layout = () => {
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top Navbar (mobile only) */}
         <div className="lg:hidden">
-          <Navbar onMenuClick={() => setLeftSidebarOpen(true)} />
+          <Navbar 
+            onMenuClick={toggleLeftSidebar} 
+            isSidebarOpen={leftSidebarOpen}
+          />
         </div>
 
         {/* Main Content */}
@@ -50,7 +57,7 @@ const Layout = () => {
 
         {/* Footer */}
         <footer className="border-t py-6 text-center text-sm text-muted-foreground bg-card">
-          <p>© 2025 Folio. Built with care for developers.</p>
+          <p>© 2025 Folio.</p>
         </footer>
       </div>
 

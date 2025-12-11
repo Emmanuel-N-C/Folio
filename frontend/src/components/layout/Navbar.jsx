@@ -9,9 +9,9 @@ import {
   DropdownMenuSeparator 
 } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Menu, Search, PlusCircle, User, LogOut, Settings, Shield } from 'lucide-react'
+import { Menu, X, Search, PlusCircle, User, LogOut, Settings, Shield } from 'lucide-react'
 
-const Navbar = ({ onMenuClick }) => {
+const Navbar = ({ onMenuClick, isSidebarOpen }) => {
   const { isAuthenticated, user, logout, isAdmin } = useAuth()
   const navigate = useNavigate()
 
@@ -25,22 +25,26 @@ const Navbar = ({ onMenuClick }) => {
       <div className="px-4 h-16 flex items-center justify-between">
         {/* Left: Menu + Logo */}
         <div className="flex items-center gap-3">
-          {/* Hamburger Menu Button */}
+          {/* Hamburger Menu Button - Toggle between Menu and X */}
           <Button
             variant="ghost"
             size="icon"
             onClick={onMenuClick}
             className="lg:hidden rounded-full"
           >
-            <Menu className="h-5 w-5" />
+            {isSidebarOpen ? (
+              <X className="h-5 w-5" />
+            ) : (
+              <Menu className="h-5 w-5" />
+            )}
           </Button>
 
-          {/* Logo */}
+          {/* Logo - Matching desktop style */}
           <Link to="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-blue-600 flex items-center justify-center">
+            <div className="w-8 h-8 bg-gradient-to-br from-primary to-primary/70 rounded-xl flex items-center justify-center shadow-md">
               <span className="text-white font-bold text-lg">F</span>
             </div>
-            <span className="text-xl font-bold gradient-text">
+            <span className="text-xl font-bold text-foreground">
               Folio
             </span>
           </Link>
