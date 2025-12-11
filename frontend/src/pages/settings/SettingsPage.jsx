@@ -8,7 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { useAuth } from '@/hooks/useAuth'
 import { useToast } from '@/components/ui/use-toast'
 import { usersAPI } from '@/api/users'
-import { CheckCircle2, XCircle, Loader2, Upload, Trash2, AlertTriangle } from 'lucide-react'
+import { CheckCircle2, XCircle, Loader2, Upload, Trash2, AlertTriangle, ArrowLeft } from 'lucide-react'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -254,6 +254,12 @@ const SettingsPage = () => {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
+      {/* Back Button */}
+      <Button variant="ghost" onClick={() => navigate(-1)}>
+        <ArrowLeft className="mr-2 h-4 w-4" />
+        Back
+      </Button>
+
       <div>
         <h1 className="text-3xl font-bold">Settings</h1>
         <p className="text-muted-foreground mt-1">Manage your account and profile information</p>
@@ -366,17 +372,17 @@ const SettingsPage = () => {
           </div>
 
           {/* Username (Read-only) */}
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Username</label>
-          <Input 
-            value={user?.username || ''} 
-            disabled 
-            className="bg-muted cursor-not-allowed" 
-          />
-          <p className="text-xs text-muted-foreground">
-            Username cannot be changed. Use display name to change how your name appears.
-          </p>
-        </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Username</label>
+            <Input 
+              value={user?.username || ''} 
+              disabled 
+              className="bg-muted cursor-not-allowed" 
+            />
+            <p className="text-xs text-muted-foreground">
+              Username cannot be changed. Use display name to change how your name appears.
+            </p>
+          </div>
 
           {/* Email (Read-only) */}
           <div className="space-y-2">
@@ -464,102 +470,102 @@ const SettingsPage = () => {
       </Card>
 
       {/* Danger Zone Section */}
-<Card>
-  <CardHeader>
-    <CardTitle>Danger Zone</CardTitle>
-    <CardDescription>
-      Irreversible and destructive actions
-    </CardDescription>
-  </CardHeader>
-  <CardContent className="space-y-4">
-    <div className="p-4 border rounded-lg space-y-3">
-      <div>
-        <h3 className="font-semibold mb-2">Delete Account</h3>
-        <p className="text-sm text-muted-foreground mb-3">
-          Once you delete your account, there is no going back. This will permanently delete:
-        </p>
-        <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside mb-4">
-          <li>Your profile and account information</li>
-          <li>All your posts and content</li>
-          <li>All your likes and comments</li>
-          <li>Your profile picture and uploaded images</li>
-        </ul>
-      </div>
-      <Button
-        variant="destructive"
-        onClick={() => setShowDeleteDialog(true)}
-      >
-        <AlertTriangle className="mr-2 h-4 w-4" />
-        Delete Account
-      </Button>
-    </div>
-  </CardContent>
-</Card>
+      <Card>
+        <CardHeader>
+          <CardTitle>Danger Zone</CardTitle>
+          <CardDescription>
+            Irreversible and destructive actions
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="p-4 border rounded-lg space-y-3">
+            <div>
+              <h3 className="font-semibold mb-2">Delete Account</h3>
+              <p className="text-sm text-muted-foreground mb-3">
+                Once you delete your account, there is no going back. This will permanently delete:
+              </p>
+              <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside mb-4">
+                <li>Your profile and account information</li>
+                <li>All your posts and content</li>
+                <li>All your likes and comments</li>
+                <li>Your profile picture and uploaded images</li>
+              </ul>
+            </div>
+            <Button
+              variant="destructive"
+              onClick={() => setShowDeleteDialog(true)}
+            >
+              <AlertTriangle className="mr-2 h-4 w-4" />
+              Delete Account
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
-{/* Remove Photo Dialog */}
-<AlertDialog open={showRemoveDialog} onOpenChange={setShowRemoveDialog}>
-  <AlertDialogContent>
-    <AlertDialogHeader>
-      <AlertDialogTitle>Remove Profile Picture?</AlertDialogTitle>
-      <AlertDialogDescription>
-        Your profile will display your username initial instead. You can upload a new picture anytime.
-      </AlertDialogDescription>
-    </AlertDialogHeader>
-    <AlertDialogFooter>
-      <AlertDialogCancel disabled={removing}>Cancel</AlertDialogCancel>
-      <AlertDialogAction
-        onClick={handleRemovePhoto}
-        disabled={removing}
-        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-      >
-        {removing ? 'Removing...' : 'Remove'}
-      </AlertDialogAction>
-    </AlertDialogFooter>
-  </AlertDialogContent>
-</AlertDialog>
+      {/* Remove Photo Dialog */}
+      <AlertDialog open={showRemoveDialog} onOpenChange={setShowRemoveDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove Profile Picture?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Your profile will display your username initial instead. You can upload a new picture anytime.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={removing}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleRemovePhoto}
+              disabled={removing}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {removing ? 'Removing...' : 'Remove'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
-{/* Delete Account Dialog */}
-<AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-  <AlertDialogContent>
-    <AlertDialogHeader>
-      <AlertDialogTitle>Delete Account?</AlertDialogTitle>
-      <AlertDialogDescription>
-        This action cannot be undone. This will permanently delete your account and remove all your data from our servers.
-      </AlertDialogDescription>
-    </AlertDialogHeader>
-    <div className="space-y-4 py-4">
-      <div className="space-y-2">
-        <label className="text-sm font-medium text-foreground">
-          Type <span className="font-bold">DELETE</span> to confirm:
-        </label>
-        <Input
-          value={confirmText}
-          onChange={(e) => setConfirmText(e.target.value)}
-          placeholder="DELETE"
-          className="font-mono"
-        />
-      </div>
-    </div>
-    <AlertDialogFooter>
-      <AlertDialogCancel
-        disabled={deleting}
-        onClick={() => {
-          setConfirmText('')
-          setShowDeleteDialog(false)
-        }}
-      >
-        Cancel
-      </AlertDialogCancel>
-      <AlertDialogAction
-        onClick={handleDeleteAccount}
-        disabled={deleting || confirmText !== 'DELETE'}
-        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-      >
-        {deleting ? 'Deleting...' : 'Delete Account'}
-      </AlertDialogAction>
-    </AlertDialogFooter>
-  </AlertDialogContent>
-</AlertDialog>
+      {/* Delete Account Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Account?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete your account and remove all your data from our servers.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-foreground">
+                Type <span className="font-bold">DELETE</span> to confirm:
+              </label>
+              <Input
+                value={confirmText}
+                onChange={(e) => setConfirmText(e.target.value)}
+                placeholder="DELETE"
+                className="font-mono"
+              />
+            </div>
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              disabled={deleting}
+              onClick={() => {
+                setConfirmText('')
+                setShowDeleteDialog(false)
+              }}
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteAccount}
+              disabled={deleting || confirmText !== 'DELETE'}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleting ? 'Deleting...' : 'Delete Account'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }
