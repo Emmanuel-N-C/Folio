@@ -145,7 +145,7 @@ const LoginPage = () => {
               <div className="relative">
                 <Input
                   type="text"
-                  placeholder="johndoe or john@example.com"
+                  placeholder="username or email"
                   value={formData.usernameOrEmail}
                   onChange={(e) => setFormData({ ...formData, usernameOrEmail: e.target.value })}
                   onBlur={() => handleBlur('usernameOrEmail')}
@@ -170,7 +170,7 @@ const LoginPage = () => {
               <div className="relative">
                 <Input
                   type={showPassword ? "text" : "password"}
-                  placeholder="••••••••"
+                  placeholder="password"
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                   onBlur={() => handleBlur('password')}
