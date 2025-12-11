@@ -1,14 +1,16 @@
 import { useState, useEffect } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams, useNavigate } from 'react-router-dom'
 import { postsAPI } from '@/api/posts'
 import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
 import PostCard from '@/components/post/PostCard'
 import PostSkeleton from '@/components/post/PostSkeleton'
 import { useDebounce } from '@/hooks/useDebounce'
-import { Search } from 'lucide-react'
+import { Search, ArrowLeft } from 'lucide-react'
 
 const SearchPage = () => {
   const [searchParams, setSearchParams] = useSearchParams()
+  const navigate = useNavigate()
   const [query, setQuery] = useState(searchParams.get('q') || '')
   const [posts, setPosts] = useState([])
   const [loading, setLoading] = useState(false)
@@ -37,6 +39,12 @@ const SearchPage = () => {
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
+      {/* Back Button */}
+      <Button variant="ghost" onClick={() => navigate(-1)}>
+        <ArrowLeft className="mr-2 h-4 w-4" />
+        Back
+      </Button>
+
       <div>
         <h1 className="text-3xl font-bold mb-4">Search Projects</h1>
         <div className="relative">
