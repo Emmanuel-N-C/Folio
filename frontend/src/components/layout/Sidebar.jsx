@@ -33,7 +33,7 @@ const Sidebar = () => {
   useEffect(() => {
     if (isAuthenticated) {
       fetchUnreadCount()
-      const interval = setInterval(fetchUnreadCount, 30000)
+      const interval = setInterval(fetchUnreadCount, 2000)
       return () => clearInterval(interval)
     }
   }, [isAuthenticated])

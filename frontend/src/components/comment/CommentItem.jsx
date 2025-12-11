@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { commentsAPI } from '@/api/comments'
 import { useAuth } from '@/hooks/useAuth'
 import { useToast } from '@/components/ui/use-toast'
@@ -8,6 +9,7 @@ import { formatRelativeTime } from '@/lib/utils'
 import { Trash2, Edit2, X, Check, MessageCircle, ChevronDown, ChevronUp } from 'lucide-react'
 import CommentLikeButton from './CommentLikeButton'
 import CommentReplyForm from './CommentReplyForm'
+import { Link } from 'react-router-dom'
 
 const CommentItem = ({ comment, postId, postOwnerId, onDeleted, onUpdated }) => {
   const { user, isAdmin } = useAuth()
@@ -115,16 +117,26 @@ const CommentItem = ({ comment, postId, postOwnerId, onDeleted, onUpdated }) => 
   return (
     <div className="space-y-2">
       <div className="flex gap-3 p-4 border rounded-lg">
-        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-          <span className="text-xs font-bold text-primary">
-            {comment.username?.charAt(0).toUpperCase()}
-          </span>
-        </div>
+        {/* Clickable Profile Picture */}
+        <Link to={`/profile/${comment.userId}`} className="flex-shrink-0">
+          <Avatar className="w-8 h-8 cursor-pointer hover:ring-2 hover:ring-primary transition-all">
+            <AvatarImage src={comment.userProfileImageUrl} alt={comment.username} />
+            <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">
+              {comment.username?.charAt(0).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+        </Link>
         
         <div className="flex-1 space-y-2">
           <div className="flex items-center justify-between">
             <div>
-              <span className="font-semibold text-sm">{comment.displayName || comment.username}</span>
+              {/* Clickable Username */}
+              <Link 
+                to={`/profile/${comment.userId}`}
+                className="font-semibold text-sm hover:underline cursor-pointer"
+              >
+                {comment.displayName || comment.username}
+              </Link>
               <span className="text-xs text-muted-foreground ml-2">
                 {formatRelativeTime(comment.createdAt)}
                 {comment.updatedAt !== comment.createdAt && ' (edited)'}
@@ -250,11 +262,15 @@ const CommentItem = ({ comment, postId, postOwnerId, onDeleted, onUpdated }) => 
           ) : (
             replies.map(reply => (
               <div key={reply.id} className="flex gap-3 p-3 border rounded-lg bg-muted/30">
-                <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                  <span className="text-xs font-bold text-primary">
-                    {reply.username?.charAt(0).toUpperCase()}
-                  </span>
-                </div>
+                {/* Clickable Reply Profile Picture */}
+                <Link to={`/profile/${reply.userId}`} className="flex-shrink-0">
+                  <Avatar className="w-7 h-7 cursor-pointer hover:ring-2 hover:ring-primary transition-all">
+                    <AvatarImage src={reply.userProfileImageUrl} alt={reply.username} />
+                    <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">
+                      {reply.username?.charAt(0).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                </Link>
                 
                 <ReplyItem
                   reply={reply}
@@ -329,7 +345,13 @@ const ReplyItem = ({ reply, postId, postOwnerId, onDeleted, onUpdated }) => {
     <div className="flex-1 space-y-1">
       <div className="flex items-center justify-between">
         <div>
-          <span className="font-semibold text-sm">{reply.displayName || reply.username}</span>
+          {/* Clickable Reply Username */}
+          <Link 
+            to={`/profile/${reply.userId}`}
+            className="font-semibold text-sm hover:underline cursor-pointer"
+          >
+            {reply.displayName || reply.username}
+          </Link>
           <span className="text-xs text-muted-foreground ml-2">
             {formatRelativeTime(reply.createdAt)}
             {reply.updatedAt !== reply.createdAt && ' (edited)'}
