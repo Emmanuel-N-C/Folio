@@ -6,7 +6,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
 import { postsAPI } from '@/api/posts'
 import { useToast } from '@/components/ui/use-toast'
-import { X } from 'lucide-react'
+import { X, ArrowLeft } from 'lucide-react'
 
 const EditPostPage = () => {
   const { postId } = useParams()
@@ -85,7 +85,13 @@ const EditPostPage = () => {
   }
 
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="max-w-2xl mx-auto space-y-6">
+      {/* Back Button */}
+      <Button variant="ghost" onClick={() => navigate(`/posts/${postId}`)}>
+        <ArrowLeft className="mr-2 h-4 w-4" />
+        Back to Post
+      </Button>
+
       <Card>
         <CardHeader>
           <CardTitle>Edit Post</CardTitle>
