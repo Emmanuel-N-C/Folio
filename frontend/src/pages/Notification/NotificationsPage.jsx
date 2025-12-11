@@ -1,16 +1,17 @@
 import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { notificationsAPI } from '@/api/notifications'
 import { useAuth } from '@/hooks/useAuth'
 import { Card, CardContent } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Heart, MessageCircle, Reply, Bell } from 'lucide-react'
+import { Heart, MessageCircle, Reply, Bell, ArrowLeft } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 
 const NotificationsPage = () => {
   const { isAuthenticated } = useAuth()
+  const navigate = useNavigate()
   const [notifications, setNotifications] = useState([])
   const [loading, setLoading] = useState(true)
   const [page, setPage] = useState(0)
@@ -131,8 +132,14 @@ const NotificationsPage = () => {
 
   return (
     <div className="max-w-3xl mx-auto space-y-6">
+      {/* Back Button */}
+      <Button variant="ghost" onClick={() => navigate(-1)}>
+        <ArrowLeft className="mr-2 h-4 w-4" />
+        Back
+      </Button>
+
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-3">
             <Bell className="h-8 w-8 text-primary" />
