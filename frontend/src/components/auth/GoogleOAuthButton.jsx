@@ -55,7 +55,7 @@ const GoogleOAuthButton = ({ mode = 'login' }) => {
 
         // Use a small delay to ensure token is stored before redirect
         setTimeout(() => {
-          window.location.href = '/'
+          window.location.href = '/feed'
         }, 100)
       } else {
         // User doesn't exist

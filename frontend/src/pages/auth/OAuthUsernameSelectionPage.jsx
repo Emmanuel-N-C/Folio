@@ -164,7 +164,7 @@ const OAuthUsernameSelectionPage = () => {
       })
 
      
-      window.location.href = '/'
+      window.location.href = '/feed' 
       
     } catch (error) {
       const errorMessage = error.response?.data?.message || 'Failed to complete registration. Please try again.'
