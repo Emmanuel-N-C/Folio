@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { postsAPI } from '@/api/posts'
 import { useToast } from '@/components/ui/use-toast'
-import { X, Loader2, AlertCircle } from 'lucide-react'
+import { X, Loader2, AlertCircle, ArrowLeft } from 'lucide-react'
 import AIGenerateProjectFields from '@/components/ai/AIGenerateProjectFields'
 import ScreenshotUpload from '@/components/post/ScreenshotUpload'
 
@@ -187,6 +187,12 @@ const CreatePostPage = () => {
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
+      {/* Back Button */}
+      <Button variant="ghost" onClick={() => navigate(-1)}>
+        <ArrowLeft className="mr-2 h-4 w-4" />
+        Back
+      </Button>
+
       {/* AI Generator Section */}
       {showAIGenerator && (
         <AIGenerateProjectFields
