@@ -12,12 +12,13 @@ import {
   Moon,
   Sun,
   LogOut,
-  Shield
+  Shield,
+  X
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { notificationsAPI } from '@/api/notifications'
 
-const Sidebar = () => {
+const Sidebar = ({ isOpen, onClose }) => {
   const { isAuthenticated, user, logout, isAdmin } = useAuth()
   const location = useLocation()
   const navigate = useNavigate()
@@ -33,7 +34,7 @@ const Sidebar = () => {
   useEffect(() => {
     if (isAuthenticated) {
       fetchUnreadCount()
-      const interval = setInterval(fetchUnreadCount, 2000)
+      const interval = setInterval(fetchUnreadCount, 5000)
       return () => clearInterval(interval)
     }
   }, [isAuthenticated])
@@ -69,129 +70,157 @@ const Sidebar = () => {
   const handleLogout = () => {
     logout()
     navigate('/login')
+    onClose?.()
+  }
+
+  const handleNavClick = () => {
+    // Close mobile sidebar when navigating
+    if (window.innerWidth < 1024) {
+      onClose?.()
+    }
   }
 
   const profileImageUrl = user?.profileImageUrl || user?.profilePictureUrl || null
 
   return (
-    <aside className="hidden lg:flex flex-col w-64 h-screen sticky top-0 bg-background">
-      <div className="flex flex-col h-full p-4 space-y-4">
-        {/* Logo */}
-        <div className="pt-2 pb-2">
-          <Link to="/" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary/70 rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-all duration-300 group-hover:scale-105">
-              <span className="font-bold text-xl text-primary-foreground">F</span>
-            </div>
-            <span className="text-2xl font-bold text-foreground">Folio</span>
-          </Link>
-        </div>
+    <>
+      {/* Desktop Sidebar - Always visible on large screens */}
+      <aside className={`
+        fixed lg:sticky top-0 h-screen w-64 bg-background border-r
+        transition-transform duration-300 ease-in-out z-50
+        ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+      `}>
+        <div className="flex flex-col h-full p-4 space-y-4">
+          {/* Mobile Close Button */}
+          <div className="lg:hidden flex justify-end">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onClose}
+              className="rounded-full"
+            >
+              <X className="h-5 w-5" />
+            </Button>
+          </div>
 
-        {/* User Profile Card */}
-        {isAuthenticated && user && (
-          <Link 
-            to={`/profile/${user.id}`} 
-            className="flex items-center gap-3 p-4 rounded-2xl bg-card hover:bg-muted transition-all group shadow-sm"
-          >
-            <Avatar className="w-12 h-12 ring-2 ring-border group-hover:ring-muted-foreground transition-all">
-              <AvatarImage src={profileImageUrl} alt={user.username || 'User'} />
-              <AvatarFallback className="bg-gradient-to-br from-primary to-primary/70 text-primary-foreground font-semibold">
-                {user.username?.charAt(0)?.toUpperCase() || 'U'}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex-1 min-w-0">
-              <p className="font-semibold text-sm truncate text-foreground">
-                {user.displayName || user.username}
-              </p>
-              <p className="text-xs text-muted-foreground truncate">
-                @{user.username?.toLowerCase()}
-              </p>
-            </div>
-          </Link>
-        )}
+          {/* Logo */}
+          <div className="pt-2 pb-2">
+            <Link to="/" className="flex items-center gap-3 group" onClick={handleNavClick}>
+              <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary/70 rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-all duration-300 group-hover:scale-105">
+                <span className="font-bold text-xl text-primary-foreground">F</span>
+              </div>
+              <span className="text-2xl font-bold text-foreground">Folio</span>
+            </Link>
+          </div>
 
-        {/* Navigation Items */}
-        <nav className="flex-1 space-y-1 overflow-y-auto">
-          {navItems.map((item) => {
-            if (!item.show) return null
-            
-            const Icon = item.icon
-            const active = isActive(item.path)
-            
-            return (
-              <Link key={item.path} to={item.path}>
+          {/* User Profile Card */}
+          {isAuthenticated && user && (
+            <Link 
+              to={`/profile/${user.id}`} 
+              className="flex items-center gap-3 p-4 rounded-2xl bg-card hover:bg-muted transition-all group shadow-sm"
+              onClick={handleNavClick}
+            >
+              <Avatar className="w-12 h-12 ring-2 ring-border group-hover:ring-muted-foreground transition-all">
+                <AvatarImage src={profileImageUrl} alt={user.username || 'User'} />
+                <AvatarFallback className="bg-gradient-to-br from-primary to-primary/70 text-primary-foreground font-semibold">
+                  {user.username?.charAt(0)?.toUpperCase() || 'U'}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-sm truncate text-foreground">
+                  {user.displayName || user.username}
+                </p>
+                <p className="text-xs text-muted-foreground truncate">
+                  @{user.username?.toLowerCase()}
+                </p>
+              </div>
+            </Link>
+          )}
+
+          {/* Navigation Items */}
+          <nav className="flex-1 space-y-1 overflow-y-auto">
+            {navItems.map((item) => {
+              if (!item.show) return null
+              
+              const Icon = item.icon
+              const active = isActive(item.path)
+              
+              return (
+                <Link key={item.path} to={item.path} onClick={handleNavClick}>
+                  <Button
+                    variant="ghost"
+                    className={`w-full justify-start gap-3 h-11 text-sm font-medium rounded-xl ${
+                      active 
+                        ? 'bg-secondary text-foreground hover:bg-secondary' 
+                        : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                    }`}
+                  >
+                    <Icon className="h-5 w-5" strokeWidth={2} />
+                    <span>{item.label}</span>
+                    {item.badge > 0 && (
+                      <span className="ml-auto bg-primary text-primary-foreground text-xs font-semibold px-2 py-0.5 rounded-full min-w-[20px] text-center">
+                        {item.badge > 99 ? '99+' : item.badge}
+                      </span>
+                    )}
+                  </Button>
+                </Link>
+              )
+            })}
+
+            {/* Theme Toggle */}
+            <Button
+              variant="ghost"
+              onClick={toggleTheme}
+              className="w-full justify-start gap-3 h-11 text-sm font-medium rounded-xl text-muted-foreground hover:bg-muted hover:text-foreground"
+            >
+              {theme === 'dark' ? (
+                <Moon className="h-5 w-5" strokeWidth={2} />
+              ) : (
+                <Sun className="h-5 w-5" strokeWidth={2} />
+              )}
+              <span>Theme</span>
+              <span className="ml-auto text-xs text-muted-foreground capitalize">{theme}</span>
+            </Button>
+
+            {isAuthenticated && (
+              <Link to="/settings" onClick={handleNavClick}>
                 <Button
                   variant="ghost"
                   className={`w-full justify-start gap-3 h-11 text-sm font-medium rounded-xl ${
-                    active 
-                      ? 'bg-secondary text-foreground hover:bg-secondary' 
+                    isActive('/settings')
+                      ? 'bg-secondary text-foreground hover:bg-secondary'
                       : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                   }`}
                 >
-                  <Icon className="h-5 w-5" strokeWidth={2} />
-                  <span>{item.label}</span>
-                  {item.badge > 0 && (
-                    <span className="ml-auto bg-primary text-primary-foreground text-xs font-semibold px-2 py-0.5 rounded-full min-w-[20px] text-center">
-                      {item.badge > 99 ? '99+' : item.badge}
-                    </span>
-                  )}
+                  <Settings className="h-5 w-5" strokeWidth={2} />
+                  <span>Settings</span>
                 </Button>
               </Link>
-            )
-          })}
-
-          {/* Theme Toggle */}
-          <Button
-            variant="ghost"
-            onClick={toggleTheme}
-            className="w-full justify-start gap-3 h-11 text-sm font-medium rounded-xl text-muted-foreground hover:bg-muted hover:text-foreground"
-          >
-            {theme === 'dark' ? (
-              <Moon className="h-5 w-5" strokeWidth={2} />
-            ) : (
-              <Sun className="h-5 w-5" strokeWidth={2} />
             )}
-            <span>Theme</span>
-            <span className="ml-auto text-xs text-muted-foreground capitalize">{theme}</span>
-          </Button>
+          </nav>
 
+          {/* Action Buttons Card */}
           {isAuthenticated && (
-            <Link to="/settings">
-              <Button
-                variant="ghost"
-                className={`w-full justify-start gap-3 h-11 text-sm font-medium rounded-xl ${
-                  isActive('/settings')
-                    ? 'bg-secondary text-foreground hover:bg-secondary'
-                    : 'text-muted-foreground hover:bg-muted hover:text-foreground'
-                }`}
+            <div className="space-y-2 p-4 rounded-2xl bg-card shadow-sm">
+              <Link to="/posts/create" onClick={handleNavClick}>
+                <Button className="w-full gap-2 h-11 text-sm font-medium rounded-xl shadow-md hover:shadow-lg transition-all">
+                  <PlusCircle className="h-5 w-5" strokeWidth={2} />
+                  Create Post
+                </Button>
+              </Link>
+              <Button 
+                onClick={handleLogout}
+                variant="outline" 
+                className="w-full gap-2 h-11 text-sm font-medium rounded-xl"
               >
-                <Settings className="h-5 w-5" strokeWidth={2} />
-                <span>Settings</span>
+                <LogOut className="h-5 w-5" strokeWidth={2} />
+                Sign Out
               </Button>
-            </Link>
+            </div>
           )}
-        </nav>
-
-        {/* Action Buttons Card */}
-        {isAuthenticated && (
-          <div className="space-y-2 p-4 rounded-2xl bg-card shadow-sm">
-            <Link to="/posts/create">
-              <Button className="w-full gap-2 h-11 text-sm font-medium rounded-xl shadow-md hover:shadow-lg transition-all">
-                <PlusCircle className="h-5 w-5" strokeWidth={2} />
-                Create Post
-              </Button>
-            </Link>
-            <Button 
-              onClick={handleLogout}
-              variant="outline" 
-              className="w-full gap-2 h-11 text-sm font-medium rounded-xl"
-            >
-              <LogOut className="h-5 w-5" strokeWidth={2} />
-              Sign Out
-            </Button>
-          </div>
-        )}
-      </div>
-    </aside>
+        </div>
+      </aside>
+    </>
   )
 }
 
