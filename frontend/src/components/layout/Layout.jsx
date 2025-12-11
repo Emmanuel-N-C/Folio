@@ -8,17 +8,21 @@ import { PanelRightClose, PanelRightOpen } from 'lucide-react'
 
 const Layout = () => {
   const [rightSidebarOpen, setRightSidebarOpen] = useState(true)
+  const [leftSidebarOpen, setLeftSidebarOpen] = useState(false)
 
   return (
     <div className="min-h-screen flex bg-background">
-      {/* Left Sidebar */}
-      <Sidebar />
+      {/* Left Sidebar - Desktop always visible, Mobile toggleable */}
+      <Sidebar 
+        isOpen={leftSidebarOpen} 
+        onClose={() => setLeftSidebarOpen(false)} 
+      />
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top Navbar (mobile only) */}
         <div className="lg:hidden">
-          <Navbar />
+          <Navbar onMenuClick={() => setLeftSidebarOpen(true)} />
         </div>
 
         {/* Main Content */}
@@ -52,6 +56,14 @@ const Layout = () => {
 
       {/* Right Sidebar - Toggleable */}
       {rightSidebarOpen && <RightSidebar />}
+      
+      {/* Mobile Overlay */}
+      {leftSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          onClick={() => setLeftSidebarOpen(false)}
+        />
+      )}
     </div>
   )
 }
