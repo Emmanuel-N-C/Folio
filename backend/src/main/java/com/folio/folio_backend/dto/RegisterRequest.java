@@ -4,6 +4,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.AssertTrue;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -32,4 +33,7 @@ public class RegisterRequest {
             message = "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character"
     )
     private String password;
+
+    @AssertTrue(message = "You must accept the Terms of Service")
+    private Boolean acceptedTerms;
 }
