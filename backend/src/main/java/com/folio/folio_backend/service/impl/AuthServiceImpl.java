@@ -44,6 +44,7 @@ public class AuthServiceImpl implements AuthService {
     private EmailService emailService;
 
     private static final SecureRandom secureRandom = new SecureRandom();
+    private static final String CURRENT_TERMS_VERSION = "1.0";
 
     @Override
     @Transactional
@@ -108,6 +109,11 @@ public class AuthServiceImpl implements AuthService {
         Set<Role> roles = new HashSet<>();
         roles.add(Role.ROLE_USER);
         user.setRoles(roles);
+
+        // Set Terms acceptance
+        user.setTermsAccepted(true);
+        user.setTermsAcceptedAt(LocalDateTime.now());
+        user.setTermsVersion(CURRENT_TERMS_VERSION);
 
         userRepository.save(user);
 
