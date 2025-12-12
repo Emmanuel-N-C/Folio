@@ -133,7 +133,7 @@ public class EmailServiceImpl implements EmailService {
                 "                    <div class=\"code\">" + user.getVerificationCode() + "</div>" +
                 "                </div>" +
                 "                <div class=\"expiry-notice\">" +
-                "                    <p>⏱️ This code will expire in 10 minutes for security purposes.</p>" +
+                "                    <p>⏱️ mvnThis code will expire in 10 minutes for security purposes.</p>" +
                 "                </div>" +
                 "                <div class=\"divider\"></div>" +
                 "                <p style=\"color: #737373; font-size: 14px;\">If you didn't create a Folio account, you can safely ignore this email. No account will be created without verification.</p>" +

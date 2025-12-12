@@ -94,6 +94,16 @@ public class User {
     @Column(nullable = false)
     private boolean onboardingComplete = false;
 
+    // Terms and Conditions acceptance tracking
+    @Column(nullable = false)
+    private boolean termsAccepted = false;
+
+    @Column(nullable = true)
+    private LocalDateTime termsAcceptedAt;
+
+    @Column(length = 10, nullable = true)
+    private String termsVersion; // e.g., "1.0", "1.1"
+
     @CreationTimestamp
     @Column(updatable = false)
     private LocalDateTime createdAt;
