@@ -20,6 +20,7 @@ const RegisterPage = () => {
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [acceptedTerms, setAcceptedTerms] = useState(false)
   
   // Field touched states
   const [touched, setTouched] = useState({
@@ -235,7 +236,8 @@ const RegisterPage = () => {
       formData.password &&
       passwordErrors.length === 0 &&
       formData.confirmPassword &&
-      formData.password === formData.confirmPassword
+      formData.password === formData.confirmPassword &&
+      acceptedTerms
     )
   }
 
@@ -306,6 +308,15 @@ const RegisterPage = () => {
       toast({
         title: "Email Already Registered",
         description: "This email is already registered. Please use another email or try logging in.",
+        variant: "destructive"
+      })
+      return
+    }
+
+    if (!acceptedTerms) {
+      toast({
+        title: "Terms Required",
+        description: "You must accept the Terms of Service to continue",
         variant: "destructive"
       })
       return
@@ -557,6 +568,36 @@ const RegisterPage = () => {
               )}
             </div>
 
+            {/* Terms and Conditions Checkbox */}
+            <div className="space-y-3 pt-2">
+              <div className="flex items-start gap-3">
+                <input
+                  type="checkbox"
+                  id="terms"
+                  checked={acceptedTerms}
+                  onChange={(e) => setAcceptedTerms(e.target.checked)}
+                  className="mt-1 h-4 w-4 rounded border-gray-300 text-primary focus:ring-2 focus:ring-primary focus:ring-offset-2 cursor-pointer"
+                  required
+                />
+                <label htmlFor="terms" className="text-sm text-gray-700 leading-relaxed cursor-pointer">
+                  I agree to Folio's{' '}
+                  <Link 
+                    to="/terms" 
+                    target="_blank"
+                    className="text-primary font-medium hover:underline"
+                  >
+                    Terms of Service
+                  </Link>
+                </label>
+              </div>
+              
+              {!acceptedTerms && touched.confirmPassword && (
+                <p className="text-xs text-muted-foreground ml-7">
+                  You must accept the Terms of Service to continue
+                </p>
+              )}
+            </div>
+
             <Button 
               type="submit" 
               className="w-full" 
@@ -576,7 +617,7 @@ const RegisterPage = () => {
               </div>
             </div>
 
-            {/* NEW OAuth Buttons */}
+            {/* OAuth Buttons */}
             <div className="space-y-3">
               <GoogleOAuthButton mode="register" />
             </div>
