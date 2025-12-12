@@ -21,6 +21,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -41,6 +42,8 @@ public class OAuthServiceImpl implements OAuthService {
 
     @Autowired
     private EmailService emailService;
+
+    private static final String CURRENT_TERMS_VERSION = "1.0";
 
     @Override
     public OAuthCheckResponse checkOAuthUser(OAuthCheckRequest request) {
@@ -211,10 +214,14 @@ public class OAuthServiceImpl implements OAuthService {
             user.setOnboardingComplete(true);
             user.setPassword(""); // Empty string for OAuth users (will be handled by CustomUserDetailsService)
 
-
             Set<Role> roles = new HashSet<>();
             roles.add(Role.ROLE_USER);
             user.setRoles(roles);
+
+            // Set Terms acceptance
+            user.setTermsAccepted(true);
+            user.setTermsAcceptedAt(LocalDateTime.now());
+            user.setTermsVersion(CURRENT_TERMS_VERSION);
 
             userRepository.save(user);
 
@@ -243,6 +250,7 @@ public class OAuthServiceImpl implements OAuthService {
             throw new BadRequestException("OAuth registration failed: " + e.getMessage());
         }
     }
+
     @Override
     public GitHubTokenResponse exchangeGitHubCode(GitHubCodeExchangeRequest request) {
         try {
