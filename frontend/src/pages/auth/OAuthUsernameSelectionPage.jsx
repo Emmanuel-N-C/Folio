@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useNavigate, useLocation, Link } from 'react-router-dom'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -24,6 +24,7 @@ const OAuthUsernameSelectionPage = () => {
   const [usernameAvailable, setUsernameAvailable] = useState(null)
   const [checkingUsername, setCheckingUsername] = useState(false)
   const [usernameError, setUsernameError] = useState('')
+  const [acceptedTerms, setAcceptedTerms] = useState(false)
 
   const debouncedUsername = useDebounce(username, 500)
 
@@ -138,6 +139,15 @@ const OAuthUsernameSelectionPage = () => {
       return
     }
 
+    if (!acceptedTerms) {
+      toast({
+        title: 'Terms Required',
+        description: 'You must accept the Terms of Service to continue',
+        variant: 'destructive',
+      })
+      return
+    }
+
     setLoading(true)
 
     try {
@@ -203,7 +213,7 @@ const OAuthUsernameSelectionPage = () => {
   }
 
   const isFormValid = () => {
-    return username && !usernameError && usernameAvailable === true
+    return username && !usernameError && usernameAvailable === true && acceptedTerms
   }
 
   return (
@@ -288,7 +298,36 @@ const OAuthUsernameSelectionPage = () => {
                 </p>
               </div>
 
-              {/* CHANGE THIS: Single button, full width */}
+              {/* Terms and Conditions Checkbox */}
+              <div className="space-y-3 pt-4">
+                <div className="flex items-start gap-3">
+                  <input
+                    type="checkbox"
+                    id="terms"
+                    checked={acceptedTerms}
+                    onChange={(e) => setAcceptedTerms(e.target.checked)}
+                    className="mt-1 h-4 w-4 rounded border-gray-300 text-primary focus:ring-2 focus:ring-primary focus:ring-offset-2 cursor-pointer"
+                    required
+                  />
+                  <label htmlFor="terms" className="text-sm text-gray-700 leading-relaxed cursor-pointer">
+                    I agree to Folio's{' '}
+                    <Link 
+                      to="/terms" 
+                      target="_blank"
+                      className="text-primary font-medium hover:underline"
+                    >
+                      Terms of Service
+                    </Link>
+                  </label>
+                </div>
+                
+                {!acceptedTerms && touched && (
+                  <p className="text-xs text-muted-foreground ml-7">
+                    You must accept the Terms of Service to continue
+                  </p>
+                )}
+              </div>
+
               <Button
                 type="submit"
                 className="w-full"
