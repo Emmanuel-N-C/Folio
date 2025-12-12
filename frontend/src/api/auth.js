@@ -2,7 +2,10 @@ import axiosInstance from './axios'
 
 export const authAPI = {
   register: async (data) => {
-    const response = await axiosInstance.post('/auth/register', data)
+    const response = await axiosInstance.post('/auth/register', {
+      ...data,
+      acceptedTerms: true  // Always true when form is submitted
+    })
     return response.data
   },
 
@@ -36,7 +39,7 @@ export const authAPI = {
     return response.data
   },
 
-  // NEW OAuth endpoints (client-side token verification)
+  // OAuth endpoints
   checkOAuthUser: async (data) => {
     const response = await axiosInstance.post('/auth/oauth/check', data)
     return response.data
@@ -48,7 +51,10 @@ export const authAPI = {
   },
 
   registerOAuthUser: async (data) => {
-    const response = await axiosInstance.post('/auth/oauth/register', data)
+    const response = await axiosInstance.post('/auth/oauth/register', {
+      ...data,
+      acceptedTerms: true  // Always true when form is submitted
+    })
     return response.data
   },
 
