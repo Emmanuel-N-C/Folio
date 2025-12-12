@@ -1,48 +1,71 @@
-import axios from 'axios'
+import axiosInstance from './axios'
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8081/api'
-
-const axiosInstance = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
+export const authAPI = {
+  register: async (data) => {
+    const response = await axiosInstance.post('/auth/register', {
+      ...data,
+      acceptedTerms: true  // Always true when form is submitted
+    })
+    return response.data
   },
-})
 
-// Request interceptor - attach JWT token
-axiosInstance.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('token')
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`
-    }
-    return config
+  login: async (data) => {
+    const response = await axiosInstance.post('/auth/login', data)
+    return response.data
   },
-  (error) => {
-    return Promise.reject(error)
-  }
-)
 
-// Response interceptor - handle errors
-axiosInstance.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      // Only redirect to login if we're not already on an auth page
-      const currentPath = window.location.pathname
-      const isAuthPage = currentPath.startsWith('/login') || 
-                        currentPath.startsWith('/register') || 
-                        currentPath.startsWith('/auth/')
-      
-      if (!isAuthPage) {
-        // Token expired or invalid
-        localStorage.removeItem('token')
-        localStorage.removeItem('user')
-        window.location.href = '/login'
-      }
-    }
-    return Promise.reject(error)
-  }
-)
+  verifyEmail: async (data) => {
+    const response = await axiosInstance.post('/auth/verify-email', data)
+    return response.data
+  },
 
-export default axiosInstance
+  resendVerification: async (data) => {
+    const response = await axiosInstance.post('/auth/resend-verification', data)
+    return response.data
+  },
+
+  forgotPassword: async (data) => {
+    const response = await axiosInstance.post('/auth/forgot-password', data)
+    return response.data
+  },
+
+  resetPassword: async (data) => {
+    const response = await axiosInstance.post('/auth/reset-password', data)
+    return response.data
+  },
+
+  getCurrentUser: async () => {
+    const response = await axiosInstance.get('/users/me')
+    return response.data
+  },
+
+  // OAuth endpoints
+  checkOAuthUser: async (data) => {
+    const response = await axiosInstance.post('/auth/oauth/check', data)
+    return response.data
+  },
+
+  loginOAuthUser: async (data) => {
+    const response = await axiosInstance.post('/auth/oauth/login', data)
+    return response.data
+  },
+
+  registerOAuthUser: async (data) => {
+    const response = await axiosInstance.post('/auth/oauth/register', {
+      ...data,
+      acceptedTerms: true  // Always true when form is submitted
+    })
+    return response.data
+  },
+
+  checkUsernameAvailability: async (username) => {
+    const response = await axiosInstance.get(`/users/check-username?username=${username}`)
+    return response.data
+  },
+
+  // GitHub: Exchange authorization code for access token
+  exchangeGitHubCode: async (data) => {
+    const response = await axiosInstance.post('/auth/oauth/github/exchange-code', data)
+    return response.data
+  },
+}
