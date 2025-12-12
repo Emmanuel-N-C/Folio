@@ -3,6 +3,7 @@ package com.folio.folio_backend.dto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.AssertTrue;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -24,4 +25,7 @@ public class OAuthRegisterRequest {
             message = "Username must start with a letter, end with a letter or number, and cannot have consecutive special characters"
     )
     private String username;
+
+    @AssertTrue(message = "You must accept the Terms of Service")
+    private Boolean acceptedTerms;
 }
