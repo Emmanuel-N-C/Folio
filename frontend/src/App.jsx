@@ -16,6 +16,9 @@ import ForgotPasswordPage from '@/pages/auth/ForgotPasswordPage'
 import ResetPasswordPage from '@/pages/auth/ResetPasswordPage'
 import OAuthUsernameSelectionPage from '@/pages/auth/OAuthUsernameSelectionPage'
 
+// Legal Pages
+import TermsOfServicePage from '@/pages/legal/TermsOfServicePage'
+
 // Feed Pages
 import FeedPage from '@/pages/feed/FeedPage'
 import TrendingPage from '@/pages/feed/TrendingPage'
@@ -58,6 +61,9 @@ function App() {
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="/auth/oauth/username-selection" element={<OAuthUsernameSelectionPage />} />
+            
+            {/* Legal Routes - WITHOUT Layout */}
+            <Route path="/terms" element={<TermsOfServicePage />} />
             
             {/* App Routes - WITH Layout (with sidebars) */}
             <Route element={<Layout />}>
