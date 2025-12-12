@@ -86,7 +86,7 @@ const Sidebar = ({ isOpen, onClose }) => {
     <>
       {/* Desktop Sidebar - Always visible on large screens */}
       <aside className={`
-        fixed lg:sticky top-0 h-screen w-64 bg-background border-r
+        fixed lg:sticky top-0 h-screen w-64 bg-background
         transition-transform duration-300 ease-in-out z-50
         ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
       `}>
