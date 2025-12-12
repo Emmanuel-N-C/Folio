@@ -1,13 +1,15 @@
 import axios from 'axios'
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8081/api'
+
 const axiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8080/api',
+  baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
 })
 
-// Add request interceptor to include JWT token
+// Request interceptor - attach JWT token
 axiosInstance.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token')
@@ -21,15 +23,23 @@ axiosInstance.interceptors.request.use(
   }
 )
 
-// Add response interceptor to handle errors
+// Response interceptor - handle errors
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Token expired or invalid
-      localStorage.removeItem('token')
-      localStorage.removeItem('user')
-      window.location.href = '/login'
+      // Only redirect to login if we're not already on an auth page
+      const currentPath = window.location.pathname
+      const isAuthPage = currentPath.startsWith('/login') || 
+                        currentPath.startsWith('/register') || 
+                        currentPath.startsWith('/auth/')
+      
+      if (!isAuthPage) {
+        // Token expired or invalid
+        localStorage.removeItem('token')
+        localStorage.removeItem('user')
+        window.location.href = '/login'
+      }
     }
     return Promise.reject(error)
   }
