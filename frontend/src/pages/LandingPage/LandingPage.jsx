@@ -131,7 +131,7 @@ export default function LandingPage() {
         </h1>
         
         <p className="text-2xl md:text-3xl lg:text-4xl text-gray-900 leading-tight mb-12 max-w-4xl">
-          The social platform where developers showcase what they've built—with live, interactive previews.
+          A social platform to explore inventive projects by developers and creators, brought to life through interaction.
         </p>
 
         {/* CTA Buttons */}
@@ -153,13 +153,13 @@ export default function LandingPage() {
         <div className="pt-12 border-t border-gray-200">
           <div className="flex flex-wrap items-center gap-6 text-sm text-gray-600">
             <div className="flex items-center gap-2">
-              <Github size={18} className="text-gray-900" />
-              <span className="font-medium">Open Source</span>
+              
+              <span className="font-medium">Live</span>
             </div>
             <div className="h-4 w-px bg-gray-300" />
-            <div className="font-medium">100% Free</div>
+            <div className="font-medium">Interactive</div>
             <div className="h-4 w-px bg-gray-300" />
-            <div className="font-medium">Live Interactive Previews</div>
+            <div className="font-medium">Previews</div>
           </div>
         </div>
       </section>
@@ -176,7 +176,7 @@ export default function LandingPage() {
             </h2>
 
             <p className="text-xl md:text-2xl text-gray-600 leading-relaxed">
-              Developers spend hours building amazing projects, then struggle to showcase them effectively. 
+              Developers and creators spend hours building amazing projects, then struggle to showcase them effectively. 
               Screenshots don't capture interactivity. GitHub READMEs don't show the experience. 
               Deployed links get lost in the noise.
             </p>
@@ -195,7 +195,7 @@ export default function LandingPage() {
 
             <p className="text-xl md:text-2xl text-gray-600 leading-relaxed">
               Folio embeds your projects directly in the feed using iframe previews. 
-              Users can interact with your app, explore the interface, and experience your work—all 
+              Users can interact with your app, explore the interface, and experience your work all 
               without leaving the platform. If a preview can't load, we fall back to screenshots and a direct link.
             </p>
           </div>
@@ -315,16 +315,14 @@ export default function LandingPage() {
                 <ArrowRight className="ml-2" size={20} />
               </Button>
             </Link>
-            <Link to="/feed">
+            <Link to="/login">
               <Button variant="outline" size="lg" className="text-lg px-8 py-6 border-gray-900 text-gray-900 hover:bg-gray-50">
-                Browse Projects
+                Login
               </Button>
             </Link>
           </div>
 
-          <p className="text-sm text-gray-500">
-            No credit card required • Free forever • Open source
-          </p>
+        
         </div>
       </section>
 
@@ -341,7 +339,7 @@ export default function LandingPage() {
                 <p className="text-2xl font-bold">Folio</p>
               </div>
               <p className="text-gray-400 leading-relaxed">
-                The social platform for developers to showcase interactive projects.
+                The social platform for developers and creators to showcase interactive projects.
               </p>
             </div>
 
@@ -361,7 +359,6 @@ export default function LandingPage() {
               <div className="space-y-3">
                 <Link to="/register" className="block text-gray-400 hover:text-white transition-colors">Sign Up</Link>
                 <Link to="/login" className="block text-gray-400 hover:text-white transition-colors">Sign In</Link>
-                <Link to="/feed" className="block text-gray-400 hover:text-white transition-colors">Browse Feed</Link>
               </div>
             </div>
 
@@ -369,11 +366,8 @@ export default function LandingPage() {
             <div>
               <h4 className="text-sm font-semibold uppercase tracking-wide mb-4">Project</h4>
               <div className="space-y-3">
-                <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="block text-gray-400 hover:text-white transition-colors">
+                <a href="https://github.com/Emmanuel-N-C/Folio" target="_blank" rel="noopener noreferrer" className="block text-gray-400 hover:text-white transition-colors">
                   GitHub
-                </a>
-                <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="block text-gray-400 hover:text-white transition-colors">
-                  Documentation
                 </a>
               </div>
             </div>
