@@ -3,6 +3,12 @@ import { ArrowRight, Github, Menu, X, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 
+// Screenshot imports - replace these with your actual screenshot files
+import step1Screenshot from '@/assets/screenshots/Createpostfolio.png';
+import step2Screenshot from '@/assets/screenshots/PostEmbedded.png';
+import step3Screenshot from '@/assets/screenshots/Interactfolio.png';
+import step4Screenshot from '@/assets/screenshots/Notifications.png';
+
 export default function LandingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [openFaq, setOpenFaq] = useState(null);
@@ -203,54 +209,94 @@ export default function LandingPage() {
       </section>
 
       {/* How It Works Section */}
-      <section id="how-it-works" className="py-24 md:py-32 bg-white">
-        <div className="max-w-7xl mx-auto px-6 lg:px-12">
-          <div className="max-w-5xl mb-20">
-            <p className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-6">How It Works</p>
-            <h2 className="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 leading-tight">
-              From Upload to Interaction
-            </h2>
-          </div>
+<section id="how-it-works" className="py-24 md:py-32 bg-white">
+  <div className="max-w-7xl mx-auto px-6 lg:px-12">
+    <div className="mb-20">
+      <p className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-6">How It Works</p>
+      <h2 className="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 leading-tight">
+        From Upload to Interaction
+      </h2>
+    </div>
 
-          <div className="grid md:grid-cols-2 gap-12 max-w-5xl">
-            {/* Step 01 */}
-            <div>
-              <p className="text-sm font-semibold text-gray-500 mb-3">01</p>
-              <h3 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Upload Your Project</h3>
-              <p className="text-lg text-gray-600 leading-relaxed">
-                Add your project title, description, live demo URL, GitHub link, screenshots, and tech stack tags.
-              </p>
-            </div>
-
-            {/* Step 02 */}
-            <div>
-              <p className="text-sm font-semibold text-gray-500 mb-3">02</p>
-              <h3 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Folio Embeds It</h3>
-              <p className="text-lg text-gray-600 leading-relaxed">
-                Our system attempts to load your project as an interactive iframe preview in the feed.
-              </p>
-            </div>
-
-            {/* Step 03 */}
-            <div>
-              <p className="text-sm font-semibold text-gray-500 mb-3">03</p>
-              <h3 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Users Interact</h3>
-              <p className="text-lg text-gray-600 leading-relaxed">
-                Developers can click, scroll, and explore your app directly—or view screenshots if embedding isn't supported.
-              </p>
-            </div>
-
-            {/* Step 04 */}
-            <div>
-              <p className="text-sm font-semibold text-gray-500 mb-3">04</p>
-              <h3 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Engage & Connect</h3>
-              <p className="text-lg text-gray-600 leading-relaxed">
-                Others can like, comment, visit your profile, and check out your GitHub repo or live deployment.
-              </p>
-            </div>
-          </div>
+    <div className="space-y-24">
+      {/* Step 01 */}
+      <div>
+        <div className="mb-8 max-w-3xl">
+          <p className="text-sm font-semibold text-gray-500 mb-3">01</p>
+          <h3 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">Upload Your Project</h3>
+          <p className="text-xl text-gray-600 leading-relaxed">
+            Add your project title, description, live demo URL, GitHub link, screenshots, and tech stack tags.
+          </p>
         </div>
-      </section>
+        
+        <div className="relative rounded-2xl overflow-hidden border border-gray-200 shadow-2xl bg-white">
+          <img 
+            src={step1Screenshot} 
+            alt="Upload Your Project" 
+            className="w-full h-auto"
+          />
+        </div>
+      </div>
+
+      {/* Step 02 */}
+      <div>
+        <div className="mb-8 max-w-3xl">
+          <p className="text-sm font-semibold text-gray-500 mb-3">02</p>
+          <h3 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">Folio Embeds It</h3>
+          <p className="text-xl text-gray-600 leading-relaxed">
+            Our system attempts to load your project as an interactive iframe preview in the feed.
+          </p>
+        </div>
+
+        <div className="relative rounded-2xl overflow-hidden border border-gray-200 shadow-2xl bg-white">
+          <img 
+            src={step2Screenshot} 
+            alt="Folio Embeds Your Project" 
+            className="w-full h-auto"
+          />
+        </div>
+      </div>
+
+      {/* Step 03 */}
+      <div>
+        <div className="mb-8 max-w-3xl">
+          <p className="text-sm font-semibold text-gray-500 mb-3">03</p>
+          <h3 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">Users Interact</h3>
+          <p className="text-xl text-gray-600 leading-relaxed">
+            Developers can click, scroll, and explore your app directly—or view screenshots if embedding isn't supported.
+          </p>
+        </div>
+        
+        <div className="relative rounded-2xl overflow-hidden border border-gray-200 shadow-2xl bg-white">
+          <img 
+            src={step3Screenshot} 
+            alt="Users Interact with Projects" 
+            className="w-full h-auto"
+          />
+        </div>
+      </div>
+
+      {/* Step 04 */}
+      <div>
+        <div className="mb-8 max-w-3xl">
+          <p className="text-sm font-semibold text-gray-500 mb-3">04</p>
+          <h3 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">Engage & Connect</h3>
+          <p className="text-xl text-gray-600 leading-relaxed">
+            Others can like, comment, visit your profile, and check out your GitHub repo or live deployment.
+          </p>
+        </div>
+
+        <div className="relative rounded-2xl overflow-hidden border border-gray-200 shadow-2xl bg-white">
+          <img 
+            src={step4Screenshot} 
+            alt="Engage and Connect" 
+            className="w-full h-auto"
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
       {/* FAQ Section - Modern with Dropdowns */}
       <section id="faq" className="py-24 md:py-32 bg-gray-50">
