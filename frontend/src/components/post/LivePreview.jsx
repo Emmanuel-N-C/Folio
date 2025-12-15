@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { ExternalLink, AlertCircle, Loader2 } from 'lucide-react'
+import { ExternalLink, AlertCircle, Loader2, Shield } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 
 const LivePreview = ({ 
@@ -10,8 +10,9 @@ const LivePreview = ({
   title = "Project",
   size = "large" // "feed" for feed cards, "large" for detail page
 }) => {
-  const [iframeStatus, setIframeStatus] = useState('loading') // 'loading', 'success', 'error'
+  const [iframeStatus, setIframeStatus] = useState('loading') // 'loading', 'success', 'error', 'blocked'
   const [showFallback, setShowFallback] = useState(false)
+  const [blockReason, setBlockReason] = useState('')
   const iframeRef = useRef(null)
   const timeoutRef = useRef(null)
 
@@ -30,9 +31,51 @@ const LivePreview = ({
       return
     }
 
+    // SECURITY 1: Detect if Folio is already in an iframe (prevent nested iframes)
+    const isInIframe = () => {
+      try {
+        return window.self !== window.top
+      } catch (e) {
+        // If we can't access window.top due to cross-origin, we're definitely in an iframe
+        return true
+      }
+    }
+
+    if (isInIframe()) {
+      console.warn('Security: Folio is embedded in an iframe. Blocking all iframe content to prevent recursive embedding attacks.')
+      setShowFallback(true)
+      setIframeStatus('blocked')
+      setBlockReason('iframe-nesting-blocked')
+      return
+    }
+
+    // SECURITY 2: Prevent embedding Folio inside itself
+    const currentDomain = window.location.hostname
+    try {
+      const urlObj = new URL(url)
+      const targetDomain = urlObj.hostname
+      
+      // Block if trying to embed Folio itself
+      if (targetDomain === currentDomain || 
+          (targetDomain.includes('folio') && targetDomain.includes('vercel.app')) ||
+          (targetDomain.includes('folio') && targetDomain.includes('railway.app'))) {
+        console.warn('Security: Blocked attempt to embed Folio inside itself')
+        setShowFallback(true)
+        setIframeStatus('blocked')
+        setBlockReason('self-embed')
+        return
+      }
+    } catch (error) {
+      console.error('Invalid URL:', error)
+      setShowFallback(true)
+      setIframeStatus('error')
+      return
+    }
+
     // Reset state when URL changes
     setIframeStatus('loading')
     setShowFallback(false)
+    setBlockReason('')
 
     // Set a timeout to detect if iframe doesn't load
     timeoutRef.current = setTimeout(() => {
@@ -103,12 +146,34 @@ const LivePreview = ({
   // Fallback UI Component
   const FallbackUI = () => (
     <div className="space-y-4">
-      <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 p-3 rounded-lg">
-        <AlertCircle className="h-5 w-5 flex-shrink-0" />
-        <p className="text-sm">
-          This website cannot be embedded. View the full experience by opening it in a new tab.
-        </p>
-      </div>
+      {blockReason === 'iframe-nesting-blocked' ? (
+        <div className="flex items-center gap-2 text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-950/30 p-3 rounded-lg">
+          <Shield className="h-5 w-5 flex-shrink-0" />
+          <div>
+            <p className="text-sm font-semibold">Security Protection Active</p>
+            <p className="text-xs mt-1">
+              Live previews are disabled when Folio is embedded to prevent infinite loops and security risks.
+            </p>
+          </div>
+        </div>
+      ) : blockReason === 'self-embed' ? (
+        <div className="flex items-center gap-2 text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/30 p-3 rounded-lg">
+          <Shield className="h-5 w-5 flex-shrink-0" />
+          <div>
+            <p className="text-sm font-semibold">Security Protection Active</p>
+            <p className="text-xs mt-1">
+              Folio cannot be embedded inside itself to prevent infinite recursion. This is a security feature.
+            </p>
+          </div>
+        </div>
+      ) : (
+        <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 p-3 rounded-lg">
+          <AlertCircle className="h-5 w-5 flex-shrink-0" />
+          <p className="text-sm">
+            This website cannot be embedded. View the full experience by opening it in a new tab.
+          </p>
+        </div>
+      )}
 
       {screenshots && screenshots.length > 0 ? (
         <div className="space-y-3">
@@ -170,6 +235,12 @@ const LivePreview = ({
             {iframeStatus === 'success' && !showFallback && (
               <Badge variant="default" className="bg-green-500">
                 Live
+              </Badge>
+            )}
+            {iframeStatus === 'blocked' && (
+              <Badge variant="destructive" className="gap-1">
+                <Shield className="h-3 w-3" />
+                Blocked
               </Badge>
             )}
           </h3>
