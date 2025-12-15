@@ -1,0 +1,55 @@
+# Maven build output
+target/
+!target/folio-backend-0.0.1-SNAPSHOT.jar
+
+# Maven wrapper
+.mvn/
+mvnw
+mvnw.cmd
+
+# IDE files
+.idea/
+*.iml
+.vscode/
+.settings/
+.classpath
+.project
+
+# Environment files
+.env
+.env.local
+.env.production
+*.env
+
+# Logs
+*.log
+logs/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Documentation
+README.md
+HELP.md
+API_TESTING_CHECKLIST.md
+PROJECT_SUMMARY.md
+*.md
+
+# Test files
+src/test/
+
+# Postman collections
+*.postman_collection.json
+Folio-API-Postman-Collection.json
+
+# Temporary files
+*.tmp
+*.swp
+*.bak
+*~
