@@ -3,6 +3,7 @@ package com.folio.folio_backend.controller;
 import com.folio.folio_backend.dto.CreatePostRequest;
 import com.folio.folio_backend.dto.MessageResponse;
 import com.folio.folio_backend.dto.PostResponse;
+import com.folio.folio_backend.exception.BadRequestException;
 import com.folio.folio_backend.service.PostService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.List;
 
 @RestController
@@ -26,9 +29,34 @@ public class PostController {
     @Autowired
     private PostService postService;
 
+    /**
+     * Validate that users cannot embed Folio inside itself
+     */
+    private void validateProjectUrl(String url) {
+        if (url != null && !url.trim().isEmpty()) {
+            try {
+                URL urlObj = new URL(url);
+                String host = urlObj.getHost().toLowerCase();
+
+                // Block Folio domains to prevent infinite recursion
+                if ((host.contains("folio") && host.contains("vercel.app")) ||
+                        (host.contains("folio") && host.contains("railway.app"))) {
+                    throw new BadRequestException(
+                            "You cannot embed Folio inside itself. Please use a different project URL."
+                    );
+                }
+            } catch (MalformedURLException e) {
+                throw new BadRequestException("Invalid URL format: " + e.getMessage());
+            }
+        }
+    }
+
     @PostMapping
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<PostResponse> createPost(@Valid @RequestBody CreatePostRequest request) {
+        // Validate live demo URL
+        validateProjectUrl(request.getLiveDemoUrl());
+
         PostResponse response = postService.createPost(request);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
@@ -79,6 +107,9 @@ public class PostController {
     public ResponseEntity<PostResponse> updatePost(
             @PathVariable Long postId,
             @Valid @RequestBody CreatePostRequest request) {
+        // Validate live demo URL
+        validateProjectUrl(request.getLiveDemoUrl());
+
         PostResponse response = postService.updatePost(postId, request);
         return ResponseEntity.ok(response);
     }

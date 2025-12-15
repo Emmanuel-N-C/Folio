@@ -45,6 +45,10 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource))
+                // SECURITY: Prevent Folio from being embedded in iframes (prevents infinite recursion)
+                .headers(headers -> headers
+                        .frameOptions(frame -> frame.deny())
+                )
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint(jwtAuthenticationEntryPoint))
                 .sessionManagement(session -> session
