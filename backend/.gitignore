@@ -49,7 +49,6 @@ files/
 temp/
 
 ### Sensitive Configuration ###
-application.properties
 application-dev.properties
 application-local.properties
 .env
