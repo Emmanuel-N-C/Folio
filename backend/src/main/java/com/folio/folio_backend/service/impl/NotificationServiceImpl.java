@@ -11,6 +11,7 @@ import com.folio.folio_backend.repository.NotificationRepository;
 import com.folio.folio_backend.repository.PostRepository;
 import com.folio.folio_backend.repository.UserRepository;
 import com.folio.folio_backend.service.NotificationService;
+import com.folio.folio_backend.websocket.WebSocketNotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -32,6 +33,9 @@ public class NotificationServiceImpl implements NotificationService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private WebSocketNotificationService webSocketNotificationService;
+
     @Override
     @Transactional
     public void createPostLikeNotification(Long postId, Long actorId) {
@@ -41,7 +45,6 @@ public class NotificationServiceImpl implements NotificationService {
         User actor = userRepository.findById(actorId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        // Don't create notification if user likes their own post
         if (post.getPostedBy().getId().equals(actorId)) {
             return;
         }
@@ -52,7 +55,13 @@ public class NotificationServiceImpl implements NotificationService {
         notification.setType(Notification.NotificationType.POST_LIKE);
         notification.setPost(post);
 
-        notificationRepository.save(notification);
+        notification = notificationRepository.save(notification);
+
+        NotificationResponse response = NotificationResponse.fromNotification(notification);
+        webSocketNotificationService.sendNotificationToUser(post.getPostedBy().getId(), response);
+
+        long unreadCount = getUnreadCount(post.getPostedBy().getId());
+        webSocketNotificationService.sendUnreadCountToUser(post.getPostedBy().getId(), unreadCount);
     }
 
     @Override
@@ -67,7 +76,6 @@ public class NotificationServiceImpl implements NotificationService {
         User actor = userRepository.findById(actorId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        // Don't create notification if user comments on their own post
         if (post.getPostedBy().getId().equals(actorId)) {
             return;
         }
@@ -79,7 +87,13 @@ public class NotificationServiceImpl implements NotificationService {
         notification.setPost(post);
         notification.setComment(comment);
 
-        notificationRepository.save(notification);
+        notification = notificationRepository.save(notification);
+
+        NotificationResponse response = NotificationResponse.fromNotification(notification);
+        webSocketNotificationService.sendNotificationToUser(post.getPostedBy().getId(), response);
+
+        long unreadCount = getUnreadCount(post.getPostedBy().getId());
+        webSocketNotificationService.sendUnreadCountToUser(post.getPostedBy().getId(), unreadCount);
     }
 
     @Override
@@ -94,7 +108,6 @@ public class NotificationServiceImpl implements NotificationService {
         User actor = userRepository.findById(actorId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        // Don't create notification if user replies to their own comment
         if (parentComment.getUser().getId().equals(actorId)) {
             return;
         }
@@ -106,7 +119,13 @@ public class NotificationServiceImpl implements NotificationService {
         notification.setPost(parentComment.getPost());
         notification.setComment(reply);
 
-        notificationRepository.save(notification);
+        notification = notificationRepository.save(notification);
+
+        NotificationResponse response = NotificationResponse.fromNotification(notification);
+        webSocketNotificationService.sendNotificationToUser(parentComment.getUser().getId(), response);
+
+        long unreadCount = getUnreadCount(parentComment.getUser().getId());
+        webSocketNotificationService.sendUnreadCountToUser(parentComment.getUser().getId(), unreadCount);
     }
 
     @Override
@@ -118,7 +137,6 @@ public class NotificationServiceImpl implements NotificationService {
         User actor = userRepository.findById(actorId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        // Don't create notification if user likes their own comment
         if (comment.getUser().getId().equals(actorId)) {
             return;
         }
@@ -130,7 +148,13 @@ public class NotificationServiceImpl implements NotificationService {
         notification.setPost(comment.getPost());
         notification.setComment(comment);
 
-        notificationRepository.save(notification);
+        notification = notificationRepository.save(notification);
+
+        NotificationResponse response = NotificationResponse.fromNotification(notification);
+        webSocketNotificationService.sendNotificationToUser(comment.getUser().getId(), response);
+
+        long unreadCount = getUnreadCount(comment.getUser().getId());
+        webSocketNotificationService.sendUnreadCountToUser(comment.getUser().getId(), unreadCount);
     }
 
     @Override
@@ -150,11 +174,15 @@ public class NotificationServiceImpl implements NotificationService {
     @Transactional
     public void markAsRead(Long notificationId, Long userId) {
         notificationRepository.markAsRead(notificationId, userId);
+
+        long unreadCount = getUnreadCount(userId);
+        webSocketNotificationService.sendUnreadCountToUser(userId, unreadCount);
     }
 
     @Override
     @Transactional
     public void markAllAsRead(Long userId) {
         notificationRepository.markAllAsReadByRecipientId(userId);
+        webSocketNotificationService.sendUnreadCountToUser(userId, 0);
     }
 }

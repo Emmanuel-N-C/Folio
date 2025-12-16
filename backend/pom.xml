@@ -131,6 +131,11 @@
 			<artifactId>github-api</artifactId>
 			<version>1.321</version>
 		</dependency>
+		<!-- WebSocket Support -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-websocket</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>

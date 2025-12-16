@@ -45,7 +45,6 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource))
-                // SECURITY: Prevent Folio from being embedded in iframes (prevents infinite recursion)
                 .headers(headers -> headers
                         .frameOptions(frame -> frame.deny())
                 )
@@ -56,6 +55,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Public endpoints
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/ws/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/posts/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/users/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/feed/**").permitAll()
@@ -73,4 +73,5 @@ public class SecurityConfig {
 
         return http.build();
     }
+
 }

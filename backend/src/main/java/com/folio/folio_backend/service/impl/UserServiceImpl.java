@@ -217,6 +217,12 @@ public class UserServiceImpl implements UserService {
         userRepository.delete(user);
     }
 
+    @Override
+    public User getUserByUsername(String username) {
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + username));
+    }
+
     private UserProfileResponse mapToUserProfileResponse(User user) {
         UserProfileResponse response = new UserProfileResponse();
         response.setId(user.getId());
