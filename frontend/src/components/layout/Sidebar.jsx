@@ -1,5 +1,6 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
+import { useWebSocket } from '@/contexts/WebSocketContext'
 import { Button } from '@/components/ui/button'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { 
@@ -13,40 +14,23 @@ import {
   Sun,
   LogOut,
   Shield,
-  X
+  X,
+  WifiOff
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
-import { notificationsAPI } from '@/api/notifications'
 
 const Sidebar = ({ isOpen, onClose }) => {
   const { isAuthenticated, user, logout, isAdmin } = useAuth()
+  const { unreadCount, connected, usePolling } = useWebSocket()
   const location = useLocation()
   const navigate = useNavigate()
   const [theme, setTheme] = useState('light')
-  const [unreadCount, setUnreadCount] = useState(0)
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme') || 'light'
     setTheme(savedTheme)
     document.documentElement.classList.toggle('dark', savedTheme === 'dark')
   }, [])
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      fetchUnreadCount()
-      const interval = setInterval(fetchUnreadCount, 2000)
-      return () => clearInterval(interval)
-    }
-  }, [isAuthenticated])
-
-  const fetchUnreadCount = async () => {
-    try {
-      const count = await notificationsAPI.getUnreadCount()
-      setUnreadCount(count)
-    } catch (error) {
-      console.error('Failed to fetch unread count:', error)
-    }
-  }
 
   const toggleTheme = () => {
     const newTheme = theme === 'light' ? 'dark' : 'light'
@@ -74,7 +58,6 @@ const Sidebar = ({ isOpen, onClose }) => {
   }
 
   const handleNavClick = () => {
-    // Close mobile sidebar when navigating
     if (window.innerWidth < 1024) {
       onClose?.()
     }
@@ -84,14 +67,12 @@ const Sidebar = ({ isOpen, onClose }) => {
 
   return (
     <>
-      {/* Desktop Sidebar - Always visible on large screens */}
       <aside className={`
         fixed lg:sticky top-0 h-screen w-64 bg-background
         transition-transform duration-300 ease-in-out z-50
         ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
       `}>
         <div className="flex flex-col h-full p-4 space-y-4">
-          {/* Mobile Close Button */}
           <div className="lg:hidden flex justify-end">
             <Button
               variant="ghost"
@@ -103,7 +84,6 @@ const Sidebar = ({ isOpen, onClose }) => {
             </Button>
           </div>
 
-          {/* Logo */}
           <div className="pt-2 pb-2">
             <Link to="/" className="flex items-center gap-3 group" onClick={handleNavClick}>
               <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary/70 rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-all duration-300 group-hover:scale-105">
@@ -113,7 +93,13 @@ const Sidebar = ({ isOpen, onClose }) => {
             </Link>
           </div>
 
-          {/* User Profile Card */}
+          {isAuthenticated && usePolling && (
+            <div className="flex items-center gap-2 p-2 rounded-lg bg-yellow-100 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-200 text-xs">
+              <WifiOff className="h-4 w-4" />
+              <span>Limited connectivity</span>
+            </div>
+          )}
+
           {isAuthenticated && user && (
             <Link 
               to={`/profile/${user.id}`} 
@@ -137,7 +123,6 @@ const Sidebar = ({ isOpen, onClose }) => {
             </Link>
           )}
 
-          {/* Navigation Items */}
           <nav className="flex-1 space-y-1 overflow-y-auto">
             {navItems.map((item) => {
               if (!item.show) return null
@@ -167,7 +152,6 @@ const Sidebar = ({ isOpen, onClose }) => {
               )
             })}
 
-            {/* Theme Toggle */}
             <Button
               variant="ghost"
               onClick={toggleTheme}
@@ -199,7 +183,6 @@ const Sidebar = ({ isOpen, onClose }) => {
             )}
           </nav>
 
-          {/* Action Buttons Card */}
           {isAuthenticated && (
             <div className="space-y-2 p-4 rounded-2xl bg-card shadow-sm">
               <Link to="/posts/create" onClick={handleNavClick}>
