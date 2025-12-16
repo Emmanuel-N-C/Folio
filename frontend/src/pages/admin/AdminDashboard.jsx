@@ -18,6 +18,8 @@ import {
   AlertCircle
 } from 'lucide-react'
 import { formatDate, formatRelativeTime } from '@/lib/utils'
+import { DeleteConfirmDialog } from '@/components/ui/DeleteConfirmDialog'
+
 const AdminDashboard = () => {
   const [stats, setStats] = useState(null)
   const [users, setUsers] = useState([])
@@ -27,22 +29,36 @@ const AdminDashboard = () => {
   const [activeView, setActiveView] = useState('overview') // 'overview', 'users', 'posts', 'comments'
   const { toast } = useToast()
   const navigate = useNavigate()
+  
+  // Delete dialog state
+  const [deleteDialog, setDeleteDialog] = useState({
+    open: false,
+    type: null, // 'user', 'post', or 'comment'
+    id: null,
+    name: '',
+    isDeleting: false
+  })
+
   useEffect(() => {
     fetchData()
   }, [activeView])
+
   const fetchData = async () => {
     setLoading(true)
     try {
       const statsData = await adminAPI.getDashboardStats()
       setStats(statsData)
+
       if (activeView === 'users' || activeView === 'overview') {
         const usersData = await adminAPI.getAllUsers(0, 50)
         setUsers(usersData.content || [])
       }
+
       if (activeView === 'posts') {
         const postsData = await postsAPI.getAllPosts(0, 50)
         setPosts(postsData.content || [])
       }
+
       if (activeView === 'comments') {
         const commentsData = await adminAPI.getAllComments(0, 50)
         setComments(commentsData.content || [])
@@ -58,63 +74,78 @@ const AdminDashboard = () => {
       setLoading(false)
     }
   }
+
   const handleDeleteUser = async (userId, username) => {
-    if (!confirm(`Are you sure you want to delete user "${username}"? This will delete all their posts and comments.`)) {
-      return
-    }
-    try {
-      await adminAPI.deleteUser(userId)
-      toast({
-        title: "Success",
-        description: "User deleted successfully",
-      })
-      fetchData()
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: error.response?.data?.message || "Failed to delete user",
-        variant: "destructive"
-      })
-    }
+    setDeleteDialog({
+      open: true,
+      type: 'user',
+      id: userId,
+      name: username,
+      isDeleting: false
+    })
   }
+
   const handleDeletePost = async (postId, postTitle) => {
-    if (!confirm(`Are you sure you want to delete post "${postTitle}"?`)) {
-      return
-    }
-    try {
-      await adminAPI.deleteAnyPost(postId)
-      toast({
-        title: "Success",
-        description: "Post deleted successfully",
-      })
-      fetchData()
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: error.response?.data?.message || "Failed to delete post",
-        variant: "destructive"
-      })
-    }
+    setDeleteDialog({
+      open: true,
+      type: 'post',
+      id: postId,
+      name: postTitle,
+      isDeleting: false
+    })
   }
+
   const handleDeleteComment = async (commentId, commentText) => {
-    if (!confirm(`Are you sure you want to delete this comment: "${commentText.substring(0, 50)}..."?`)) {
-      return
-    }
+    setDeleteDialog({
+      open: true,
+      type: 'comment',
+      id: commentId,
+      name: commentText.substring(0, 50) + (commentText.length > 50 ? '...' : ''),
+      isDeleting: false
+    })
+  }
+
+  const confirmDelete = async () => {
+    setDeleteDialog(prev => ({ ...prev, isDeleting: true }))
+    
     try {
-      await adminAPI.deleteAnyComment(commentId)
-      toast({
-        title: "Success",
-        description: "Comment deleted successfully",
-      })
-      fetchData()
+      if (deleteDialog.type === 'user') {
+        await adminAPI.deleteUser(deleteDialog.id)
+        setUsers(users.filter(u => u.id !== deleteDialog.id))
+        toast({
+          title: "User deleted",
+          description: `User "${deleteDialog.name}" has been deleted`,
+        })
+      } else if (deleteDialog.type === 'post') {
+        await adminAPI.deleteAnyPost(deleteDialog.id)
+        setPosts(posts.filter(p => p.id !== deleteDialog.id))
+        toast({
+          title: "Post deleted",
+          description: `Post "${deleteDialog.name}" has been deleted`,
+        })
+      } else if (deleteDialog.type === 'comment') {
+        await adminAPI.deleteAnyComment(deleteDialog.id)
+        setComments(comments.filter(c => c.id !== deleteDialog.id))
+        toast({
+          title: "Comment deleted",
+          description: "Comment has been deleted",
+        })
+      }
+      
+      setDeleteDialog({ open: false, type: null, id: null, name: '', isDeleting: false })
+      // Refresh stats
+      const statsData = await adminAPI.getDashboardStats()
+      setStats(statsData)
     } catch (error) {
       toast({
         title: "Error",
-        description: error.response?.data?.message || "Failed to delete comment",
-        variant: "destructive"
+        description: `Failed to delete ${deleteDialog.type}`,
+        variant: "destructive",
       })
+      setDeleteDialog(prev => ({ ...prev, isDeleting: false }))
     }
   }
+
   if (loading && activeView === 'overview') {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
@@ -125,6 +156,7 @@ const AdminDashboard = () => {
       </div>
     )
   }
+
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       {/* Header */}
@@ -145,6 +177,7 @@ const AdminDashboard = () => {
           Back to Feed
         </Button>
       </div>
+
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card className="border-blue-200 dark:border-blue-800 cursor-pointer hover:shadow-lg transition-shadow"
@@ -158,6 +191,7 @@ const AdminDashboard = () => {
             <p className="text-xs text-muted-foreground mt-1">Click to manage</p>
           </CardContent>
         </Card>
+
         <Card className="border-green-200 dark:border-green-800 cursor-pointer hover:shadow-lg transition-shadow"
               onClick={() => setActiveView('posts')}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -169,6 +203,7 @@ const AdminDashboard = () => {
             <p className="text-xs text-muted-foreground mt-1">Click to manage</p>
           </CardContent>
         </Card>
+
         <Card className="border-purple-200 dark:border-purple-800 cursor-pointer hover:shadow-lg transition-shadow"
               onClick={() => setActiveView('comments')}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -181,6 +216,7 @@ const AdminDashboard = () => {
           </CardContent>
         </Card>
       </div>
+
       {/* View Switcher */}
       <div className="flex gap-2 border-b pb-4">
         <Button 
@@ -211,6 +247,7 @@ const AdminDashboard = () => {
           Comments Management
         </Button>
       </div>
+
       {/* Overview View */}
       {activeView === 'overview' && (
         <div className="grid gap-6">
@@ -240,6 +277,7 @@ const AdminDashboard = () => {
           </Card>
         </div>
       )}
+
       {/* Users View */}
       {activeView === 'users' && (
         <Card>
@@ -312,6 +350,7 @@ const AdminDashboard = () => {
           </CardContent>
         </Card>
       )}
+
       {/* Posts View */}
       {activeView === 'posts' && (
         <Card>
@@ -416,6 +455,7 @@ const AdminDashboard = () => {
           </CardContent>
         </Card>
       )}
+
       {/* Comments View */}
       {activeView === 'comments' && (
         <Card>
@@ -481,7 +521,24 @@ const AdminDashboard = () => {
           </CardContent>
         </Card>
       )}
+
+      <DeleteConfirmDialog
+        open={deleteDialog.open}
+        onOpenChange={(open) => setDeleteDialog({ ...deleteDialog, open })}
+        onConfirm={confirmDelete}
+        title={`Delete ${deleteDialog.type === 'user' ? 'User' : deleteDialog.type === 'post' ? 'Post' : 'Comment'}`}
+        description={
+          deleteDialog.type === 'user' 
+            ? "This will permanently delete the user and all their posts, comments, and likes. This action cannot be undone."
+            : deleteDialog.type === 'post'
+            ? "This will permanently delete the post and all its comments and likes. This action cannot be undone."
+            : "This will permanently delete the comment. This action cannot be undone."
+        }
+        itemName={deleteDialog.name}
+        isDeleting={deleteDialog.isDeleting}
+      />
     </div>
   )
 }
+
 export default AdminDashboard
