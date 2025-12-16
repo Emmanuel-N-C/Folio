@@ -120,6 +120,14 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
 
+    // Notifications where this user is the recipient
+    @OneToMany(mappedBy = "recipient", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Notification> receivedNotifications = new ArrayList<>();
+
+    // Notifications where this user is the actor
+    @OneToMany(mappedBy = "actor", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Notification> sentNotifications = new ArrayList<>();
+
     // Automatically normalize username and email to lowercase before saving
     @PrePersist
     @PreUpdate

@@ -56,7 +56,10 @@ public class Post {
     
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
-    
+
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Notification> notifications = new ArrayList<>();
+
     @CreationTimestamp
     @Column(updatable = false)
     private LocalDateTime createdAt;
