@@ -142,7 +142,7 @@ const Sidebar = ({ isOpen, onClose }) => {
                   >
                     <Icon className="h-5 w-5" strokeWidth={2} />
                     <span>{item.label}</span>
-                    {item.badge > 0 && (
+                    {item.badge !== undefined && item.badge > 0 && (
                       <span className="ml-auto bg-primary text-primary-foreground text-xs font-semibold px-2 py-0.5 rounded-full min-w-[20px] text-center">
                         {item.badge > 99 ? '99+' : item.badge}
                       </span>
