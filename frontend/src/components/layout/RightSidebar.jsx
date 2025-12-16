@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
+import { useWebSocket } from '@/contexts/WebSocketContext'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -10,27 +11,30 @@ import { formatDistanceToNow } from 'date-fns'
 
 const RightSidebar = () => {
   const { isAuthenticated } = useAuth()
+  const { unreadCount, notifications: realtimeNotifications } = useWebSocket()
   const [notifications, setNotifications] = useState([])
-  const [unreadCount, setUnreadCount] = useState(0)
 
   useEffect(() => {
     if (isAuthenticated) {
       fetchNotifications()
-      const interval = setInterval(fetchNotifications, 2000)
-      return () => clearInterval(interval)
     }
   }, [isAuthenticated])
 
+  useEffect(() => {
+    if (realtimeNotifications.length > 0) {
+      setNotifications(prev => {
+        const newNotifications = [...realtimeNotifications, ...prev]
+        return newNotifications.slice(0, 5)
+      })
+    }
+  }, [realtimeNotifications])
+
   const fetchNotifications = async () => {
     try {
-      const [notifData, count] = await Promise.all([
-        notificationsAPI.getNotifications(0, 5),
-        notificationsAPI.getUnreadCount()
-      ])
+      const notifData = await notificationsAPI.getNotifications(0, 5)
       setNotifications(notifData.content)
-      setUnreadCount(count)
     } catch (error) {
-      console.error('Failed to fetch notifications:', error)
+      // Silent fail
     }
   }
 
@@ -68,7 +72,6 @@ const RightSidebar = () => {
     <aside className="hidden xl:flex flex-col w-80 h-screen sticky top-0 bg-background">
       <ScrollArea className="flex-1 p-6">
         <div className="space-y-6">
-          {/* Notifications Section */}
           {isAuthenticated && (
             <div className="bg-card rounded-2xl shadow-sm overflow-hidden">
               <div className="p-4 bg-muted/50">
