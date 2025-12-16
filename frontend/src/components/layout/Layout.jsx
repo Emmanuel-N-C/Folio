@@ -33,7 +33,7 @@ const Layout = () => {
         </div>
 
         {/* Main Content */}
-        <main className="flex-1 overflow-y-auto relative">
+        <main className="flex-1 overflow-y-auto relative pt-16 lg:pt-0">
           {/* Toggle Button for Right Sidebar */}
           <div className="hidden xl:block fixed top-4 right-4 z-40">
             <Button
@@ -57,20 +57,12 @@ const Layout = () => {
 
         {/* Footer */}
         <footer className="border-t py-6 text-center text-sm text-muted-foreground bg-card">
-          <p>© 2025 Folio.</p>
+          © 2025 Folio. All rights reserved.
         </footer>
       </div>
 
-      {/* Right Sidebar - Toggleable */}
+      {/* Right Sidebar */}
       {rightSidebarOpen && <RightSidebar />}
-      
-      {/* Mobile Overlay */}
-      {leftSidebarOpen && (
-        <div 
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
-          onClick={() => setLeftSidebarOpen(false)}
-        />
-      )}
     </div>
   )
 }
