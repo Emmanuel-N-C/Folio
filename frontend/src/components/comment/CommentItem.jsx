@@ -6,10 +6,18 @@ import { commentsAPI } from '@/api/comments'
 import { useAuth } from '@/hooks/useAuth'
 import { useToast } from '@/components/ui/use-toast'
 import { formatRelativeTime } from '@/lib/utils'
-import { Trash2, Edit2, X, Check, MessageCircle, ChevronDown, ChevronUp } from 'lucide-react'
+import { Trash2, Edit2, X, Check, MessageCircle, ChevronDown, ChevronUp, MoreVertical } from 'lucide-react'
 import CommentLikeButton from './CommentLikeButton'
 import CommentReplyForm from './CommentReplyForm'
 import { Link } from 'react-router-dom'
+import { DeleteConfirmDialog } from '@/components/ui/DeleteConfirmDialog'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 
 const CommentItem = ({ comment, postId, postOwnerId, onDeleted, onUpdated }) => {
   const { user, isAdmin } = useAuth()
@@ -22,13 +30,14 @@ const CommentItem = ({ comment, postId, postOwnerId, onDeleted, onUpdated }) => 
   const [showReplies, setShowReplies] = useState(false)
   const [loadingReplies, setLoadingReplies] = useState(false)
   const [replyCount, setReplyCount] = useState(comment.repliesCount || 0)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   const canEdit = user?.userId === comment.userId
   const canDelete = user?.userId === comment.userId || user?.userId === postOwnerId || isAdmin()
 
   const handleDelete = async () => {
-    if (!confirm('Are you sure you want to delete this comment?')) return
-
+    setIsDeleting(true)
     try {
       await commentsAPI.deleteComment(postId, comment.id)
       onDeleted(comment.id)
@@ -36,22 +45,25 @@ const CommentItem = ({ comment, postId, postOwnerId, onDeleted, onUpdated }) => 
         title: "Success",
         description: "Comment deleted successfully",
       })
+      setShowDeleteDialog(false)
     } catch (error) {
       toast({
         title: "Error",
         description: "Failed to delete comment",
         variant: "destructive"
       })
+    } finally {
+      setIsDeleting(false)
     }
   }
 
   const handleUpdate = async () => {
     if (!editContent.trim()) return
-    
+
     setIsSubmitting(true)
     try {
-      const updatedComment = await commentsAPI.updateComment(postId, comment.id, editContent)
-      onUpdated(updatedComment)
+      const updated = await commentsAPI.updateComment(postId, comment.id, editContent)
+      onUpdated(updated)
       setIsEditing(false)
       toast({
         title: "Success",
@@ -68,16 +80,16 @@ const CommentItem = ({ comment, postId, postOwnerId, onDeleted, onUpdated }) => 
     }
   }
 
-  const handleCancelEdit = () => {
-    setEditContent(comment.content)
-    setIsEditing(false)
-  }
-
   const loadReplies = async () => {
+    if (replies.length > 0) {
+      setShowReplies(!showReplies)
+      return
+    }
+
     setLoadingReplies(true)
     try {
-      const repliesData = await commentsAPI.getReplies(postId, comment.id)
-      setReplies(repliesData)
+      const data = await commentsAPI.getReplies(postId, comment.id)
+      setReplies(data)
       setShowReplies(true)
     } catch (error) {
       toast({
@@ -91,7 +103,7 @@ const CommentItem = ({ comment, postId, postOwnerId, onDeleted, onUpdated }) => 
   }
 
   const handleReplyAdded = (newReply) => {
-    setReplies([...replies, newReply])
+    setReplies([newReply, ...replies])
     setReplyCount(prev => prev + 1)
     setShowReplyForm(false)
     setShowReplies(true)
@@ -106,81 +118,68 @@ const CommentItem = ({ comment, postId, postOwnerId, onDeleted, onUpdated }) => 
     setReplies(replies.map(r => r.id === updatedReply.id ? updatedReply : r))
   }
 
-  const toggleReplies = () => {
-    if (!showReplies && replies.length === 0) {
-      loadReplies()
-    } else {
-      setShowReplies(!showReplies)
-    }
-  }
-
   return (
     <div className="space-y-2">
-      <div className="flex gap-3 p-4 border rounded-lg">
-        {/* Clickable Profile Picture */}
-        <Link to={`/profile/${comment.userId}`} className="flex-shrink-0">
-          <Avatar className="w-8 h-8 cursor-pointer hover:ring-2 hover:ring-primary transition-all">
-            <AvatarImage src={comment.userProfileImageUrl} alt={comment.username} />
-            <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">
-              {comment.username?.charAt(0).toUpperCase()}
-            </AvatarFallback>
+      <div className="flex gap-3">
+        <Link to={`/profile/${comment.userId}`}>
+          <Avatar className="h-8 w-8">
+            <AvatarImage src={comment.userProfileImage} />
+            <AvatarFallback>{comment.username?.[0]?.toUpperCase()}</AvatarFallback>
           </Avatar>
         </Link>
         
-        <div className="flex-1 space-y-2">
+        <div className="flex-1 space-y-1">
           <div className="flex items-center justify-between">
-            <div>
-              {/* Clickable Username */}
+            <div className="flex items-center gap-2">
               <Link 
                 to={`/profile/${comment.userId}`}
-                className="font-semibold text-sm hover:underline cursor-pointer"
+                className="font-semibold text-sm hover:underline"
               >
-                {comment.displayName || comment.username}
+                {comment.username}
               </Link>
-              <span className="text-xs text-muted-foreground ml-2">
+              <span className="text-xs text-muted-foreground">
                 {formatRelativeTime(comment.createdAt)}
                 {comment.updatedAt !== comment.createdAt && ' (edited)'}
               </span>
             </div>
-            
-            <div className="flex gap-1">
-              {canEdit && !isEditing && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setIsEditing(true)}
-                >
-                  <Edit2 className="h-4 w-4" />
-                </Button>
-              )}
-              
-              {canDelete && !isEditing && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleDelete}
-                  className="text-destructive"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              )}
-            </div>
+
+            {(canEdit || canDelete) && !isEditing && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-6 w-6">
+                    <MoreVertical className="h-3 w-3" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  {canEdit && (
+                    <DropdownMenuItem onClick={() => setIsEditing(true)}>
+                      <Edit2 className="h-3 w-3 mr-2" />
+                      Edit
+                    </DropdownMenuItem>
+                  )}
+                  {canDelete && (
+                    <>
+                      {canEdit && <DropdownMenuSeparator />}
+                      <DropdownMenuItem 
+                        onClick={() => setShowDeleteDialog(true)}
+                        className="text-destructive focus:text-destructive"
+                      >
+                        <Trash2 className="h-3 w-3 mr-2" />
+                        Delete
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </div>
-          
+
           {isEditing ? (
-            <div className="space-y-2 pt-2">
+            <div className="space-y-2">
               <Input
                 value={editContent}
                 onChange={(e) => setEditContent(e.target.value)}
-                disabled={isSubmitting}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault()
-                    handleUpdate()
-                  } else if (e.key === 'Escape') {
-                    handleCancelEdit()
-                  }
-                }}
+                className="text-sm"
               />
               <div className="flex gap-2">
                 <Button
@@ -193,8 +192,11 @@ const CommentItem = ({ comment, postId, postOwnerId, onDeleted, onUpdated }) => 
                 </Button>
                 <Button
                   size="sm"
-                  variant="outline"
-                  onClick={handleCancelEdit}
+                  variant="ghost"
+                  onClick={() => {
+                    setIsEditing(false)
+                    setEditContent(comment.content)
+                  }}
                   disabled={isSubmitting}
                 >
                   <X className="h-3 w-3 mr-1" />
@@ -203,105 +205,105 @@ const CommentItem = ({ comment, postId, postOwnerId, onDeleted, onUpdated }) => 
               </div>
             </div>
           ) : (
-            <>
-              <p className="text-sm">{comment.content}</p>
-              
-              <div className="flex items-center gap-2 pt-1">
-                <CommentLikeButton
-                  commentId={comment.id}
-                  postId={postId}
-                  initialLiked={comment.likedByCurrentUser}
-                  initialCount={comment.likesCount}
-                />
-                
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowReplyForm(!showReplyForm)}
-                  className="gap-1 text-muted-foreground hover:text-foreground"
-                >
-                  <MessageCircle className="h-4 w-4" />
-                  Reply
-                </Button>
-
-                {replyCount > 0 && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={toggleReplies}
-                    className="gap-1 text-muted-foreground hover:text-foreground"
-                  >
-                    {showReplies ? (
-                      <ChevronUp className="h-4 w-4" />
-                    ) : (
-                      <ChevronDown className="h-4 w-4" />
-                    )}
-                    {replyCount} {replyCount === 1 ? 'reply' : 'replies'}
-                  </Button>
-                )}
-              </div>
-            </>
+            <p className="text-sm">{comment.content}</p>
           )}
 
-          {showReplyForm && (
-            <CommentReplyForm
+          <div className="flex items-center gap-4 pt-1">
+            <CommentLikeButton
               postId={postId}
-              commentId={comment.id}
-              onReplyAdded={handleReplyAdded}
-              onCancel={() => setShowReplyForm(false)}
+              comment={comment}
             />
+
+            {user && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-6 px-2 text-xs"
+                onClick={() => setShowReplyForm(!showReplyForm)}
+              >
+                <MessageCircle className="h-3 w-3 mr-1" />
+                Reply
+              </Button>
+            )}
+          </div>
+
+          {replyCount > 0 && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-6 px-2 text-xs text-muted-foreground"
+              onClick={loadReplies}
+              disabled={loadingReplies}
+            >
+              {showReplies ? (
+                <ChevronUp className="h-3 w-3 mr-1" />
+              ) : (
+                <ChevronDown className="h-3 w-3 mr-1" />
+              )}
+              {loadingReplies ? 'Loading...' : `${replyCount} ${replyCount === 1 ? 'reply' : 'replies'}`}
+            </Button>
           )}
         </div>
       </div>
 
-      {/* Replies Section */}
-      {showReplies && (
-        <div className="ml-12 space-y-2">
-          {loadingReplies ? (
-            <div className="text-sm text-muted-foreground">Loading replies...</div>
-          ) : (
-            replies.map(reply => (
-              <div key={reply.id} className="flex gap-3 p-3 border rounded-lg bg-muted/30">
-                {/* Clickable Reply Profile Picture */}
-                <Link to={`/profile/${reply.userId}`} className="flex-shrink-0">
-                  <Avatar className="w-7 h-7 cursor-pointer hover:ring-2 hover:ring-primary transition-all">
-                    <AvatarImage src={reply.userProfileImageUrl} alt={reply.username} />
-                    <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">
-                      {reply.username?.charAt(0).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                </Link>
-                
-                <ReplyItem
-                  reply={reply}
-                  postId={postId}
-                  postOwnerId={postOwnerId}
-                  onDeleted={handleReplyDeleted}
-                  onUpdated={handleReplyUpdated}
-                />
-              </div>
-            ))
-          )}
+      {showReplyForm && (
+        <div className="ml-11">
+          <CommentReplyForm
+            postId={postId}
+            parentCommentId={comment.id}
+            onReplyAdded={handleReplyAdded}
+            onCancel={() => setShowReplyForm(false)}
+          />
         </div>
       )}
+
+      {showReplies && replies.length > 0 && (
+        <div className="ml-11 space-y-3 pt-2 border-l-2 border-muted pl-4">
+          {replies.map(reply => (
+            <ReplyItem
+              key={reply.id}
+              reply={reply}
+              postId={postId}
+              postOwnerId={postOwnerId}
+              parentCommentUserId={comment.userId}
+              onDeleted={handleReplyDeleted}
+              onUpdated={handleReplyUpdated}
+            />
+          ))}
+        </div>
+      )}
+
+      <DeleteConfirmDialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        onConfirm={handleDelete}
+        title="Delete Comment"
+        description="Are you sure you want to delete this comment? This action cannot be undone."
+        itemName={comment.content.length > 50 ? comment.content.substring(0, 50) + '...' : comment.content}
+        isDeleting={isDeleting}
+      />
     </div>
   )
 }
 
-// Reply Item Component (nested inside same file)
-const ReplyItem = ({ reply, postId, postOwnerId, onDeleted, onUpdated }) => {
+// Reply Item Component
+const ReplyItem = ({ reply, postId, postOwnerId, parentCommentUserId, onDeleted, onUpdated }) => {
   const { user, isAdmin } = useAuth()
   const { toast } = useToast()
   const [isEditing, setIsEditing] = useState(false)
   const [editContent, setEditContent] = useState(reply.content)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   const canEdit = user?.userId === reply.userId
-  const canDelete = user?.userId === reply.userId || user?.userId === postOwnerId || isAdmin()
+  const canDelete = user?.userId === reply.userId || 
+                   user?.userId === postOwnerId || 
+                   user?.userId === parentCommentUserId || 
+                   isAdmin()
 
   const handleDelete = async () => {
-    if (!confirm('Are you sure you want to delete this reply?')) return
-
+    setIsDeleting(true)
     try {
       await commentsAPI.deleteComment(postId, reply.id)
       onDeleted(reply.id)
@@ -309,22 +311,25 @@ const ReplyItem = ({ reply, postId, postOwnerId, onDeleted, onUpdated }) => {
         title: "Success",
         description: "Reply deleted successfully",
       })
+      setShowDeleteDialog(false)
     } catch (error) {
       toast({
         title: "Error",
         description: "Failed to delete reply",
         variant: "destructive"
       })
+    } finally {
+      setIsDeleting(false)
     }
   }
 
   const handleUpdate = async () => {
     if (!editContent.trim()) return
-    
+
     setIsSubmitting(true)
     try {
-      const updatedReply = await commentsAPI.updateComment(postId, reply.id, editContent)
-      onUpdated(updatedReply)
+      const updated = await commentsAPI.updateComment(postId, reply.id, editContent)
+      onUpdated(updated)
       setIsEditing(false)
       toast({
         title: "Success",
@@ -342,88 +347,114 @@ const ReplyItem = ({ reply, postId, postOwnerId, onDeleted, onUpdated }) => {
   }
 
   return (
-    <div className="flex-1 space-y-1">
-      <div className="flex items-center justify-between">
-        <div>
-          {/* Clickable Reply Username */}
-          <Link 
-            to={`/profile/${reply.userId}`}
-            className="font-semibold text-sm hover:underline cursor-pointer"
-          >
-            {reply.displayName || reply.username}
-          </Link>
-          <span className="text-xs text-muted-foreground ml-2">
-            {formatRelativeTime(reply.createdAt)}
-            {reply.updatedAt !== reply.createdAt && ' (edited)'}
-          </span>
-        </div>
+    <>
+      <div className="flex gap-3">
+        <Link to={`/profile/${reply.userId}`}>
+          <Avatar className="h-7 w-7">
+            <AvatarImage src={reply.userProfileImage} />
+            <AvatarFallback>{reply.username?.[0]?.toUpperCase()}</AvatarFallback>
+          </Avatar>
+        </Link>
         
-        <div className="flex gap-1">
-          {canEdit && !isEditing && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsEditing(true)}
-            >
-              <Edit2 className="h-3 w-3" />
-            </Button>
-          )}
-          
-          {canDelete && !isEditing && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleDelete}
-              className="text-destructive"
-            >
-              <Trash2 className="h-3 w-3" />
-            </Button>
-          )}
-        </div>
-      </div>
-      
-      {isEditing ? (
-        <div className="space-y-2">
-          <Input
-            value={editContent}
-            onChange={(e) => setEditContent(e.target.value)}
-            disabled={isSubmitting}
-            className="text-sm"
-          />
-          <div className="flex gap-2">
-            <Button
-              size="sm"
-              onClick={handleUpdate}
-              disabled={isSubmitting || !editContent.trim()}
-            >
-              <Check className="h-3 w-3 mr-1" />
-              Save
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => setIsEditing(false)}
-              disabled={isSubmitting}
-            >
-              <X className="h-3 w-3 mr-1" />
-              Cancel
-            </Button>
+        <div className="flex-1 space-y-1">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Link 
+                to={`/profile/${reply.userId}`}
+                className="font-semibold text-sm hover:underline"
+              >
+                {reply.username}
+              </Link>
+              <span className="text-xs text-muted-foreground">
+                {formatRelativeTime(reply.createdAt)}
+                {reply.updatedAt !== reply.createdAt && ' (edited)'}
+              </span>
+            </div>
+
+            {(canEdit || canDelete) && !isEditing && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-6 w-6">
+                    <MoreVertical className="h-3 w-3" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  {canEdit && (
+                    <DropdownMenuItem onClick={() => setIsEditing(true)}>
+                      <Edit2 className="h-3 w-3 mr-2" />
+                      Edit
+                    </DropdownMenuItem>
+                  )}
+                  {canDelete && (
+                    <>
+                      {canEdit && <DropdownMenuSeparator />}
+                      <DropdownMenuItem 
+                        onClick={() => setShowDeleteDialog(true)}
+                        className="text-destructive focus:text-destructive"
+                      >
+                        <Trash2 className="h-3 w-3 mr-2" />
+                        Delete
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </div>
-        </div>
-      ) : (
-        <>
-          <p className="text-sm">{reply.content}</p>
-          <div className="flex items-center gap-2 pt-1">
+
+          {isEditing ? (
+            <div className="space-y-2">
+              <Input
+                value={editContent}
+                onChange={(e) => setEditContent(e.target.value)}
+                className="text-sm"
+              />
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  onClick={handleUpdate}
+                  disabled={isSubmitting || !editContent.trim()}
+                >
+                  <Check className="h-3 w-3 mr-1" />
+                  Save
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => {
+                    setIsEditing(false)
+                    setEditContent(reply.content)
+                  }}
+                  disabled={isSubmitting}
+                >
+                  <X className="h-3 w-3 mr-1" />
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <p className="text-sm">{reply.content}</p>
+          )}
+
+          <div className="flex items-center gap-4 pt-1">
             <CommentLikeButton
-              commentId={reply.id}
               postId={postId}
-              initialLiked={reply.likedByCurrentUser}
-              initialCount={reply.likesCount}
+              comment={reply}
             />
           </div>
-        </>
-      )}
-    </div>
+        </div>
+      </div>
+
+      <DeleteConfirmDialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        onConfirm={handleDelete}
+        title="Delete Reply"
+        description="Are you sure you want to delete this reply? This action cannot be undone."
+        itemName={reply.content.length > 50 ? reply.content.substring(0, 50) + '...' : reply.content}
+        isDeleting={isDeleting}
+      />
+    </>
   )
 }
 

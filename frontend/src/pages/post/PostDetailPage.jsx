@@ -11,7 +11,15 @@ import ProjectMediaViewer from '@/components/post/ProjectMediaViewer'
 import { useAuth } from '@/hooks/useAuth'
 import { useToast } from '@/components/ui/use-toast'
 import { formatRelativeTime } from '@/lib/utils'
-import { Edit, Trash2, ExternalLink, Github, ArrowLeft, Upload } from 'lucide-react'
+import { Edit, Trash2, ExternalLink, Github, ArrowLeft, Upload, Images, MoreVertical } from 'lucide-react'
+import { DeleteConfirmDialog } from '@/components/ui/DeleteConfirmDialog'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 
 const PostDetailPage = () => {
   const { postId } = useParams()
@@ -20,6 +28,8 @@ const PostDetailPage = () => {
   const { user, isAdmin } = useAuth()
   const navigate = useNavigate()
   const { toast } = useToast()
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   useEffect(() => {
     fetchPost()
@@ -42,8 +52,7 @@ const PostDetailPage = () => {
   }
 
   const handleDelete = async () => {
-    if (!confirm('Are you sure you want to delete this post?')) return
-
+    setIsDeleting(true)
     try {
       await postsAPI.deletePost(postId)
       toast({
@@ -57,6 +66,9 @@ const PostDetailPage = () => {
         description: "Failed to delete post",
         variant: "destructive"
       })
+    } finally {
+      setIsDeleting(false)
+      setShowDeleteDialog(false)
     }
   }
 
@@ -112,38 +124,39 @@ const PostDetailPage = () => {
             </div>
 
             {(canEdit || canDelete) && (
-              <div className="flex gap-2">
-                {canEdit && (
-                  <>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => navigate(`/posts/${postId}/upload-screenshots`)}
-                    >
-                      <Upload className="h-4 w-4 mr-2" />
-                      Upload Screenshots
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => navigate(`/posts/${postId}/edit`)}
-                    >
-                      <Edit className="h-4 w-4 mr-2" />
-                      Edit
-                    </Button>
-                  </>
-                )}
-                {canDelete && (
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    onClick={handleDelete}
-                  >
-                    <Trash2 className="h-4 w-4 mr-2" />
-                    Delete
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                    <MoreVertical className="h-4 w-4" />
                   </Button>
-                )}
-              </div>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  {canEdit && (
+                    <>
+                      <DropdownMenuItem onClick={() => navigate(`/posts/${postId}/upload-screenshots`)}>
+                        <Upload className="h-4 w-4 mr-2" />
+                        Upload Screenshots
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => navigate(`/posts/${postId}/edit`)}>
+                        <Edit className="h-4 w-4 mr-2" />
+                        Edit Post
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                  {canDelete && (
+                    <>
+                      {canEdit && <DropdownMenuSeparator />}
+                      <DropdownMenuItem 
+                        onClick={() => setShowDeleteDialog(true)}
+                        className="text-destructive focus:text-destructive"
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Delete Post
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
             )}
           </div>
         </CardHeader>
@@ -182,7 +195,7 @@ const PostDetailPage = () => {
                 Upload Screenshots
               </Button>
             </div>
-            )}
+          )}
 
           <div className="space-y-4">
             <div>
@@ -249,6 +262,16 @@ const PostDetailPage = () => {
           <CommentList postId={postId} postOwnerId={post.userId} />
         </CardContent>
       </Card>
+
+      <DeleteConfirmDialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        onConfirm={handleDelete}
+        title="Delete Post"
+        description="Are you sure you want to delete this post? This will also delete all comments and likes. This action cannot be undone."
+        itemName={post?.title}
+        isDeleting={isDeleting}
+      />
     </div>
   )
 }
