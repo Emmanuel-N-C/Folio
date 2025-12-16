@@ -9,7 +9,7 @@ import PostCard from '@/components/post/PostCard'
 import { useAuth } from '@/hooks/useAuth'
 import { useToast } from '@/components/ui/use-toast'
 import { formatDate } from '@/lib/utils'
-import { Edit, Github, Globe, Mail, ArrowLeft } from 'lucide-react'
+import { Edit, Github, Globe, Mail, ArrowLeft, MapPin, Briefcase } from 'lucide-react'
 
 const ProfilePage = () => {
   const { userId } = useParams()
@@ -80,11 +80,32 @@ const ProfilePage = () => {
               </Avatar>
               
               <div>
-                <CardTitle className="text-2xl">{profile.username}</CardTitle>
-                <p className="text-sm text-muted-foreground flex items-center gap-2 mt-1">
-                  <Mail className="h-4 w-4" />
-                  {profile.email}
-                </p>
+                <CardTitle className="text-2xl">{profile.displayName || profile.username}</CardTitle>
+                <p className="text-sm text-muted-foreground">@{profile.username}</p>
+                
+                {/* Only show email to profile owner - SECURITY FIX */}
+                {isOwnProfile && (
+                  <p className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
+                    <Mail className="h-3 w-3" />
+                    {profile.email}
+                  </p>
+                )}
+                
+                <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
+                  {profile.location && (
+                    <span className="flex items-center gap-1">
+                      <MapPin className="h-3 w-3" />
+                      {profile.location}
+                    </span>
+                  )}
+                  {profile.profession && (
+                    <span className="flex items-center gap-1">
+                      <Briefcase className="h-3 w-3" />
+                      {profile.profession}
+                    </span>
+                  )}
+                </div>
+                
                 <p className="text-xs text-muted-foreground mt-1">
                   Joined {formatDate(profile.createdAt)}
                 </p>

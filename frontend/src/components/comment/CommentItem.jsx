@@ -123,7 +123,7 @@ const CommentItem = ({ comment, postId, postOwnerId, onDeleted, onUpdated }) => 
       <div className="flex gap-3">
         <Link to={`/profile/${comment.userId}`}>
           <Avatar className="h-8 w-8">
-            <AvatarImage src={comment.userProfileImage} />
+            <AvatarImage src={comment.userProfileImageUrl} />
             <AvatarFallback>{comment.username?.[0]?.toUpperCase()}</AvatarFallback>
           </Avatar>
         </Link>
@@ -135,7 +135,7 @@ const CommentItem = ({ comment, postId, postOwnerId, onDeleted, onUpdated }) => 
                 to={`/profile/${comment.userId}`}
                 className="font-semibold text-sm hover:underline"
               >
-                {comment.username}
+                {comment.displayName || comment.username}
               </Link>
               <span className="text-xs text-muted-foreground">
                 {formatRelativeTime(comment.createdAt)}
@@ -351,7 +351,7 @@ const ReplyItem = ({ reply, postId, postOwnerId, parentCommentUserId, onDeleted,
       <div className="flex gap-3">
         <Link to={`/profile/${reply.userId}`}>
           <Avatar className="h-7 w-7">
-            <AvatarImage src={reply.userProfileImage} />
+            <AvatarImage src={reply.userProfileImageUrl} />
             <AvatarFallback>{reply.username?.[0]?.toUpperCase()}</AvatarFallback>
           </Avatar>
         </Link>
@@ -363,7 +363,7 @@ const ReplyItem = ({ reply, postId, postOwnerId, parentCommentUserId, onDeleted,
                 to={`/profile/${reply.userId}`}
                 className="font-semibold text-sm hover:underline"
               >
-                {reply.username}
+                {reply.displayName || reply.username}
               </Link>
               <span className="text-xs text-muted-foreground">
                 {formatRelativeTime(reply.createdAt)}
