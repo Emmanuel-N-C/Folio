@@ -11,8 +11,8 @@ public interface UserService {
     UserProfileResponse uploadProfilePicture(Long userId, MultipartFile file);
     User getCurrentUser();
     Long getCurrentUserId();
+    User getUserByUsername(String username);
 
-    // NEW METHODS
     boolean isUsernameExists(String username);
     boolean isEmailExists(String email);
     UserProfileResponse removeProfilePicture(Long userId);
