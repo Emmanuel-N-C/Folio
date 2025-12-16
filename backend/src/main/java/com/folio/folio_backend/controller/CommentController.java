@@ -16,10 +16,10 @@ import java.util.List;
 @RequestMapping("/api/posts/{postId}/comments")
 @CrossOrigin(origins = "*", maxAge = 3600)
 public class CommentController {
-    
+
     @Autowired
     private CommentService commentService;
-    
+
     @PostMapping
     public ResponseEntity<CommentResponse> createComment(
             @PathVariable Long postId,
@@ -27,13 +27,13 @@ public class CommentController {
         CommentResponse response = commentService.createComment(postId, request);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
-    
+
     @GetMapping
     public ResponseEntity<List<CommentResponse>> getPostComments(@PathVariable Long postId) {
         List<CommentResponse> response = commentService.getPostComments(postId);
         return ResponseEntity.ok(response);
     }
-    
+
     @DeleteMapping("/{commentId}")
     public ResponseEntity<MessageResponse> deleteComment(
             @PathVariable Long postId,
@@ -49,35 +49,41 @@ public class CommentController {
         CommentResponse response = commentService.updateComment(commentId, request);
         return ResponseEntity.ok(response);
     }
-    
+
     // Like a comment
     @PostMapping("/{commentId}/like")
-    public ResponseEntity<CommentResponse> likeComment(@PathVariable Long commentId) {
+    public ResponseEntity<CommentResponse> likeComment(
+            @PathVariable Long postId,
+            @PathVariable Long commentId) {
         CommentResponse response = commentService.likeComment(commentId);
         return ResponseEntity.ok(response);
     }
-    
+
     // Unlike a comment
     @DeleteMapping("/{commentId}/like")
-    public ResponseEntity<CommentResponse> unlikeComment(@PathVariable Long commentId) {
+    public ResponseEntity<CommentResponse> unlikeComment(
+            @PathVariable Long postId,
+            @PathVariable Long commentId) {
         CommentResponse response = commentService.unlikeComment(commentId);
         return ResponseEntity.ok(response);
     }
-    
+
     // Reply to a comment
     @PostMapping("/{commentId}/replies")
     public ResponseEntity<CommentResponse> createReply(
+            @PathVariable Long postId,
             @PathVariable Long commentId,
             @Valid @RequestBody CreateCommentRequest request) {
         CommentResponse response = commentService.createReply(commentId, request);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
-    
+
     // Get replies to a comment
     @GetMapping("/{commentId}/replies")
-    public ResponseEntity<List<CommentResponse>> getReplies(@PathVariable Long commentId) {
+    public ResponseEntity<List<CommentResponse>> getReplies(
+            @PathVariable Long postId,
+            @PathVariable Long commentId) {
         List<CommentResponse> response = commentService.getReplies(commentId);
         return ResponseEntity.ok(response);
     }
 }
-
