@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import { useWebSocket } from '@/contexts/WebSocketContext'
@@ -11,43 +11,20 @@ import { formatDistanceToNow } from 'date-fns'
 
 const RightSidebar = () => {
   const { isAuthenticated } = useAuth()
-  const { unreadCount, notifications: realtimeNotifications, decrementUnreadCount } = useWebSocket()
-  const [notifications, setNotifications] = useState([])
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      fetchNotifications()
-    }
-  }, [isAuthenticated])
-
-  useEffect(() => {
-    if (realtimeNotifications.length > 0) {
-      setNotifications(prev => {
-        const newNotifications = [...realtimeNotifications, ...prev]
-        return newNotifications.slice(0, 5)
-      })
-    }
-  }, [realtimeNotifications])
-
-  const fetchNotifications = async () => {
-    try {
-      const notifData = await notificationsAPI.getNotifications(0, 5)
-      setNotifications(notifData.content)
-    } catch (error) {
-      // Silent fail
-    }
-  }
+  const { 
+    unreadCount, 
+    notifications,
+    markNotificationAsRead, 
+    decrementUnreadCount 
+  } = useWebSocket()
 
   const handleNotificationClick = async (notificationId) => {
     const notification = notifications.find(n => n.id === notificationId)
     
-    // If notification is unread, mark it as read and update count
     if (notification && !notification.read) {
       try {
         await notificationsAPI.markAsRead(notificationId)
-        setNotifications(prev =>
-          prev.map(n => n.id === notificationId ? { ...n, read: true } : n)
-        )
+        markNotificationAsRead(notificationId)
         decrementUnreadCount()
       } catch (error) {
         console.error('Failed to mark as read:', error)
@@ -85,6 +62,9 @@ const RightSidebar = () => {
     }
   }
 
+  // Show only the 5 most recent notifications
+  const recentNotifications = notifications.slice(0, 5)
+
   return (
     <aside className="hidden xl:flex flex-col w-80 h-screen sticky top-0 bg-background">
       <ScrollArea className="flex-1 p-6">
@@ -105,14 +85,14 @@ const RightSidebar = () => {
                 </div>
               </div>
               <div className="p-3 space-y-2">
-                {notifications.length === 0 ? (
+                {recentNotifications.length === 0 ? (
                   <div className="text-center py-12 text-muted-foreground">
                     <Bell className="h-12 w-12 mx-auto mb-3 opacity-30" strokeWidth={1.5} />
                     <p className="text-sm">No notifications yet</p>
                   </div>
                 ) : (
                   <>
-                    {notifications.map((notification) => (
+                    {recentNotifications.map((notification) => (
                       <Link
                         key={notification.id}
                         to={`/posts/${notification.postId}`}

@@ -22,6 +22,15 @@ const Layout = () => {
         onClose={() => setLeftSidebarOpen(false)} 
       />
 
+      {/* Mobile Overlay - Click outside to close sidebar */}
+      {leftSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden transition-opacity duration-300"
+          onClick={() => setLeftSidebarOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top Navbar (mobile only) */}

@@ -31,7 +31,6 @@ async function fetchGitHubReadme(githubUrl) {
     }
     return null;
   } catch (error) {
-    console.error('Error fetching GitHub README:', error);
     return null;
   }
 }
@@ -53,7 +52,6 @@ async function fetchDeployedSiteContent(url) {
       hasContent: true,
     };
   } catch (error) {
-    console.error('Error fetching deployed site:', error);
     return null;
   }
 }
@@ -122,7 +120,6 @@ export async function generateProjectWithAI({
     const result = JSON.parse(content);
     return validateAndFormatResponse(result);
   } catch (error) {
-    console.error('Error generating project with AI:', error);
     throw error;
   }
 }

@@ -17,11 +17,10 @@ const GitHubOAuthButton = ({ mode = 'login' }) => {
     if (!GITHUB_CLIENT_ID) {
       toast({
         title: 'Configuration Error',
-        description: 'GitHub OAuth is not configured. Please set VITE_GITHUB_CLIENT_ID in your .env file.',
+        description: 'GitHub OAuth is not configured. Please contact support.',
         variant: 'destructive',
         duration: 5000,
       })
-      console.error('VITE_GITHUB_CLIENT_ID is not set in environment variables')
       return
     }
 
@@ -34,7 +33,6 @@ const GitHubOAuthButton = ({ mode = 'login' }) => {
     // Redirect to GitHub OAuth
     const githubAuthUrl = `https://github.com/login/oauth/authorize?client_id=${GITHUB_CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&scope=user:email read:user`
     
-    console.log('Redirecting to GitHub OAuth:', githubAuthUrl)
     window.location.href = githubAuthUrl
   }
 

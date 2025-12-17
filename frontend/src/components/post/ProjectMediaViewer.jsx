@@ -11,7 +11,7 @@ const ProjectMediaViewer = ({
   size = "large" // "large" for detail page, "feed" for cards
 }) => {
   const [activeTab, setActiveTab] = useState(null)
-  const [iframeStatus, setIframeStatus] = useState('loading') // 'loading', 'success', 'failed'
+  const [iframeStatus, setIframeStatus] = useState('loading')
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [blockReason, setBlockReason] = useState('')
   const iframeRef = useRef(null)
@@ -21,23 +21,19 @@ const ProjectMediaViewer = ({
   const hasLiveUrl = !!liveDemoUrl
   const hasScreenshots = screenshots && screenshots.length > 0
 
-  // Determine available tabs
   const availableTabs = []
   if (hasLiveUrl) availableTabs.push('live')
   if (hasScreenshots) availableTabs.push('screenshots')
 
-  // Initialize active tab
   useEffect(() => {
     if (availableTabs.length > 0 && !activeTab) {
-      setActiveTab(availableTabs[0]) // Default to first available tab
+      setActiveTab(availableTabs[0])
     }
   }, [availableTabs.length])
 
-  // SECURITY: Check for iframe nesting
   useEffect(() => {
     if (!hasLiveUrl) return
 
-    // Detect if Folio is already in an iframe
     const isInIframe = () => {
       try {
         return window.self !== window.top
@@ -47,17 +43,14 @@ const ProjectMediaViewer = ({
     }
 
     if (isInIframe()) {
-      console.warn('Security: Folio is embedded - blocking iframe content')
       setIframeStatus('failed')
       setBlockReason('iframe-nesting-blocked')
-      // Auto-switch to screenshots if available
       if (hasScreenshots) {
         setActiveTab('screenshots')
       }
       return
     }
 
-    // Check if trying to embed Folio itself
     const currentDomain = window.location.hostname
     try {
       const urlObj = new URL(liveDemoUrl)
@@ -66,7 +59,6 @@ const ProjectMediaViewer = ({
       if (targetDomain === currentDomain || 
           (targetDomain.includes('folio') && targetDomain.includes('vercel.app')) ||
           (targetDomain.includes('folio') && targetDomain.includes('railway.app'))) {
-        console.warn('Security: Blocked attempt to embed Folio inside itself')
         setIframeStatus('failed')
         setBlockReason('self-embed')
         if (hasScreenshots) {
@@ -75,27 +67,23 @@ const ProjectMediaViewer = ({
         return
       }
     } catch (error) {
-      console.error('Invalid URL:', error)
+      setIframeStatus('failed')
     }
   }, [liveDemoUrl, hasLiveUrl, hasScreenshots])
 
-  // Iframe loading detection
   useEffect(() => {
     if (!hasLiveUrl || activeTab !== 'live') return
 
     setIframeStatus('loading')
 
-    // Timeout to detect if iframe doesn't load
     timeoutRef.current = setTimeout(() => {
       if (iframeStatus === 'loading') {
-        console.log('Iframe timeout - switching to screenshots')
         setIframeStatus('failed')
-        // Auto-switch to screenshots if available
         if (hasScreenshots) {
           setActiveTab('screenshots')
         }
       }
-    }, 6000) // 6 second timeout
+    }, 6000)
 
     return () => {
       if (timeoutRef.current) {
@@ -105,7 +93,6 @@ const ProjectMediaViewer = ({
   }, [hasLiveUrl, activeTab])
 
   const handleIframeLoad = () => {
-    console.log('Iframe loaded successfully')
     setIframeStatus('success')
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current)
@@ -113,18 +100,15 @@ const ProjectMediaViewer = ({
   }
 
   const handleIframeError = () => {
-    console.log('Iframe failed - switching to screenshots')
     setIframeStatus('failed')
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current)
     }
-    // Auto-switch to screenshots if available
     if (hasScreenshots) {
       setActiveTab('screenshots')
     }
   }
 
-  // Detect X-Frame-Options blocking
   useEffect(() => {
     if (!hasLiveUrl || activeTab !== 'live' || iframeStatus !== 'loading') return
 
@@ -134,11 +118,7 @@ const ProjectMediaViewer = ({
     const checkIframeAccess = () => {
       try {
         const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document
-        if (iframeDoc) {
-          console.log('Iframe accessible')
-        }
       } catch (error) {
-        console.log('Iframe blocked by security policy')
         setIframeStatus('failed')
         if (hasScreenshots) {
           setActiveTab('screenshots')
@@ -153,7 +133,6 @@ const ProjectMediaViewer = ({
     return () => clearTimeout(checkTimeout)
   }, [hasLiveUrl, activeTab, iframeStatus, hasScreenshots])
 
-  // Screenshot navigation
   const nextImage = () => {
     setCurrentImageIndex((prev) => (prev + 1) % screenshots.length)
   }
@@ -162,7 +141,6 @@ const ProjectMediaViewer = ({
     setCurrentImageIndex((prev) => (prev - 1 + screenshots.length) % screenshots.length)
   }
 
-  // If no content available
   if (!hasLiveUrl && !hasScreenshots) {
     return (
       <div className="flex items-center justify-center h-48 bg-muted rounded-lg border">
@@ -174,7 +152,6 @@ const ProjectMediaViewer = ({
     )
   }
 
-  // Single tab (auto-hide tabs if only one option)
   if (availableTabs.length === 1) {
     const singleTab = availableTabs[0]
 
@@ -222,7 +199,7 @@ const ProjectMediaViewer = ({
               </Button>
             </div>
           ) : (
-            <div className={`relative ${isFeed ? 'aspect-video' : 'h-96 md:h-[600px]'} w-full overflow-hidden rounded-lg border bg-muted`}>
+            <div className={`relative ${isFeed ? 'h-[300px] sm:h-[400px]' : 'h-[600px] sm:h-[700px] md:h-[750px] lg:h-[850px]'} w-full overflow-hidden rounded-lg border bg-muted`}>
               {iframeStatus === 'loading' && (
                 <div className="absolute inset-0 flex items-center justify-center bg-background/80 z-10">
                   <div className="text-center">
@@ -255,7 +232,6 @@ const ProjectMediaViewer = ({
       )
     }
 
-    // Only screenshots available
     return (
       <div className="space-y-3">
         {!isFeed && (
@@ -268,7 +244,7 @@ const ProjectMediaViewer = ({
         )}
 
         <div className="relative">
-          <div className={`${isFeed ? 'aspect-video' : 'aspect-video md:aspect-[16/10]'} w-full overflow-hidden rounded-lg border bg-muted`}>
+          <div className={`${isFeed ? 'aspect-video' : 'h-[500px] sm:h-[600px] md:h-[650px]'} w-full overflow-hidden rounded-lg border bg-muted`}>
             <img
               src={screenshots[currentImageIndex]}
               alt={`${title} screenshot ${currentImageIndex + 1}`}
@@ -313,10 +289,9 @@ const ProjectMediaViewer = ({
     )
   }
 
-  // Multiple tabs available (both live and screenshots)
+  // Multiple tabs
   return (
     <div className="space-y-3">
-      {/* Tabs */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           {availableTabs.map((tab) => (
@@ -355,7 +330,6 @@ const ProjectMediaViewer = ({
         )}
       </div>
 
-      {/* Content */}
       {activeTab === 'live' && hasLiveUrl && (
         <>
           {blockReason ? (
@@ -379,7 +353,7 @@ const ProjectMediaViewer = ({
               </Button>
             </div>
           ) : (
-            <div className={`relative ${isFeed ? 'aspect-video' : 'h-96 md:h-[600px]'} w-full overflow-hidden rounded-lg border bg-muted`}>
+            <div className={`relative ${isFeed ? 'h-[300px] sm:h-[400px]' : 'h-[600px] sm:h-[700px] md:h-[750px] lg:h-[850px]'} w-full overflow-hidden rounded-lg border bg-muted`}>
               {iframeStatus === 'loading' && (
                 <div className="absolute inset-0 flex items-center justify-center bg-background/80 z-10">
                   <div className="text-center">
@@ -407,7 +381,7 @@ const ProjectMediaViewer = ({
 
       {activeTab === 'screenshots' && hasScreenshots && (
         <div className="relative">
-          <div className={`${isFeed ? 'aspect-video' : 'aspect-video md:aspect-[16/10]'} w-full overflow-hidden rounded-lg border bg-muted`}>
+          <div className={`${isFeed ? 'aspect-video' : 'h-[500px] sm:h-[600px] md:h-[650px]'} w-full overflow-hidden rounded-lg border bg-muted`}>
             <img
               src={screenshots[currentImageIndex]}
               alt={`${title} screenshot ${currentImageIndex + 1}`}
