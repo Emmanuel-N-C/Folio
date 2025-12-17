@@ -42,7 +42,6 @@ const LivePreview = ({
     }
 
     if (isInIframe()) {
-      console.warn('Security: Folio is embedded in an iframe. Blocking all iframe content to prevent recursive embedding attacks.')
       setShowFallback(true)
       setIframeStatus('blocked')
       setBlockReason('iframe-nesting-blocked')
@@ -59,14 +58,12 @@ const LivePreview = ({
       if (targetDomain === currentDomain || 
           (targetDomain.includes('folio') && targetDomain.includes('vercel.app')) ||
           (targetDomain.includes('folio') && targetDomain.includes('railway.app'))) {
-        console.warn('Security: Blocked attempt to embed Folio inside itself')
         setShowFallback(true)
         setIframeStatus('blocked')
         setBlockReason('self-embed')
         return
       }
     } catch (error) {
-      console.error('Invalid URL:', error)
       setShowFallback(true)
       setIframeStatus('error')
       return
@@ -80,7 +77,6 @@ const LivePreview = ({
     // Set a timeout to detect if iframe doesn't load
     timeoutRef.current = setTimeout(() => {
       if (iframeStatus === 'loading') {
-        console.log('Iframe load timeout - showing fallback')
         setShowFallback(true)
         setIframeStatus('error')
       }
@@ -94,7 +90,6 @@ const LivePreview = ({
   }, [url])
 
   const handleIframeLoad = () => {
-    console.log('Iframe loaded successfully')
     setIframeStatus('success')
     setShowFallback(false)
     if (timeoutRef.current) {
@@ -103,7 +98,6 @@ const LivePreview = ({
   }
 
   const handleIframeError = () => {
-    console.log('Iframe failed to load - showing fallback')
     setShowFallback(true)
     setIframeStatus('error')
     if (timeoutRef.current) {
@@ -122,13 +116,9 @@ const LivePreview = ({
       try {
         // Try to access iframe content - will throw if blocked by X-Frame-Options/CSP
         const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document
-        if (iframeDoc) {
-          // Successfully accessed - iframe is loading
-          console.log('Iframe content accessible')
-        }
+        // Successfully accessed - iframe is loading
       } catch (error) {
         // Blocked by security policy
-        console.log('Iframe blocked by security policy:', error.message)
         setShowFallback(true)
         setIframeStatus('error')
         if (timeoutRef.current) {

@@ -152,6 +152,9 @@ const VerifyEmailPage = () => {
           <CardDescription>
             Enter the 6-digit code sent to your email address
           </CardDescription>
+           <span className="mt-2 block text-xs text-muted-foreground">
+            Didn’t receive the email? Please check your spam or junk folder.
+          </span>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleVerify} className="space-y-4">

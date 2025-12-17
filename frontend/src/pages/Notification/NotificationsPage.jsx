@@ -2,20 +2,28 @@ import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { notificationsAPI } from '@/api/notifications'
 import { useAuth } from '@/hooks/useAuth'
+import { useWebSocket } from '@/contexts/WebSocketContext'
 import { Card, CardContent } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { Heart, MessageCircle, Reply, Bell, ArrowLeft } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 
 const NotificationsPage = () => {
   const { isAuthenticated } = useAuth()
+  const { 
+    notifications: contextNotifications,
+    markNotificationAsRead, 
+    markAllNotificationsAsRead,
+    decrementUnreadCount, 
+    resetUnreadCount,
+    refreshNotifications
+  } = useWebSocket()
   const navigate = useNavigate()
-  const [notifications, setNotifications] = useState([])
   const [loading, setLoading] = useState(true)
   const [page, setPage] = useState(0)
   const [hasMore, setHasMore] = useState(true)
+  const [allNotifications, setAllNotifications] = useState([])
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -23,11 +31,24 @@ const NotificationsPage = () => {
     }
   }, [isAuthenticated])
 
+  // Sync with context notifications
+  useEffect(() => {
+    if (page === 0 && contextNotifications.length > 0) {
+      setAllNotifications(contextNotifications)
+    }
+  }, [contextNotifications, page])
+
   const loadNotifications = async () => {
     try {
       setLoading(true)
       const data = await notificationsAPI.getNotifications(page, 20)
-      setNotifications(prev => page === 0 ? data.content : [...prev, ...data.content])
+      
+      if (page === 0) {
+        setAllNotifications(data.content)
+      } else {
+        setAllNotifications(prev => [...prev, ...data.content])
+      }
+      
       setHasMore(!data.last)
     } catch (error) {
       console.error('Failed to load notifications:', error)
@@ -38,10 +59,22 @@ const NotificationsPage = () => {
 
   const handleMarkAsRead = async (notificationId) => {
     try {
+      const notification = allNotifications.find(n => n.id === notificationId)
+      const wasUnread = notification && !notification.read
+
       await notificationsAPI.markAsRead(notificationId)
-      setNotifications(prev =>
+      
+      // Update local state
+      setAllNotifications(prev =>
         prev.map(n => n.id === notificationId ? { ...n, read: true } : n)
       )
+      
+      // Update context (syncs with sidebar)
+      markNotificationAsRead(notificationId)
+
+      if (wasUnread) {
+        decrementUnreadCount()
+      }
     } catch (error) {
       console.error('Failed to mark as read:', error)
     }
@@ -50,7 +83,13 @@ const NotificationsPage = () => {
   const handleMarkAllAsRead = async () => {
     try {
       await notificationsAPI.markAllAsRead()
-      setNotifications(prev => prev.map(n => ({ ...n, read: true })))
+      
+      // Update local state
+      setAllNotifications(prev => prev.map(n => ({ ...n, read: true })))
+      
+      // Update context (syncs with sidebar)
+      markAllNotificationsAsRead()
+      resetUnreadCount()
     } catch (error) {
       console.error('Failed to mark all as read:', error)
     }
@@ -149,7 +188,7 @@ const NotificationsPage = () => {
             Stay updated with your latest activity
           </p>
         </div>
-        {notifications.some(n => !n.read) && (
+        {allNotifications.some(n => !n.read) && (
           <Button onClick={handleMarkAllAsRead} variant="outline" size="sm">
             Mark all as read
           </Button>
@@ -173,7 +212,7 @@ const NotificationsPage = () => {
             </Card>
           ))}
         </div>
-      ) : notifications.length === 0 ? (
+      ) : allNotifications.length === 0 ? (
         <Card>
           <CardContent className="p-12 text-center">
             <Bell className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
@@ -185,7 +224,7 @@ const NotificationsPage = () => {
         </Card>
       ) : (
         <div className="space-y-3">
-          {notifications.map((notification) => (
+          {allNotifications.map((notification) => (
             <Card
               key={notification.id}
               className={`transition-all hover:shadow-md ${

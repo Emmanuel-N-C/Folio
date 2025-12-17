@@ -5,7 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { useAuth } from '@/hooks/useAuth'
 import { useToast } from '@/components/ui/use-toast'
 import { usersAPI } from '@/api/users'
-import { Trash2, Upload, Loader2 } from 'lucide-react'
+import { Trash2, Upload, Loader2, Image as ImageIcon } from 'lucide-react'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -112,32 +112,47 @@ const ProfilePhotoSettings = () => {
       <CardHeader>
         <CardTitle>Profile Photo</CardTitle>
         <CardDescription>
-          Manage your profile picture
+          Upload a photo to personalize your profile
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Current/Preview Photo */}
         <div className="flex flex-col items-center space-y-4">
-          <Avatar className="h-40 w-40">
-            <AvatarImage src={previewUrl || user?.profileImageUrl} alt="Profile" />
-            <AvatarFallback className="text-5xl">
-              {user?.username?.charAt(0)?.toUpperCase() || 'U'}
-            </AvatarFallback>
-          </Avatar>
-
-          {previewUrl && (
-            <p className="text-sm text-muted-foreground">Preview of new photo</p>
-          )}
+          <div className="relative">
+            <Avatar className="h-40 w-40 border-2 border-border">
+              <AvatarImage 
+                src={previewUrl || user?.profileImageUrl} 
+                alt="Profile"
+                className="object-cover"
+              />
+              <AvatarFallback className="text-5xl bg-gradient-to-br from-primary/10 to-primary/5">
+                {user?.username?.charAt(0)?.toUpperCase() || 'U'}
+              </AvatarFallback>
+            </Avatar>
+            {previewUrl && (
+              <div className="absolute -bottom-2 left-1/2 -translate-x-1/2">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-primary text-primary-foreground">
+                  <ImageIcon className="h-3 w-3" />
+                  Preview
+                </span>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Upload Section */}
         {selectedFile ? (
           <div className="space-y-4">
-            <div className="p-4 bg-muted rounded-lg">
-              <p className="text-sm font-medium">{selectedFile.name}</p>
-              <p className="text-xs text-muted-foreground">
-                {(selectedFile.size / 1024).toFixed(1)} KB
-              </p>
+            <div className="p-4 bg-muted/50 rounded-lg border">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium truncate max-w-[250px]">{selectedFile.name}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {(selectedFile.size / 1024).toFixed(1)} KB
+                  </p>
+                </div>
+                <ImageIcon className="h-5 w-5 text-muted-foreground" />
+              </div>
             </div>
             <div className="flex gap-2">
               <Button onClick={handleUpload} disabled={uploading} className="flex-1">
@@ -164,9 +179,10 @@ const ProfilePhotoSettings = () => {
               <Button
                 onClick={() => document.getElementById('photo-upload').click()}
                 className="flex-1"
+                variant="outline"
               >
                 <Upload className="mr-2 h-4 w-4" />
-                Change Photo
+                {user?.profileImageUrl ? 'Change Photo' : 'Upload Photo'}
               </Button>
               {user?.profileImageUrl && (
                 <Button
@@ -178,9 +194,14 @@ const ProfilePhotoSettings = () => {
                 </Button>
               )}
             </div>
-            <p className="text-xs text-center text-muted-foreground">
-              JPEG, PNG, or WEBP • Max 5MB
-            </p>
+            <div className="text-center">
+              <p className="text-xs text-muted-foreground">
+                JPEG, PNG, or WEBP • Max 5MB
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Your photo will be cropped to fit a circle
+              </p>
+            </div>
           </div>
         )}
 

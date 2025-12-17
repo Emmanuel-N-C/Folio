@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { useToast } from '@/components/ui/use-toast'
 import { usersAPI } from '@/api/users'
-import { Upload, Loader2, X, Camera } from 'lucide-react'
+import { Upload, Loader2, X, Camera, Image as ImageIcon } from 'lucide-react'
 
 const ProfilePictureUpload = ({ userId, currentImageUrl, username, onUploadSuccess }) => {
   const [selectedFile, setSelectedFile] = useState(null)
@@ -93,21 +93,33 @@ const ProfilePictureUpload = ({ userId, currentImageUrl, username, onUploadSucce
         <div className="flex flex-col items-center space-y-4">
           {/* Avatar Preview */}
           <div className="relative">
-            <Avatar className="h-32 w-32">
-              <AvatarImage src={previewUrl || currentImageUrl} alt="Profile" />
-              <AvatarFallback className="text-4xl">
+            <Avatar className="h-32 w-32 border-2 border-border">
+              <AvatarImage 
+                src={previewUrl || currentImageUrl} 
+                alt="Profile"
+                className="object-cover"
+              />
+              <AvatarFallback className="text-4xl bg-gradient-to-br from-primary/10 to-primary/5">
                 {username?.charAt(0)?.toUpperCase() || 'U'}
               </AvatarFallback>
             </Avatar>
             <Button
               size="icon"
               variant="secondary"
-              className="absolute bottom-0 right-0 rounded-full"
+              className="absolute bottom-0 right-0 rounded-full shadow-md border-2 border-background"
               onClick={() => fileInputRef.current?.click()}
               disabled={uploading}
             >
               <Camera className="h-4 w-4" />
             </Button>
+            {previewUrl && (
+              <div className="absolute -top-2 left-1/2 -translate-x-1/2">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-primary text-primary-foreground shadow-sm">
+                  <ImageIcon className="h-3 w-3" />
+                  Preview
+                </span>
+              </div>
+            )}
           </div>
 
           {/* File Input (Hidden) */}
@@ -122,21 +134,24 @@ const ProfilePictureUpload = ({ userId, currentImageUrl, username, onUploadSucce
           {/* Selected File Info */}
           {selectedFile && (
             <div className="w-full space-y-2">
-              <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
-                <div className="flex items-center space-x-2">
-                  <Upload className="h-4 w-4" />
-                  <span className="text-sm font-medium truncate max-w-[200px]">
-                    {selectedFile.name}
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    ({(selectedFile.size / 1024).toFixed(1)} KB)
-                  </span>
+              <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg border">
+                <div className="flex items-center space-x-2 flex-1 min-w-0">
+                  <ImageIcon className="h-4 w-4 text-muted-foreground shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">
+                      {selectedFile.name}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {(selectedFile.size / 1024).toFixed(1)} KB
+                    </p>
+                  </div>
                 </div>
                 <Button
                   size="icon"
                   variant="ghost"
                   onClick={handleCancel}
                   disabled={uploading}
+                  className="shrink-0"
                 >
                   <X className="h-4 w-4" />
                 </Button>
@@ -174,7 +189,7 @@ const ProfilePictureUpload = ({ userId, currentImageUrl, username, onUploadSucce
 
           {/* Instructions */}
           {!selectedFile && (
-            <div className="text-center space-y-1">
+            <div className="text-center space-y-2">
               <Button
                 variant="outline"
                 onClick={() => fileInputRef.current?.click()}
@@ -182,9 +197,14 @@ const ProfilePictureUpload = ({ userId, currentImageUrl, username, onUploadSucce
                 <Upload className="mr-2 h-4 w-4" />
                 Choose Image
               </Button>
-              <p className="text-xs text-muted-foreground">
-                JPEG, PNG, or WEBP • Max 5MB
-              </p>
+              <div>
+                <p className="text-xs text-muted-foreground">
+                  JPEG, PNG, or WEBP • Max 5MB
+                </p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Image will be cropped to fit a circle
+                </p>
+              </div>
             </div>
           )}
         </div>

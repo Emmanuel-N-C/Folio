@@ -11,7 +11,7 @@ import ProjectMediaViewer from '@/components/post/ProjectMediaViewer'
 import { useAuth } from '@/hooks/useAuth'
 import { useToast } from '@/components/ui/use-toast'
 import { formatRelativeTime } from '@/lib/utils'
-import { Edit, Trash2, ExternalLink, Github, ArrowLeft, Upload, Images, MoreVertical } from 'lucide-react'
+import { Edit, Trash2, ExternalLink, Github, ArrowLeft, Upload, Images, MoreVertical, ChevronDown, ChevronUp } from 'lucide-react'
 import { DeleteConfirmDialog } from '@/components/ui/DeleteConfirmDialog'
 import {
   DropdownMenu,
@@ -30,6 +30,7 @@ const PostDetailPage = () => {
   const { toast } = useToast()
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [showMobileDetails, setShowMobileDetails] = useState(false)
 
   useEffect(() => {
     fetchPost()
@@ -87,13 +88,59 @@ const PostDetailPage = () => {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
-      <Button variant="ghost" onClick={() => navigate(-1)}>
+      <Button variant="ghost" onClick={() => navigate(-1)} className="hidden md:flex">
         <ArrowLeft className="mr-2 h-4 w-4" />
         Back
       </Button>
 
       <Card>
-        <CardHeader>
+        {/* Mobile: Minimal Header */}
+        <CardHeader className="md:hidden pb-3">
+          <div className="flex items-center justify-between gap-2">
+            <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="shrink-0">
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+            <h1 className="text-lg font-bold line-clamp-1 flex-1">{post.title}</h1>
+            {(canEdit || canDelete) && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
+                    <MoreVertical className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  {canEdit && (
+                    <>
+                      <DropdownMenuItem onClick={() => navigate(`/posts/${postId}/upload-screenshots`)}>
+                        <Upload className="h-4 w-4 mr-2" />
+                        Upload Screenshots
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => navigate(`/posts/${postId}/edit`)}>
+                        <Edit className="h-4 w-4 mr-2" />
+                        Edit Post
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                  {canDelete && (
+                    <>
+                      {canEdit && <DropdownMenuSeparator />}
+                      <DropdownMenuItem 
+                        onClick={() => setShowDeleteDialog(true)}
+                        className="text-destructive focus:text-destructive"
+                      >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        Delete Post
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+          </div>
+        </CardHeader>
+
+        {/* Desktop: Full Header */}
+        <CardHeader className="hidden md:block">
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-3 flex-1">
               <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden">
@@ -161,15 +208,16 @@ const PostDetailPage = () => {
           </div>
         </CardHeader>
 
-        <CardContent className="space-y-6">
-          <div>
+        <CardContent className="space-y-4 md:space-y-6">
+          {/* Desktop: Full Title and Description */}
+          <div className="hidden md:block">
             <h1 className="text-3xl font-bold mb-4">{post.title}</h1>
             <p className="text-lg text-muted-foreground whitespace-pre-wrap">
               {post.description}
             </p>
           </div>
 
-          {/* Media Viewer Section */}
+          {/* Media Viewer Section - PRIORITY ON MOBILE */}
           {(post.liveDemoUrl || (post.screenshotUrls && post.screenshotUrls.length > 0)) && (
             <ProjectMediaViewer
               liveDemoUrl={post.liveDemoUrl}
@@ -197,7 +245,83 @@ const PostDetailPage = () => {
             </div>
           )}
 
-          <div className="space-y-4">
+          {/* Mobile: Collapsible Details */}
+          <div className="md:hidden">
+            <Button
+              variant="outline"
+              onClick={() => setShowMobileDetails(!showMobileDetails)}
+              className="w-full justify-between"
+            >
+              <span className="font-medium">
+                {showMobileDetails ? 'Hide Details' : 'Show Details'}
+              </span>
+              {showMobileDetails ? (
+                <ChevronUp className="h-4 w-4" />
+              ) : (
+                <ChevronDown className="h-4 w-4" />
+              )}
+            </Button>
+
+            {showMobileDetails && (
+              <div className="mt-4 space-y-4 p-4 border rounded-lg bg-muted/30">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden shrink-0">
+                    {post.userProfileImageUrl ? (
+                      <img 
+                        src={post.userProfileImageUrl} 
+                        alt={post.username}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <span className="text-sm font-bold text-primary">
+                        {post.username?.charAt(0).toUpperCase()}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <Link 
+                      to={`/profile/${post.userId}`}
+                      className="font-semibold hover:underline block truncate"
+                    >
+                      {post.displayName || post.username}
+                    </Link>
+                    <p className="text-xs text-muted-foreground">
+                      {formatRelativeTime(post.createdAt)}
+                    </p>
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                    {post.description}
+                  </p>
+                </div>
+
+                <div>
+                  <h4 className="text-sm font-semibold mb-2">Tech Stack</h4>
+                  <p className="text-sm text-muted-foreground">{post.techStack}</p>
+                </div>
+
+                {post.tags && post.tags.length > 0 && (
+                  <div>
+                    <h4 className="text-sm font-semibold mb-2">Tags</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {post.tags.map((tag, index) => (
+                        <Link key={index} to={`/search?tag=${tag}`}>
+                          <Badge variant="secondary" className="text-xs cursor-pointer hover:bg-primary hover:text-primary-foreground">
+                            {tag}
+                          </Badge>
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Desktop: Full Details */}
+          <div className="hidden md:block space-y-4">
             <div>
               <h3 className="font-semibold mb-2">Tech Stack</h3>
               <p className="text-muted-foreground">{post.techStack}</p>
@@ -217,42 +341,43 @@ const PostDetailPage = () => {
                 </div>
               </div>
             )}
+          </div>
 
-            <div className="flex items-center gap-4 pt-4 border-t">
-              <LikeButton 
-                postId={post.id}
-                initialLiked={post.likedByCurrentUser}
-                initialCount={post.likesCount}
-              />
+          {/* Actions Bar */}
+          <div className="flex items-center gap-4 pt-4 border-t">
+            <LikeButton 
+              postId={post.id}
+              initialLiked={post.likedByCurrentUser}
+              initialCount={post.likesCount}
+            />
 
-              <span className="text-sm text-muted-foreground">
-                {post.commentsCount} {post.commentsCount === 1 ? 'comment' : 'comments'}
-              </span>
+            <span className="text-sm text-muted-foreground">
+              {post.commentsCount} {post.commentsCount === 1 ? 'comment' : 'comments'}
+            </span>
 
-              {post.liveDemoUrl && (
-                <a
-                  href={post.liveDemoUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-primary hover:underline"
-                >
-                  <ExternalLink className="h-4 w-4" />
-                  Live Demo
-                </a>
-              )}
+            {post.liveDemoUrl && (
+              <a
+                href={post.liveDemoUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-primary hover:underline text-sm md:text-base"
+              >
+                <ExternalLink className="h-4 w-4" />
+                <span className="hidden sm:inline">Live Demo</span>
+              </a>
+            )}
 
-              {post.githubUrl && (
-                <a
-                  href={post.githubUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-primary hover:underline"
-                >
-                  <Github className="h-4 w-4" />
-                  View Code
-                </a>
-              )}
-            </div>
+            {post.githubUrl && (
+              <a
+                href={post.githubUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-primary hover:underline text-sm md:text-base"
+              >
+                <Github className="h-4 w-4" />
+                <span className="hidden sm:inline">View Code</span>
+              </a>
+            )}
           </div>
         </CardContent>
       </Card>

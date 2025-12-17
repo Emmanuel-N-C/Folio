@@ -12,7 +12,8 @@ export const notificationsAPI = {
   // Get unread notification count
   getUnreadCount: async () => {
     const response = await axiosInstance.get('/notifications/unread-count')
-    return response.data.count
+    // Handle both direct number and object with count property
+    return typeof response.data === 'number' ? response.data : response.data.count
   },
 
   // Mark a single notification as read
