@@ -11,7 +11,7 @@ import { formatDistanceToNow } from 'date-fns'
 
 const RightSidebar = () => {
   const { isAuthenticated } = useAuth()
-  const { unreadCount, notifications: realtimeNotifications } = useWebSocket()
+  const { unreadCount, notifications: realtimeNotifications, decrementUnreadCount } = useWebSocket()
   const [notifications, setNotifications] = useState([])
 
   useEffect(() => {
@@ -35,6 +35,23 @@ const RightSidebar = () => {
       setNotifications(notifData.content)
     } catch (error) {
       // Silent fail
+    }
+  }
+
+  const handleNotificationClick = async (notificationId) => {
+    const notification = notifications.find(n => n.id === notificationId)
+    
+    // If notification is unread, mark it as read and update count
+    if (notification && !notification.read) {
+      try {
+        await notificationsAPI.markAsRead(notificationId)
+        setNotifications(prev =>
+          prev.map(n => n.id === notificationId ? { ...n, read: true } : n)
+        )
+        decrementUnreadCount()
+      } catch (error) {
+        console.error('Failed to mark as read:', error)
+      }
     }
   }
 
@@ -99,6 +116,7 @@ const RightSidebar = () => {
                       <Link
                         key={notification.id}
                         to={`/posts/${notification.postId}`}
+                        onClick={() => handleNotificationClick(notification.id)}
                         className={`flex items-start gap-3 p-3 rounded-xl hover:bg-muted transition-all cursor-pointer group ${
                           !notification.read ? 'bg-blue-50/50 dark:bg-blue-950/20' : ''
                         }`}

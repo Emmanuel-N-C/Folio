@@ -205,7 +205,7 @@ const NotificationsPage = () => {
                         src={notification.actor.profileImageUrl}
                         alt={notification.actor.username}
                       />
-                      <AvatarFallback className="bg-gradient-to-br from-primary to-blue-600 text-white font-semibold">
+                      <AvatarFallback className="bg-gradient-to-br from-primary to-primary/70 text-primary-foreground font-semibold">
                         {notification.actor.username.charAt(0).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>

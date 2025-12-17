@@ -5,9 +5,9 @@ import { commentsAPI } from '@/api/comments'
 import { useAuth } from '@/hooks/useAuth'
 import { useToast } from '@/components/ui/use-toast'
 
-const CommentLikeButton = ({ commentId, postId, initialLiked, initialCount }) => {
-  const [liked, setLiked] = useState(initialLiked)
-  const [count, setCount] = useState(initialCount)
+const CommentLikeButton = ({ comment, postId }) => {
+  const [liked, setLiked] = useState(comment.likedByCurrentUser)
+  const [count, setCount] = useState(comment.likesCount)
   const [loading, setLoading] = useState(false)
   const { isAuthenticated } = useAuth()
   const { toast } = useToast()
@@ -27,11 +27,11 @@ const CommentLikeButton = ({ commentId, postId, initialLiked, initialCount }) =>
     setLoading(true)
     try {
       if (liked) {
-        await commentsAPI.unlikeComment(postId, commentId)
+        await commentsAPI.unlikeComment(postId, comment.id)
         setLiked(false)
         setCount(prev => prev - 1)
       } else {
-        await commentsAPI.likeComment(postId, commentId)
+        await commentsAPI.likeComment(postId, comment.id)
         setLiked(true)
         setCount(prev => prev + 1)
       }
@@ -52,9 +52,9 @@ const CommentLikeButton = ({ commentId, postId, initialLiked, initialCount }) =>
       size="sm"
       onClick={handleLike}
       disabled={loading}
-      className={`gap-1 ${liked ? 'text-red-500 hover:text-red-600' : 'text-muted-foreground hover:text-foreground'}`}
+      className={`h-6 px-2 text-xs gap-1 ${liked ? 'text-red-500 hover:text-red-600' : 'text-muted-foreground hover:text-foreground'}`}
     >
-      <Heart className={`h-4 w-4 ${liked ? 'fill-current' : ''}`} />
+      <Heart className={`h-3 w-3 ${liked ? 'fill-current' : ''}`} />
       <span>{count}</span>
     </Button>
   )

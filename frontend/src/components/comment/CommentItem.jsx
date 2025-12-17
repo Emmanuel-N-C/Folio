@@ -36,6 +36,15 @@ const CommentItem = ({ comment, postId, postOwnerId, onDeleted, onUpdated }) => 
   const canEdit = user?.userId === comment.userId
   const canDelete = user?.userId === comment.userId || user?.userId === postOwnerId || isAdmin()
 
+  // Helper function to check if comment was edited (accounting for timestamp differences)
+  const isEdited = (createdAt, updatedAt) => {
+    if (!createdAt || !updatedAt) return false
+    const created = new Date(createdAt).getTime()
+    const updated = new Date(updatedAt).getTime()
+    // Consider edited if difference is more than 1 second
+    return Math.abs(updated - created) > 1000
+  }
+
   const handleDelete = async () => {
     setIsDeleting(true)
     try {
@@ -139,7 +148,7 @@ const CommentItem = ({ comment, postId, postOwnerId, onDeleted, onUpdated }) => 
               </Link>
               <span className="text-xs text-muted-foreground">
                 {formatRelativeTime(comment.createdAt)}
-                {comment.updatedAt !== comment.createdAt && ' (edited)'}
+                {isEdited(comment.createdAt, comment.updatedAt) && ' (edited)'}
               </span>
             </div>
 
@@ -250,7 +259,7 @@ const CommentItem = ({ comment, postId, postOwnerId, onDeleted, onUpdated }) => 
         <div className="ml-11">
           <CommentReplyForm
             postId={postId}
-            parentCommentId={comment.id}
+            commentId={comment.id}
             onReplyAdded={handleReplyAdded}
             onCancel={() => setShowReplyForm(false)}
           />
@@ -301,6 +310,15 @@ const ReplyItem = ({ reply, postId, postOwnerId, parentCommentUserId, onDeleted,
                    user?.userId === postOwnerId || 
                    user?.userId === parentCommentUserId || 
                    isAdmin()
+
+  // Helper function to check if reply was edited
+  const isEdited = (createdAt, updatedAt) => {
+    if (!createdAt || !updatedAt) return false
+    const created = new Date(createdAt).getTime()
+    const updated = new Date(updatedAt).getTime()
+    // Consider edited if difference is more than 1 second
+    return Math.abs(updated - created) > 1000
+  }
 
   const handleDelete = async () => {
     setIsDeleting(true)
@@ -367,7 +385,7 @@ const ReplyItem = ({ reply, postId, postOwnerId, parentCommentUserId, onDeleted,
               </Link>
               <span className="text-xs text-muted-foreground">
                 {formatRelativeTime(reply.createdAt)}
-                {reply.updatedAt !== reply.createdAt && ' (edited)'}
+                {isEdited(reply.createdAt, reply.updatedAt) && ' (edited)'}
               </span>
             </div>
 
