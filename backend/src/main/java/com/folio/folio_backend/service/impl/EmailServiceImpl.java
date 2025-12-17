@@ -89,14 +89,12 @@ public class EmailServiceImpl implements EmailService {
                 "    <title>Verify Your Email</title>" +
                 "    <style>" +
                 "        * { margin: 0; padding: 0; box-sizing: border-box; }" +
-                "        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', 'Roboto', 'Helvetica Neue', Arial, sans-serif; background-color: #fafafa; margin: 0; padding: 0; line-height: 1.6; }" +
+                "        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif; background-color: #fafafa; margin: 0; padding: 0; line-height: 1.6; }" +
                 "        .email-wrapper { background-color: #fafafa; padding: 40px 20px; }" +
                 "        .container { max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }" +
                 "        .header { background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); color: #ffffff; padding: 48px 40px; text-align: center; }" +
-                "        .logo { display: inline-flex; align-items: center; justify-content: center; width: 56px; height: 56px; background: linear-gradient(135deg, #ffffff 0%, #f5f5f5 100%); border-radius: 14px; margin-bottom: 20px; }" +
-                "        .logo-text { font-size: 28px; font-weight: 700; color: #1a1a1a; }" +
                 "        .header h1 { margin: 0; font-size: 28px; font-weight: 600; letter-spacing: -0.5px; }" +
-                "        .content { padding: 48px 40px; }" +
+                "        .content { padding: 48px 40px; text-align: center; }" +
                 "        .content p { color: #525252; line-height: 1.7; margin: 0 0 20px; font-size: 16px; }" +
                 "        .greeting { color: #1a1a1a; font-size: 18px; font-weight: 600; margin-bottom: 24px; }" +
                 "        .code-box { background: #fafafa; border: 2px solid #e5e5e5; border-radius: 12px; padding: 32px 24px; text-align: center; margin: 32px 0; }" +
@@ -119,9 +117,6 @@ public class EmailServiceImpl implements EmailService {
                 "    <div class=\"email-wrapper\">" +
                 "        <div class=\"container\">" +
                 "            <div class=\"header\">" +
-                "                <div class=\"logo\">" +
-                "                    <span class=\"logo-text\">F</span>" +
-                "                </div>" +
                 "                <h1>Verify Your Email</h1>" +
                 "            </div>" +
                 "            <div class=\"content\">" +
@@ -133,7 +128,7 @@ public class EmailServiceImpl implements EmailService {
                 "                    <div class=\"code\">" + user.getVerificationCode() + "</div>" +
                 "                </div>" +
                 "                <div class=\"expiry-notice\">" +
-                "                    <p>⏱️ mvnThis code will expire in 10 minutes for security purposes.</p>" +
+                "                    <p>⏱️ This code will expire in 10 minutes for security purposes.</p>" +
                 "                </div>" +
                 "                <div class=\"divider\"></div>" +
                 "                <p style=\"color: #737373; font-size: 14px;\">If you didn't create a Folio account, you can safely ignore this email. No account will be created without verification.</p>" +
@@ -159,18 +154,17 @@ public class EmailServiceImpl implements EmailService {
                 "    <title>Reset Your Password</title>" +
                 "    <style>" +
                 "        * { margin: 0; padding: 0; box-sizing: border-box; }" +
-                "        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', 'Roboto', 'Helvetica Neue', Arial, sans-serif; background-color: #fafafa; margin: 0; padding: 0; line-height: 1.6; }" +
+                "        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif; background-color: #fafafa; margin: 0; padding: 0; line-height: 1.6; }" +
                 "        .email-wrapper { background-color: #fafafa; padding: 40px 20px; }" +
                 "        .container { max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }" +
                 "        .header { background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%); color: #ffffff; padding: 48px 40px; text-align: center; }" +
-                "        .icon { font-size: 48px; margin-bottom: 16px; }" +
+                "        .icon { font-size: 56px; margin-bottom: 20px; line-height: 1; }" +
                 "        .header h1 { margin: 0; font-size: 28px; font-weight: 600; letter-spacing: -0.5px; }" +
-                "        .content { padding: 48px 40px; }" +
+                "        .content { padding: 48px 40px; text-align: center; }" +
                 "        .content p { color: #525252; line-height: 1.7; margin: 0 0 20px; font-size: 16px; }" +
                 "        .greeting { color: #1a1a1a; font-size: 18px; font-weight: 600; margin-bottom: 24px; }" +
                 "        .button-container { text-align: center; margin: 36px 0; }" +
-                "        .button { display: inline-block; background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); color: #ffffff; padding: 16px 48px; text-decoration: none; border-radius: 12px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 12px rgba(26,26,26,0.2); transition: transform 0.2s; }" +
-                "        .button:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(26,26,26,0.3); }" +
+                "        .button { display: inline-block; background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); color: #ffffff; padding: 16px 48px; text-decoration: none; border-radius: 12px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 12px rgba(26,26,26,0.2); }" +
                 "        .security-notice { background: #fef3c7; border-left: 4px solid #f59e0b; padding: 16px 20px; border-radius: 8px; margin: 24px 0; }" +
                 "        .security-notice p { color: #92400e; margin: 0; font-size: 14px; font-weight: 500; }" +
                 "        .link-box { background: #fafafa; border: 1px solid #e5e5e5; border-radius: 8px; padding: 16px; margin: 24px 0; word-break: break-all; }" +
@@ -222,7 +216,6 @@ public class EmailServiceImpl implements EmailService {
 
     private String buildWelcomeEmailTemplate(User user) {
         String loginUrl = frontendUrl + "/login";
-        String exploreUrl = frontendUrl + "/feed";
 
         return "<!DOCTYPE html>" +
                 "<html lang=\"en\">" +
@@ -232,27 +225,24 @@ public class EmailServiceImpl implements EmailService {
                 "    <title>Welcome to Folio</title>" +
                 "    <style>" +
                 "        * { margin: 0; padding: 0; box-sizing: border-box; }" +
-                "        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', 'Roboto', 'Helvetica Neue', Arial, sans-serif; background-color: #fafafa; margin: 0; padding: 0; line-height: 1.6; }" +
+                "        body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif; background-color: #fafafa; margin: 0; padding: 0; line-height: 1.6; }" +
                 "        .email-wrapper { background-color: #fafafa; padding: 40px 20px; }" +
                 "        .container { max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }" +
                 "        .header { background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); color: #ffffff; padding: 48px 40px; text-align: center; }" +
-                "        .celebration { font-size: 64px; margin-bottom: 20px; }" +
+                "        .celebration { font-size: 72px; margin-bottom: 20px; line-height: 1; }" +
                 "        .header h1 { margin: 0; font-size: 32px; font-weight: 700; letter-spacing: -0.5px; }" +
                 "        .header p { margin: 12px 0 0; font-size: 16px; opacity: 0.9; font-weight: 400; }" +
-                "        .content { padding: 48px 40px; }" +
+                "        .content { padding: 48px 40px; text-align: center; }" +
                 "        .content p { color: #525252; line-height: 1.7; margin: 0 0 20px; font-size: 16px; }" +
                 "        .greeting { color: #1a1a1a; font-size: 18px; font-weight: 600; margin-bottom: 24px; }" +
-                "        .features { background: #fafafa; border-radius: 12px; padding: 32px 28px; margin: 32px 0; border: 1px solid #e5e5e5; }" +
-                "        .features h3 { color: #1a1a1a; margin: 0 0 20px; font-size: 18px; font-weight: 600; }" +
+                "        .features { background: #fafafa; border-radius: 12px; padding: 32px 28px; margin: 32px 0; border: 1px solid #e5e5e5; text-align: left; }" +
+                "        .features h3 { color: #1a1a1a; margin: 0 0 20px; font-size: 18px; font-weight: 600; text-align: center; }" +
                 "        .features ul { margin: 0; padding-left: 0; list-style: none; }" +
                 "        .features li { color: #525252; margin: 16px 0; line-height: 1.6; padding-left: 28px; position: relative; }" +
                 "        .features li:before { content: '✓'; position: absolute; left: 0; color: #1a1a1a; font-weight: 700; font-size: 18px; }" +
                 "        .features strong { color: #1a1a1a; font-weight: 600; }" +
                 "        .button-container { text-align: center; margin: 36px 0; }" +
-                "        .button { display: inline-block; background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); color: #ffffff; padding: 16px 40px; text-decoration: none; border-radius: 12px; font-weight: 600; font-size: 16px; margin: 8px; box-shadow: 0 4px 12px rgba(26,26,26,0.2); transition: transform 0.2s; }" +
-                "        .button:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(26,26,26,0.3); }" +
-                "        .button-secondary { background: #ffffff; color: #1a1a1a; border: 2px solid #1a1a1a; box-shadow: none; }" +
-                "        .button-secondary:hover { background: #fafafa; box-shadow: none; }" +
+                "        .button { display: inline-block; background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); color: #ffffff; padding: 16px 48px; text-decoration: none; border-radius: 12px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 12px rgba(26,26,26,0.2); }" +
                 "        .footer { background: #fafafa; padding: 32px 40px; text-align: center; border-top: 1px solid #e5e5e5; }" +
                 "        .footer p { color: #737373; font-size: 14px; margin: 8px 0; }" +
                 "        .footer-brand { color: #1a1a1a; font-weight: 600; }" +
@@ -260,8 +250,8 @@ public class EmailServiceImpl implements EmailService {
                 "        @media only screen and (max-width: 600px) {" +
                 "            .email-wrapper { padding: 20px 10px; }" +
                 "            .header, .content, .footer { padding: 32px 24px; }" +
-                "            .celebration { font-size: 48px; }" +
-                "            .button { display: block; margin: 8px 0; }" +
+                "            .celebration { font-size: 56px; }" +
+                "            .button { display: block; width: 100%; padding: 14px 32px; }" +
                 "        }" +
                 "    </style>" +
                 "</head>" +
@@ -288,7 +278,6 @@ public class EmailServiceImpl implements EmailService {
                 "                <p>Ready to get started? Log in to your account and begin your journey!</p>" +
                 "                <div class=\"button-container\">" +
                 "                    <a href=\"" + loginUrl + "\" class=\"button\">Log In Now</a>" +
-                "                    <a href=\"" + exploreUrl + "\" class=\"button button-secondary\">Explore Projects</a>" +
                 "                </div>" +
                 "                <div class=\"divider\"></div>" +
                 "                <p style=\"color: #737373; font-size: 14px;\">If you have any questions or need help getting started, feel free to reach out to our support team. We're here to help!</p>" +
@@ -296,7 +285,7 @@ public class EmailServiceImpl implements EmailService {
                 "            </div>" +
                 "            <div class=\"footer\">" +
                 "                <p class=\"footer-brand\">Folio</p>" +
-                "                <p>&copy; 2025 Folio. Built with care for developers.</p>" +
+                "                <p>&copy; 2025 Folio.</p>" +
                 "            </div>" +
                 "        </div>" +
                 "    </div>" +
