@@ -24,7 +24,7 @@ const PostCard = ({ post }) => {
             <Link to={`/profile/${post.userId}`}>
               <Avatar className="w-12 h-12 ring-2 ring-primary/10 hover:ring-primary/30 transition-all">
                 <AvatarImage src={post.userProfileImageUrl} alt={post.username} />
-                <AvatarFallback className="bg-gradient-to-br from-primary to-blue-600 text-white font-semibold">
+                <AvatarFallback className="bg-gradient-to-br from-primary to-primary/70 text-primary-foreground font-semibold">
                   {post.username?.charAt(0).toUpperCase()}
                 </AvatarFallback>
               </Avatar>

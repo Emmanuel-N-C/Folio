@@ -71,7 +71,7 @@ const Navbar = ({ onMenuClick, isSidebarOpen }) => {
                   <Button variant="ghost" className="relative h-10 w-10 rounded-full">
                     <Avatar className="h-10 w-10 border-2 border-primary/20">
                       <AvatarImage src={user?.profileImageUrl} alt={user?.username} />
-                      <AvatarFallback className="bg-gradient-to-br from-primary to-blue-600 text-white">
+                      <AvatarFallback className="bg-gradient-to-br from-primary to-primary/70 text-primary-foreground font-semibold">
                         {user?.username?.charAt(0).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>

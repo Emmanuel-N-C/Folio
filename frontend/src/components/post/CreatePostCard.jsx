@@ -27,7 +27,7 @@ const CreatePostCard = () => {
             src={profileImageUrl} 
             alt={user?.username || 'User'} 
           />
-          <AvatarFallback className="bg-gradient-to-br from-primary to-blue-600 text-white font-semibold">
+          <AvatarFallback className="bg-gradient-to-br from-primary to-primary/70 text-primary-foreground font-semibold">
             {user?.username?.charAt(0)?.toUpperCase() || 'U'}
           </AvatarFallback>
         </Avatar>
@@ -41,34 +41,32 @@ const CreatePostCard = () => {
 
       {/* Action buttons */}
       <div className="flex items-center justify-between gap-2">
-        <Button
-          variant="ghost"
-          size="sm"
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          className="flex-1 gap-2 text-muted-foreground hover:text-foreground"
           onClick={handleStartPost}
-          className="flex-1 gap-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-950"
         >
-          <Image className="h-5 w-5" />
-          <span className="hidden sm:inline font-semibold">Photo</span>
+          <Image className="h-4 w-4" />
+          <span className="hidden sm:inline">Photo</span>
         </Button>
-        
-        <Button
-          variant="ghost"
-          size="sm"
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          className="flex-1 gap-2 text-muted-foreground hover:text-foreground"
           onClick={handleStartPost}
-          className="flex-1 gap-2 text-green-600 hover:text-green-700 hover:bg-green-50 dark:text-green-400 dark:hover:bg-green-950"
         >
-          <Video className="h-5 w-5" />
-          <span className="hidden sm:inline font-semibold">Live Preview</span>
+          <Video className="h-4 w-4" />
+          <span className="hidden sm:inline">Live Preview</span>
         </Button>
-        
-        <Button
-          variant="ghost"
-          size="sm"
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          className="flex-1 gap-2 text-muted-foreground hover:text-foreground"
           onClick={handleStartPost}
-          className="flex-1 gap-2 text-orange-600 hover:text-orange-700 hover:bg-orange-50 dark:text-orange-400 dark:hover:bg-orange-950"
         >
-          <FileText className="h-5 w-5" />
-          <span className="hidden sm:inline font-semibold">Article</span>
+          <FileText className="h-4 w-4" />
+          <span className="hidden sm:inline">Article</span>
         </Button>
       </div>
     </Card>
