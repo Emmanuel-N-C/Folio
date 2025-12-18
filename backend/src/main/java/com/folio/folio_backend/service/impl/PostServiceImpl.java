@@ -254,8 +254,9 @@ public class PostServiceImpl implements PostService {
         response.setLikesCount(post.getLikes() != null ? post.getLikes().size() : 0);
         response.setCommentsCount(post.getComments() != null ? post.getComments().size() : 0);
 
+
         response.setCreatedAt(post.getCreatedAt());
-        response.setUpdatedAt(post.getUpdatedAt());
+        response.setUpdatedAt(post.getUpdatedAt() != null ? post.getUpdatedAt() : post.getCreatedAt());
 
         if (currentUserId != null) {
             response.setLikedByCurrentUser(likeRepository.existsByUserIdAndPostId(currentUserId, post.getId()));
