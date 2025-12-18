@@ -223,7 +223,7 @@ public class CommentServiceImpl implements CommentService {
         response.setLikesCount(comment.getLikesCount());
         response.setRepliesCount(comment.getRepliesCount());
         response.setCreatedAt(comment.getCreatedAt());
-        response.setUpdatedAt(comment.getUpdatedAt());
+        response.setUpdatedAt(comment.getUpdatedAt() != null ? comment.getUpdatedAt() : comment.getCreatedAt());
 
         if (currentUserId != null) {
             response.setLikedByCurrentUser(commentLikeRepository.existsByUserIdAndCommentId(currentUserId, comment.getId()));

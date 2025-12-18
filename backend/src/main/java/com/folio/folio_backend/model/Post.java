@@ -60,11 +60,13 @@ public class Post {
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Notification> notifications = new ArrayList<>();
 
+
     @CreationTimestamp
-    @Column(updatable = false)
+    @Column(updatable = false, nullable = false)
     private LocalDateTime createdAt;
-    
+
     @UpdateTimestamp
+    @Column(nullable = false)
     private LocalDateTime updatedAt;
     
     public int getLikesCount() {
