@@ -18,15 +18,31 @@ export function formatDate(date) {
 export function formatRelativeTime(date) {
   if (!date) return ''
   
-  // Parse the date - ensure it's treated as UTC if no timezone info
-  const past = new Date(date)
-  const now = new Date()
+  // Ensure we handle the timestamp correctly
+  let timestamp;
   
-  // Calculate difference in seconds
-  const diffInSeconds = Math.floor((now - past) / 1000)
+  if (typeof date === 'string') {
+    // Check if the date string has timezone information
+    const hasTimezone = date.includes('Z') || 
+                       date.includes('+') || 
+                       (date.includes('-') && date.lastIndexOf('-') > 10)
+    
+    if (!hasTimezone) {
+      // No timezone - assume it's UTC and add 'Z'
+      timestamp = new Date(date + 'Z').getTime()
+    } else {
+      timestamp = new Date(date).getTime()
+    }
+  } else {
+    timestamp = new Date(date).getTime()
+  }
   
-  // Handle future dates (shouldn't happen, but just in case)
-  if (diffInSeconds < 0) return 'just now'
+  const now = Date.now()
+  const diffInSeconds = Math.floor((now - timestamp) / 1000)
+  
+  // Handle edge cases
+  if (diffInSeconds < 0 || isNaN(diffInSeconds)) return 'just now'
+  if (diffInSeconds > 31536000) return formatDate(date) // > 1 year
   
   if (diffInSeconds < 60) return 'just now'
   if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`
