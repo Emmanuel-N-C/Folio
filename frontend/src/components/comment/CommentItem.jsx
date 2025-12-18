@@ -41,8 +41,8 @@ const CommentItem = ({ comment, postId, postOwnerId, onDeleted, onUpdated }) => 
     if (!createdAt || !updatedAt) return false
     const created = new Date(createdAt).getTime()
     const updated = new Date(updatedAt).getTime()
-    // Consider edited if difference is more than 1 second
-    return Math.abs(updated - created) > 1000
+    // Consider edited if difference is more than 2 seconds
+    return Math.abs(updated - created) > 2000
   }
 
   const handleDelete = async () => {
@@ -316,8 +316,8 @@ const ReplyItem = ({ reply, postId, postOwnerId, parentCommentUserId, onDeleted,
     if (!createdAt || !updatedAt) return false
     const created = new Date(createdAt).getTime()
     const updated = new Date(updatedAt).getTime()
-    // Consider edited if difference is more than 1 second
-    return Math.abs(updated - created) > 1000
+    // Consider edited if difference is more than 2 seconds
+    return Math.abs(updated - created) > 2000
   }
 
   const handleDelete = async () => {
