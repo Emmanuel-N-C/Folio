@@ -17,10 +17,17 @@ export function formatDate(date) {
 
 export function formatRelativeTime(date) {
   if (!date) return ''
-  const now = new Date()
+  
+  // Parse the date - ensure it's treated as UTC if no timezone info
   const past = new Date(date)
+  const now = new Date()
+  
+  // Calculate difference in seconds
   const diffInSeconds = Math.floor((now - past) / 1000)
-
+  
+  // Handle future dates (shouldn't happen, but just in case)
+  if (diffInSeconds < 0) return 'just now'
+  
   if (diffInSeconds < 60) return 'just now'
   if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`
   if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`

@@ -32,6 +32,15 @@ const PostDetailPage = () => {
   const [isDeleting, setIsDeleting] = useState(false)
   const [showMobileDetails, setShowMobileDetails] = useState(false)
 
+  // Helper function to check if post was edited
+  const isPostEdited = (createdAt, updatedAt) => {
+    if (!createdAt || !updatedAt) return false
+    const created = new Date(createdAt).getTime()
+    const updated = new Date(updatedAt).getTime()
+    // Consider edited if difference is more than 2 seconds
+    return Math.abs(updated - created) > 2000
+  }
+
   useEffect(() => {
     fetchPost()
   }, [postId])
@@ -165,7 +174,7 @@ const PostDetailPage = () => {
                 </Link>
                 <p className="text-sm text-muted-foreground">
                   {formatRelativeTime(post.createdAt)}
-                  {post.updatedAt !== post.createdAt && ' (edited)'}
+                  {isPostEdited(post.createdAt, post.updatedAt) && ' (edited)'}
                 </p>
               </div>
             </div>
@@ -287,6 +296,7 @@ const PostDetailPage = () => {
                     </Link>
                     <p className="text-xs text-muted-foreground">
                       {formatRelativeTime(post.createdAt)}
+                      {isPostEdited(post.createdAt, post.updatedAt) && ' (edited)'}
                     </p>
                   </div>
                 </div>
