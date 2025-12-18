@@ -7,7 +7,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Heart, MessageCircle, Reply, Bell, ArrowLeft } from 'lucide-react'
-import { formatDistanceToNow } from 'date-fns'
+import { formatRelativeTime } from '@/lib/utils' 
 
 const NotificationsPage = () => {
   const { isAuthenticated } = useAuth()
@@ -264,7 +264,7 @@ const NotificationsPage = () => {
                       </p>
                     )}
                     <p className="text-xs text-muted-foreground mt-2 flex items-center gap-2">
-                      {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
+                      {formatRelativeTime(notification.createdAt)}
                       {!notification.read && (
                         <span className="inline-block w-2 h-2 rounded-full bg-primary" />
                       )}
