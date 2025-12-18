@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Heart, MessageCircle, Reply, Bell } from 'lucide-react'
 import { notificationsAPI } from '@/api/notifications'
-import { formatDistanceToNow } from 'date-fns'
+import { formatRelativeTime } from '@/lib/utils'
 
 const RightSidebar = () => {
   const { isAuthenticated } = useAuth()
@@ -119,7 +119,7 @@ const RightSidebar = () => {
                               </p>
                               <div className="flex items-center gap-2 mt-1">
                                 <p className="text-xs text-muted-foreground">
-                                  {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
+                                  {formatRelativeTime(notification.createdAt)}
                                 </p>
                                 {!notification.read && (
                                   <span className="inline-block w-1.5 h-1.5 rounded-full bg-blue-500" />
