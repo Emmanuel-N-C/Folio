@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { useAuth } from '@/hooks/useAuth'
 import { useToast } from '@/components/ui/use-toast'
-import { Eye, EyeOff, AlertCircle } from 'lucide-react'
+import { Eye, EyeOff, AlertCircle, ArrowLeft } from 'lucide-react'
 import GoogleOAuthButton from '@/components/auth/GoogleOAuthButton'
 import GitHubOAuthButton from '@/components/auth/GitHubOAuthButton'
 
@@ -135,6 +135,18 @@ const LoginPage = () => {
     <div className="flex items-center justify-center min-h-screen bg-background">
       <Card className="w-full max-w-md">
         <CardHeader>
+          <div className="flex items-center gap-3 mb-2">
+            <Link to="/">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="gap-2 text-muted-foreground hover:text-foreground"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Back to Home
+              </Button>
+            </Link>
+          </div>
           <CardTitle>Welcome Back</CardTitle>
           <CardDescription>Login to your Folio account</CardDescription>
         </CardHeader>

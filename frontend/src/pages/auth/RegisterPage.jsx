@@ -7,7 +7,7 @@ import { useToast } from '@/components/ui/use-toast'
 import { useDebounce } from '@/hooks/useDebounce'
 import { usersAPI } from '@/api/users'
 import { authAPI } from '@/api/auth'
-import { Eye, EyeOff, Check, X, Loader2, AlertCircle } from 'lucide-react'
+import { Eye, EyeOff, Check, X, Loader2, AlertCircle, ArrowLeft } from 'lucide-react'
 import GoogleOAuthButton from '@/components/auth/GoogleOAuthButton'
 
 const RegisterPage = () => {
@@ -390,9 +390,21 @@ const RegisterPage = () => {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-background">
+    <div className="flex items-center justify-center min-h-screen bg-background py-8">
       <Card className="w-full max-w-md">
         <CardHeader>
+          <div className="flex items-center gap-3 mb-2">
+            <Link to="/">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="gap-2 text-muted-foreground hover:text-foreground"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Back to Home
+              </Button>
+            </Link>
+          </div>
           <CardTitle>Create Account</CardTitle>
           <CardDescription>Join Folio and showcase your projects</CardDescription>
         </CardHeader>

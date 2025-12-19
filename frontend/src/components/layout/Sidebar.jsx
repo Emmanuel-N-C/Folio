@@ -17,20 +17,14 @@ import {
   X,
   WifiOff
 } from 'lucide-react'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 
 const Sidebar = ({ isOpen, onClose }) => {
   const { isAuthenticated, user, logout, isAdmin } = useAuth()
   const { unreadCount, connected, usePolling } = useWebSocket()
   const location = useLocation()
   const navigate = useNavigate()
-  const [theme, setTheme] = useState('light')
-
-  useEffect(() => {
-    const savedTheme = localStorage.getItem('theme') || 'light'
-    setTheme(savedTheme)
-    document.documentElement.classList.toggle('dark', savedTheme === 'dark')
-  }, [])
+  const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'light')
 
   const toggleTheme = () => {
     const newTheme = theme === 'light' ? 'dark' : 'light'
@@ -85,7 +79,7 @@ const Sidebar = ({ isOpen, onClose }) => {
           </div>
 
           <div className="pt-2 pb-2">
-            <Link to="/" className="flex items-center gap-3 group" onClick={handleNavClick}>
+            <Link to={isAuthenticated ? "/feed" : "/"} className="flex items-center gap-3 group" onClick={handleNavClick}>
               <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary/70 rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-all duration-300 group-hover:scale-105">
                 <span className="font-bold text-xl text-primary-foreground">F</span>
               </div>

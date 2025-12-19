@@ -40,7 +40,7 @@ const Navbar = ({ onMenuClick, isSidebarOpen }) => {
           </Button>
 
           {/* Logo - Matching desktop style */}
-          <Link to="/" className="flex items-center gap-2">
+          <Link to={isAuthenticated ? "/feed" : "/"} className="flex items-center gap-2">
             <div className="w-8 h-8 bg-gradient-to-br from-primary to-primary/70 rounded-xl flex items-center justify-center shadow-md">
               <span className="text-white font-bold text-lg">F</span>
             </div>
