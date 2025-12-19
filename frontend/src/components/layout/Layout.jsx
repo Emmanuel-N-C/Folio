@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Outlet } from 'react-router-dom'
 import Navbar from './Navbar'
 import Sidebar from './Sidebar'
@@ -9,6 +9,17 @@ import { PanelRightClose, PanelRightOpen } from 'lucide-react'
 const Layout = () => {
   const [rightSidebarOpen, setRightSidebarOpen] = useState(true)
   const [leftSidebarOpen, setLeftSidebarOpen] = useState(false)
+
+  // Apply theme only when Layout is mounted (authenticated pages)
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme') || 'light'
+    document.documentElement.classList.toggle('dark', savedTheme === 'dark')
+
+    // Cleanup: remove theme when leaving Layout
+    return () => {
+      document.documentElement.classList.remove('dark')
+    }
+  }, [])
 
   const toggleLeftSidebar = () => {
     setLeftSidebarOpen(!leftSidebarOpen)
