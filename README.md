@@ -22,6 +22,10 @@
 
 **Folio** is a modern social platform designed specifically for developers and creators to showcase their projects in an interactive way. Unlike traditional portfolio sites, Folio embeds live demos directly in the feed using iframe previews, allowing users to interact with projects without leaving the platform.
 
+Note: This application is currently inactive to manage hosting costs.
+
+If you’re interested in trying out Folio, please feel free to reach out to me and I’ll be happy to spin the application back up.
+
 ### 🎯 The Problem
 
 - **Portfolios are static** – Screenshots don't capture interactivity
